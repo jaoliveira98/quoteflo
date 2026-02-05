@@ -11,7 +11,8 @@ import {
   Menu,
   X,
   LogOut,
-  ChevronDown
+  ChevronDown,
+  BarChart3
 } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "@/components/logo";
@@ -23,6 +24,7 @@ const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Quotes", href: "/quotes", icon: FileText },
   { name: "Customers", href: "/customers", icon: Users },
+  { name: "Analytics", href: "/analytics", icon: BarChart3 },
   { name: "Settings", href: "/settings", icon: Settings },
 ];
 
