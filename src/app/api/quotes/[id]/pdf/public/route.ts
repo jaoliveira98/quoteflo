@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import type { Quote, QuoteLineItem, UserProfile } from "@/types";
 
 // Create a public Supabase client (no auth required)
 const supabase = createClient(
@@ -39,7 +40,7 @@ export async function GET(
     .single();
 
   // Generate HTML for PDF
-  const html = generateQuoteHTML(quote, lineItems || [], profile);
+  const html = generateQuoteHTML(quote as Quote, (lineItems || []) as QuoteLineItem[], profile as UserProfile | null);
 
   return new NextResponse(html, {
     headers: {
@@ -49,9 +50,9 @@ export async function GET(
 }
 
 function generateQuoteHTML(
-  quote: any,
-  lineItems: any[],
-  profile: any
+  quote: Quote,
+  lineItems: QuoteLineItem[],
+  profile: UserProfile | null
 ) {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-GB", {
