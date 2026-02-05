@@ -6,6 +6,10 @@ All notable changes to this project are documented in this file.
 
 ## [Step 8] - Automated Follow-ups & Reminders
 
+### Fixed
+- **TypeScript Build Error** (`src/lib/supabase/middleware.ts`)
+  - Added proper types for `cookiesToSet` parameter to fix Vercel build error
+
 ### Added
 - **Database Schema Updates** (`supabase/migrations/step8_reminders.sql`)
   - `user_profiles` table: Added `auto_followup_enabled`, `auto_followup_days`, `expiry_reminder_enabled`, `expiry_reminder_days` columns
