@@ -4,6 +4,49 @@ All notable changes to this project are documented in this file.
 
 ---
 
+## [Step 9] - Stripe Billing
+
+### Added
+- **Database Schema Updates** (`supabase/migrations/step9_billing.sql`)
+  - `user_profiles` table: Added `trial_ends_at`, `stripe_subscription_id`, `stripe_price_id`, `billing_cycle_anchor` columns
+  - New `billing_events` table for audit trail of billing events
+  - SQL functions: `is_subscription_active()` and `get_trial_days_remaining()`
+  - Updated `handle_new_user()` trigger to set 14-day trial
+
+- **Stripe Integration** (`src/lib/stripe.ts`)
+  - Stripe client initialization
+  - Price configuration and plan definitions
+  - Helper functions for formatting and URLs
+
+- **API Endpoints**
+  - `POST /api/billing/checkout` - Create Stripe Checkout session for upgrades
+  - `POST /api/billing/portal` - Create Stripe Customer Portal session
+  - `POST /api/billing/webhook` - Handle Stripe webhook events
+
+- **Settings Page Updates** (`src/app/settings/settings-form.tsx`)
+  - New `SubscriptionCard` component with:
+    - Trial status and days remaining
+    - Upgrade button (redirects to Stripe Checkout)
+    - Manage billing button (opens Stripe Customer Portal)
+    - Success/cancel message handling
+    - Feature list for Professional plan
+
+- **TypeScript Types** (`src/types/index.ts`)
+  - Added `stripe_subscription_id`, `stripe_price_id`, `trial_ends_at` to `UserProfile`
+
+- **Dependencies**
+  - Added `stripe` package
+
+### Webhook Events Handled
+- `checkout.session.completed` - User completed checkout
+- `customer.subscription.created` - New subscription created
+- `customer.subscription.updated` - Subscription status changed
+- `customer.subscription.deleted` - Subscription canceled
+- `invoice.payment_succeeded` - Payment successful
+- `invoice.payment_failed` - Payment failed (updates status to past_due)
+
+---
+
 ## [Step 8] - Automated Follow-ups & Reminders
 
 ### Fixed

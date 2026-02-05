@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,10 +18,14 @@ import {
   Wrench,
   Hammer,
   AlertCircle,
-  Bell
+  Bell,
+  Crown,
+  ExternalLink,
+  Clock
 } from "lucide-react";
 import type { UserProfile } from "@/types";
 import { cn } from "@/lib/utils";
+import { Suspense } from "react";
 
 interface SettingsFormProps {
   profile: UserProfile;
@@ -45,6 +49,239 @@ const brandColors = [
   { value: "#6366f1", label: "Indigo" },
   { value: "#0f172a", label: "Dark" },
 ];
+
+// Subscription Card Component
+function SubscriptionCard({ profile }: { profile: UserProfile }) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  
+  const success = searchParams.get("success");
+  const canceled = searchParams.get("canceled");
+  
+  const isTrialing = profile.subscription_status === "trialing";
+  const isActive = profile.subscription_status === "active";
+  const isPastDue = profile.subscription_status === "past_due";
+  const hasStripeCustomer = !!profile.stripe_customer_id;
+  
+  // Calculate trial days remaining
+  const trialDaysRemaining = profile.trial_ends_at 
+    ? Math.max(0, Math.ceil((new Date(profile.trial_ends_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+    : 0;
+  
+  const handleUpgrade = async () => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const response = await fetch("/api/billing/checkout", {
+        method: "POST",
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to create checkout session");
+      }
+      
+      // Redirect to Stripe Checkout
+      window.location.href = data.url;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+      setIsLoading(false);
+    }
+  };
+  
+  const handleManageBilling = async () => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const response = await fetch("/api/billing/portal", {
+        method: "POST",
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to open billing portal");
+      }
+      
+      // Redirect to Stripe Customer Portal
+      window.location.href = data.url;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-lg flex items-center gap-2">
+          <CreditCard className="h-5 w-5 text-surface-400" />
+          Subscription
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Success/Cancel Messages */}
+        {success && (
+          <div className="p-3 rounded-lg bg-green-50 text-green-700 text-sm flex items-center gap-2">
+            <Check className="h-4 w-4" />
+            Welcome to Professional! Your subscription is now active.
+          </div>
+        )}
+        {canceled && (
+          <div className="p-3 rounded-lg bg-amber-50 text-amber-700 text-sm">
+            Checkout was canceled. No charges were made.
+          </div>
+        )}
+        
+        {/* Current Plan */}
+        <div className="flex items-center justify-between p-4 rounded-lg bg-surface-50">
+          <div>
+            <div className="flex items-center gap-2">
+              <p className="font-medium text-surface-900">
+                {isActive ? "Professional" : isTrialing ? "Free Trial" : "Starter"} Plan
+              </p>
+              {isActive && (
+                <Badge variant="success" className="gap-1">
+                  <Crown className="h-3 w-3" />
+                  Active
+                </Badge>
+              )}
+              {isTrialing && trialDaysRemaining > 0 && (
+                <Badge variant="warning" className="gap-1">
+                  <Clock className="h-3 w-3" />
+                  {trialDaysRemaining} days left
+                </Badge>
+              )}
+              {isTrialing && trialDaysRemaining === 0 && (
+                <Badge variant="secondary">Trial expired</Badge>
+              )}
+              {isPastDue && (
+                <Badge variant="secondary" className="bg-red-100 text-red-700">
+                  Payment failed
+                </Badge>
+              )}
+            </div>
+            <p className="text-sm text-surface-500 mt-1">
+              {isActive 
+                ? "Unlimited quotes, all features included"
+                : isTrialing && trialDaysRemaining > 0
+                  ? "Full access during trial period"
+                  : "Upgrade to continue creating quotes"
+              }
+            </p>
+          </div>
+          
+          {isActive || hasStripeCustomer ? (
+            <Button 
+              variant="outline" 
+              onClick={handleManageBilling}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <>
+                  Manage
+                  <ExternalLink className="h-3 w-3 ml-1" />
+                </>
+              )}
+            </Button>
+          ) : (
+            <Button onClick={handleUpgrade} disabled={isLoading}>
+              {isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <>
+                  <Crown className="h-4 w-4" />
+                  Upgrade - £19/mo
+                </>
+              )}
+            </Button>
+          )}
+        </div>
+        
+        {/* Upgrade prompt for trial users */}
+        {isTrialing && (
+          <div className="p-4 rounded-lg border-2 border-brand-200 bg-brand-50">
+            <div className="flex items-start gap-3">
+              <div className="h-10 w-10 rounded-full bg-brand-100 flex items-center justify-center flex-shrink-0">
+                <Crown className="h-5 w-5 text-brand-600" />
+              </div>
+              <div className="flex-1">
+                <p className="font-medium text-surface-900">Upgrade to Professional</p>
+                <p className="text-sm text-surface-600 mt-1">
+                  Keep creating unlimited quotes with PDF generation, email sending, and auto follow-ups.
+                </p>
+                <ul className="mt-3 space-y-1 text-sm text-surface-600">
+                  <li className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-brand-600" />
+                    Unlimited quotes
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-brand-600" />
+                    PDF generation & email sending
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-brand-600" />
+                    Automated follow-ups
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-brand-600" />
+                    Priority support
+                  </li>
+                </ul>
+                {!hasStripeCustomer && (
+                  <Button onClick={handleUpgrade} disabled={isLoading} className="mt-4">
+                    {isLoading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <>
+                        <Crown className="h-4 w-4" />
+                        Upgrade Now - £19/month
+                      </>
+                    )}
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {error && (
+          <div className="p-3 rounded-lg bg-red-50 text-red-700 text-sm flex items-center gap-2">
+            <AlertCircle className="h-4 w-4" />
+            {error}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+// Wrapped SubscriptionCard with Suspense for useSearchParams
+function SubscriptionCardWrapper({ profile }: { profile: UserProfile }) {
+  return (
+    <Suspense fallback={
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <CreditCard className="h-5 w-5 text-surface-400" />
+            Subscription
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-20 animate-pulse bg-surface-100 rounded-lg" />
+        </CardContent>
+      </Card>
+    }>
+      <SubscriptionCard profile={profile} />
+    </Suspense>
+  );
+}
 
 export function SettingsForm({ profile }: SettingsFormProps) {
   const router = useRouter();
@@ -372,39 +609,7 @@ export function SettingsForm({ profile }: SettingsFormProps) {
       </Card>
 
       {/* Subscription */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <CreditCard className="h-5 w-5 text-surface-400" />
-            Subscription
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between p-4 rounded-lg bg-surface-50">
-            <div>
-              <div className="flex items-center gap-2">
-                <p className="font-medium text-surface-900">
-                  {profile.subscription_tier.charAt(0).toUpperCase() + profile.subscription_tier.slice(1)} Plan
-                </p>
-                <Badge variant={profile.subscription_status === "active" ? "success" : "warning"}>
-                  {profile.subscription_status === "trialing" ? "Trial" : profile.subscription_status}
-                </Badge>
-              </div>
-              <p className="text-sm text-surface-500 mt-1">
-                {profile.subscription_tier === "professional" 
-                  ? "Unlimited quotes, all features included"
-                  : "Upgrade for unlimited quotes"}
-              </p>
-            </div>
-            <Button variant="outline" disabled>
-              Manage
-            </Button>
-          </div>
-          <p className="text-xs text-surface-500 mt-3">
-            Billing management coming soon. Contact support for any billing queries.
-          </p>
-        </CardContent>
-      </Card>
+      <SubscriptionCardWrapper profile={profile} />
 
       {/* Error/Success Messages */}
       {error && (
