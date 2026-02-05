@@ -40,10 +40,14 @@ export interface Customer {
   name: string;
   email: string | null;
   phone: string | null;
+  emails: string[];
+  phones: string[];
   address: string | null;
   postcode: string | null;
   notes: string | null;
+  merged_from: string[];
   created_at: string;
+  updated_at: string;
 }
 
 // Quote

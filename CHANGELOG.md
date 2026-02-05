@@ -4,6 +4,111 @@ All notable changes to this project are documented in this file.
 
 ---
 
+## [Step 12] - Loading Skeletons & UI Polish
+
+### Added
+- **Skeleton Component** (`src/components/ui/skeleton.tsx`)
+  - Base `Skeleton` component with pulse animation
+  - Pre-built patterns: `SkeletonCard`, `SkeletonTable`, `SkeletonStats`
+  - Page-specific skeletons: `SkeletonQuoteDetail`, `SkeletonCustomerDetail`, `SkeletonDashboard`, `SkeletonAnalytics`, `SkeletonSettings`
+
+- **Loading States for All Pages**
+  - `src/app/dashboard/loading.tsx` - Dashboard skeleton
+  - `src/app/quotes/loading.tsx` - Quotes list skeleton
+  - `src/app/quotes/[id]/loading.tsx` - Quote detail skeleton
+  - `src/app/customers/loading.tsx` - Customers list skeleton
+  - `src/app/customers/[id]/loading.tsx` - Customer detail skeleton
+  - `src/app/analytics/loading.tsx` - Analytics skeleton
+  - `src/app/settings/loading.tsx` - Settings skeleton
+
+- **Instant Navigation Feedback** (`src/components/dashboard-shell.tsx`)
+  - Top loading bar animation when navigating
+  - Spinner icon on clicked nav item
+  - Content fades to 60% opacity during navigation
+  - Uses React's `useTransition` for non-blocking updates
+  - Prevents double-clicks during navigation
+
+- **Loading Bar Animation** (`src/app/globals.css`)
+  - Smooth animated loading bar at top of screen
+  - Brand-colored with subtle animation
+
+### Changed
+- **Card Component** (`src/components/ui/card.tsx`)
+  - Fixed background color to explicitly use `bg-white` instead of `bg-card` CSS variable
+  - Added `border-surface-200` for consistent border color
+  - Ensures all modals have correct white background
+
+- **Dashboard Shell** - Converted from Link components to buttons with programmatic navigation for instant feedback
+
+### How It Works
+1. **Instant feedback**: When you click a nav link, the icon immediately changes to a spinner
+2. **Top loading bar**: A brand-colored bar animates across the top of the screen
+3. **Content fades**: The current page content fades slightly to indicate loading
+4. **Skeleton shows**: Next.js then shows the loading skeleton while fetching data
+5. **Content appears**: Finally, the actual page content loads
+
+---
+
+## [Step 11] - Enhanced Customer Management
+
+### Added
+- **Database Migration** (`supabase/migrations/step11_enhanced_customers.sql`)
+  - Added `emails` and `phones` array columns for multiple contact methods
+  - Added `merged_from` array to track merged customer IDs
+  - `ensure_customer_from_quote()` trigger function - automatically creates/links customers when quotes are created
+  - `merge_customers()` function - combines two customers into one
+  - Backfill script to create customer records for existing quotes without customer_id
+
+- **Customer Detail Page** (`src/app/customers/[id]/page.tsx`)
+  - Full customer profile with all contact information
+  - Stats cards: total quotes, won quotes, total value, won value
+  - Complete quote history with status, date, and value
+  - Support for multiple emails and phones with "Primary" badge
+
+- **Customer Actions** (`src/app/customers/[id]/customer-actions.tsx`)
+  - **Edit Customer**: Update name, add/remove multiple emails and phones, address, postcode, notes
+  - **Delete Customer**: Confirmation modal, unlinks quotes before deleting
+  - **Merge Customers**: Search and select another customer to merge into current one
+    - Combines all emails and phones
+    - Transfers all quotes to primary customer
+    - Appends notes from merged customer
+
+- **Improved Customers List** (`src/app/customers/page.tsx`)
+  - Cards are now clickable (link to detail page)
+  - Fixed quote count - now properly counts linked quotes
+  - Shows total value and won count per customer
+  - Displays badges for multiple emails/phones (+N indicator)
+  - Info banner when orphan quotes exist (quotes without customer_id)
+
+### Changed
+- Updated `src/types/index.ts` - Customer type now includes `emails`, `phones`, `merged_from`, `updated_at`
+- Updated `src/components/ui/button.tsx` - Fixed destructive variant colors
+
+### How It Works
+1. **Auto-linking**: When you create a quote, the system automatically:
+   - Searches for existing customer by email
+   - If not found, searches by name + postcode
+   - Creates new customer if no match found
+   - Links the quote to the customer
+
+2. **Multiple Contact Methods**: Customers can have multiple emails and phones
+   - First entry is marked as "Primary"
+   - New contact info from quotes is automatically added if not already present
+
+3. **Merging**: When you merge customers:
+   - All unique emails/phones are combined
+   - All quotes are transferred to the primary customer
+   - Notes are appended
+   - Secondary customer is deleted
+
+### Required Migration
+Run `supabase/migrations/step11_enhanced_customers.sql` to:
+- Add new columns to customers table
+- Create trigger for auto-linking quotes to customers
+- Backfill existing quotes with customer records
+
+---
+
 ## [Step 10] - Analytics Dashboard
 
 ### Added
