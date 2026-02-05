@@ -82,6 +82,38 @@ To enable automated follow-up emails and expiry reminders:
    Authorization: Bearer your_cron_secret
    ```
 
+### 7. Set Up Stripe Billing (Optional)
+
+To enable subscription billing:
+
+1. Run the Step 9 migration in Supabase SQL Editor:
+   - Copy the contents of `supabase/migrations/step9_billing.sql`
+   - Paste and run it
+
+2. Create a Stripe account at [stripe.com](https://stripe.com)
+
+3. In Stripe Dashboard:
+   - Create a Product called "QuoteFlo Professional"
+   - Add a Price: £19/month recurring
+   - Copy the Price ID (starts with `price_`)
+
+4. Add environment variables:
+   ```env
+   STRIPE_SECRET_KEY=sk_test_xxxxxxxxxxxx
+   STRIPE_WEBHOOK_SECRET=whsec_xxxxxxxxxxxx
+   STRIPE_PRICE_PROFESSIONAL_MONTHLY=price_xxxxxxxxxxxx
+   ```
+
+5. Set up webhook endpoint in Stripe Dashboard:
+   - URL: `https://your-domain.com/api/billing/webhook`
+   - Events to listen for:
+     - `checkout.session.completed`
+     - `customer.subscription.created`
+     - `customer.subscription.updated`
+     - `customer.subscription.deleted`
+     - `invoice.payment_succeeded`
+     - `invoice.payment_failed`
+
 ## 📁 Project Structure
 
 ```
@@ -171,6 +203,15 @@ quoteflo/
 - [x] Manual follow-up from quote detail
 - [x] Activity timeline with follow-up events
 - [x] Cron endpoint for automated processing
+
+### ✅ Step 9: Stripe Billing (Complete)
+- [x] Stripe integration
+- [x] 14-day free trial
+- [x] £19/month Professional plan
+- [x] Stripe Checkout for upgrades
+- [x] Customer Portal for subscription management
+- [x] Webhook handling for subscription events
+- [x] Trial countdown in settings
 
 ## 🎨 Brand Colors
 

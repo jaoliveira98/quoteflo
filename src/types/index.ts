@@ -21,6 +21,9 @@ export interface UserProfile {
   subscription_tier: SubscriptionTier;
   subscription_status: SubscriptionStatus;
   stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
+  stripe_price_id: string | null;
+  trial_ends_at: string | null;
   // Notification preferences
   auto_followup_enabled: boolean;
   auto_followup_days: number;
