@@ -138,7 +138,7 @@ export function AnalyticsCharts({ monthlyData, statusData }: AnalyticsChartsProp
                       
                       acc.offset += strokeLength;
                       return acc;
-                    }, { elements: [] as JSX.Element[], offset: 0 }).elements}
+                    }, { elements: [] as React.ReactElement[], offset: 0 }).elements}
                   </svg>
                   {/* Center text */}
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
