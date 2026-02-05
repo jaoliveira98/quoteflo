@@ -11,7 +11,13 @@ All notable changes to this project are documented in this file.
   - `src/lib/supabase/middleware.ts` - Added `CookieToSet` type for `cookiesToSet` parameter
   - `src/lib/supabase/server.ts` - Added `CookieToSet` type for `cookiesToSet` parameter
   - `src/app/api/quotes/[id]/pdf/route.ts` - Changed `any` types to proper `Quote`, `QuoteLineItem`, `UserProfile` types
-  - `src/app/api/quotes/[id]/pdf/public/route.ts` - Changed `any` types to proper `Quote`, `QuoteLineItem`, `UserProfile` types
+  - `src/app/api/quotes/[id]/pdf/public/route.ts` - Changed `any` types to proper types
+- **Next.js 15 Suspense Boundary** - Fixed `useSearchParams()` error:
+  - `src/app/(auth)/login/page.tsx` - Wrapped component in Suspense boundary
+  - `src/app/quotes/quotes-filter.tsx` - Removed unused `useSearchParams` import
+- **SSR Window Access** - Fixed `window is not defined` errors during build:
+  - `src/app/quotes/[id]/quote-detail-actions.tsx` - Added typeof check for window
+  - `src/app/(auth)/forgot-password/page.tsx` - Added typeof check for window
 
 ### Added
 - **Database Schema Updates** (`supabase/migrations/step8_reminders.sql`)

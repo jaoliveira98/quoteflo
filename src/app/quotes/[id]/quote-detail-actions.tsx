@@ -41,7 +41,12 @@ export function QuoteDetailActions({
   const [followUpSuccess, setFollowUpSuccess] = useState(false);
   const [followUpError, setFollowUpError] = useState<string | null>(null);
 
-  const publicUrl = `${window.location.origin}/q/${accessToken}`;
+  const getPublicUrl = () => {
+    if (typeof window !== "undefined") {
+      return `${window.location.origin}/q/${accessToken}`;
+    }
+    return `/q/${accessToken}`;
+  };
 
   const handleSend = async () => {
     if (!hasEmail) {
@@ -82,7 +87,7 @@ export function QuoteDetailActions({
 
   const handleCopyLink = async () => {
     try {
-      await navigator.clipboard.writeText(publicUrl);
+      await navigator.clipboard.writeText(getPublicUrl());
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
@@ -91,7 +96,7 @@ export function QuoteDetailActions({
   };
 
   const handleViewPublic = () => {
-    window.open(publicUrl, "_blank");
+    window.open(getPublicUrl(), "_blank");
   };
 
   const handleFollowUp = async () => {
