@@ -4,6 +4,50 @@ All notable changes to this project are documented in this file.
 
 ---
 
+## [Step 10] - Analytics Dashboard
+
+### Added
+- **Analytics Page** (`src/app/analytics/page.tsx`)
+  - Comprehensive analytics dashboard for tracking quoting performance
+  - Period comparison: current 30 days vs previous 30 days with % change indicators
+  - Key metrics: quotes created, total value, won quotes, conversion rate
+  
+- **Conversion Funnel**
+  - Visual funnel showing: Created → Sent → Viewed → Accepted/Declined
+  - Percentage breakdown at each stage
+  - Color-coded status bars
+
+- **Performance Metrics**
+  - Average quote value
+  - Average accepted quote value
+  - Average time to accept (in hours/days)
+  - View rate (% of sent quotes that were opened)
+
+- **Charts** (`src/app/analytics/analytics-charts.tsx`)
+  - Quotes over time: 6-month bar chart showing quote count and value
+  - Status distribution: Donut chart with breakdown by status
+  - Interactive tooltips on hover
+  - Empty states for new users
+
+- **Top Customers**
+  - Top 5 customers by total quote value
+  - Shows quote count and won count per customer
+  - Customer avatar with initial
+
+- **All-Time Summary**
+  - Total quotes created
+  - Total value quoted
+  - Total value won
+  - Overall win rate
+
+- **Navigation**
+  - Added "Analytics" link to sidebar navigation with chart icon
+
+### Changed
+- Updated `src/components/dashboard-shell.tsx` to include Analytics in navigation
+
+---
+
 ## [Step 9] - Stripe Billing
 
 ### Added
