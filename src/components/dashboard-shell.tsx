@@ -11,10 +11,10 @@ import {
   Menu,
   X,
   LogOut,
-  ChevronDown,
-  BarChart3
+  BarChart3,
+  Loader2
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -40,6 +40,24 @@ export function DashboardShell({ children, user }: DashboardShellProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  const [loadingPath, setLoadingPath] = useState<string | null>(null);
+
+  // Reset loading state when pathname changes
+  useEffect(() => {
+    setLoadingPath(null);
+  }, [pathname]);
+
+  const handleNavigation = (href: string) => {
+    if (pathname === href) return;
+    
+    setLoadingPath(href);
+    setSidebarOpen(false);
+    
+    startTransition(() => {
+      router.push(href);
+    });
+  };
 
   const handleLogout = async () => {
     const supabase = createClient();
@@ -48,8 +66,17 @@ export function DashboardShell({ children, user }: DashboardShellProps) {
     router.refresh();
   };
 
+  const isNavigating = isPending || loadingPath !== null;
+
   return (
     <div className="min-h-screen bg-surface-50">
+      {/* Top loading bar */}
+      {isNavigating && (
+        <div className="fixed top-0 left-0 right-0 z-[100] h-1 bg-brand-100">
+          <div className="h-full bg-brand-500 animate-loading-bar" />
+        </div>
+      )}
+
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div 
@@ -79,11 +106,18 @@ export function DashboardShell({ children, user }: DashboardShellProps) {
 
           {/* New Quote Button */}
           <div className="p-4">
-            <Button asChild className="w-full" size="lg">
-              <Link href="/quotes/new">
+            <Button 
+              className="w-full" 
+              size="lg"
+              onClick={() => handleNavigation("/quotes/new")}
+              disabled={isNavigating}
+            >
+              {loadingPath === "/quotes/new" ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
                 <Plus className="h-4 w-4" />
-                New Quote
-              </Link>
+              )}
+              New Quote
             </Button>
           </div>
 
@@ -91,21 +125,28 @@ export function DashboardShell({ children, user }: DashboardShellProps) {
           <nav className="flex-1 px-3 space-y-1">
             {navigation.map((item) => {
               const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+              const isLoading = loadingPath === item.href;
+              
               return (
-                <Link
+                <button
                   key={item.name}
-                  href={item.href}
-                  onClick={() => setSidebarOpen(false)}
+                  onClick={() => handleNavigation(item.href)}
+                  disabled={isNavigating && !isLoading}
                   className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                    "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
                     isActive
                       ? "bg-brand-50 text-brand-700"
-                      : "text-surface-600 hover:bg-surface-100 hover:text-surface-900"
+                      : "text-surface-600 hover:bg-surface-100 hover:text-surface-900",
+                    isLoading && "bg-surface-100"
                   )}
                 >
-                  <item.icon className={cn("h-5 w-5", isActive ? "text-brand-600" : "text-surface-400")} />
+                  {isLoading ? (
+                    <Loader2 className="h-5 w-5 animate-spin text-brand-600" />
+                  ) : (
+                    <item.icon className={cn("h-5 w-5", isActive ? "text-brand-600" : "text-surface-400")} />
+                  )}
                   {item.name}
-                </Link>
+                </button>
               );
             })}
           </nav>
@@ -155,7 +196,10 @@ export function DashboardShell({ children, user }: DashboardShellProps) {
         </header>
 
         {/* Page content */}
-        <main className="min-h-[calc(100vh-4rem)] lg:min-h-screen">
+        <main className={cn(
+          "min-h-[calc(100vh-4rem)] lg:min-h-screen transition-opacity duration-150",
+          isNavigating && "opacity-60 pointer-events-none"
+        )}>
           {children}
         </main>
       </div>
