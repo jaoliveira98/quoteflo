@@ -7,8 +7,11 @@ All notable changes to this project are documented in this file.
 ## [Step 8] - Automated Follow-ups & Reminders
 
 ### Fixed
-- **TypeScript Build Error** (`src/lib/supabase/middleware.ts`)
-  - Added proper types for `cookiesToSet` parameter to fix Vercel build error
+- **TypeScript Build Errors** - Fixed all implicit `any` types that caused Vercel build failures:
+  - `src/lib/supabase/middleware.ts` - Added `CookieToSet` type for `cookiesToSet` parameter
+  - `src/lib/supabase/server.ts` - Added `CookieToSet` type for `cookiesToSet` parameter
+  - `src/app/api/quotes/[id]/pdf/route.ts` - Changed `any` types to proper `Quote`, `QuoteLineItem`, `UserProfile` types
+  - `src/app/api/quotes/[id]/pdf/public/route.ts` - Changed `any` types to proper `Quote`, `QuoteLineItem`, `UserProfile` types
 
 ### Added
 - **Database Schema Updates** (`supabase/migrations/step8_reminders.sql`)
