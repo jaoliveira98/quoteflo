@@ -94,20 +94,20 @@ export function DashboardShell({ children, user }: DashboardShellProps) {
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="flex items-center justify-between h-16 px-4 border-b border-surface-200">
+          <div className="flex items-center justify-between h-14 px-4 border-b border-surface-200">
             <Logo />
             <button
               onClick={() => setSidebarOpen(false)}
-              className="lg:hidden p-2 rounded-lg hover:bg-surface-100"
+              className="lg:hidden p-2 rounded-lg hover:bg-surface-100 active:bg-surface-200 transition-colors"
             >
               <X className="h-5 w-5" />
             </button>
           </div>
 
           {/* New Quote Button */}
-          <div className="p-4">
+          <div className="p-4 pb-2">
             <Button 
-              className="w-full" 
+              className="w-full shadow-sm" 
               size="lg"
               onClick={() => handleNavigation("/quotes/new")}
               disabled={isNavigating}
@@ -122,7 +122,7 @@ export function DashboardShell({ children, user }: DashboardShellProps) {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-3 space-y-1">
+          <nav className="flex-1 px-3 pt-2 space-y-0.5">
             {navigation.map((item) => {
               const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
               const isLoading = loadingPath === item.href;
@@ -133,11 +133,11 @@ export function DashboardShell({ children, user }: DashboardShellProps) {
                   onClick={() => handleNavigation(item.href)}
                   disabled={isNavigating && !isLoading}
                   className={cn(
-                    "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                    "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all",
                     isActive
-                      ? "bg-brand-50 text-brand-700"
-                      : "text-surface-600 hover:bg-surface-100 hover:text-surface-900",
-                    isLoading && "bg-surface-100"
+                      ? "bg-brand-50 text-brand-700 shadow-sm"
+                      : "text-surface-600 hover:bg-surface-50 hover:text-surface-900 active:bg-surface-100",
+                    isLoading && "bg-surface-50"
                   )}
                 >
                   {isLoading ? (
@@ -182,22 +182,29 @@ export function DashboardShell({ children, user }: DashboardShellProps) {
       {/* Main content */}
       <div className="lg:pl-64">
         {/* Top bar (mobile) */}
-        <header className="sticky top-0 z-30 flex items-center h-16 px-4 bg-white border-b border-surface-200 lg:hidden">
+        <header className="sticky top-0 z-30 flex items-center h-14 px-4 bg-white/95 backdrop-blur-sm border-b border-surface-200 lg:hidden">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="p-2 -ml-2 rounded-lg hover:bg-surface-100"
+            className="p-2 -ml-2 rounded-lg hover:bg-surface-100 active:bg-surface-200 transition-colors"
+            aria-label="Open menu"
           >
-            <Menu className="h-5 w-5" />
+            <Menu className="h-5 w-5 text-surface-700" />
           </button>
           <div className="flex-1 flex justify-center">
             <Logo size="sm" />
           </div>
-          <div className="w-9" /> {/* Spacer for centering */}
+          <button
+            onClick={() => handleNavigation("/quotes/new")}
+            className="p-2 -mr-2 rounded-lg bg-brand-600 text-white hover:bg-brand-700 active:bg-brand-800 transition-colors"
+            aria-label="New quote"
+          >
+            <Plus className="h-5 w-5" />
+          </button>
         </header>
 
         {/* Page content */}
         <main className={cn(
-          "min-h-[calc(100vh-4rem)] lg:min-h-screen transition-opacity duration-150",
+          "min-h-[calc(100vh-3.5rem)] lg:min-h-screen transition-opacity duration-150",
           isNavigating && "opacity-60 pointer-events-none"
         )}>
           {children}

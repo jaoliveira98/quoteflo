@@ -138,10 +138,10 @@ export function QuoteDetailActions({
     <div className="flex flex-col gap-2 ml-14 sm:ml-0">
       <div className="flex flex-wrap gap-2">
         {canEdit && (
-          <Button variant="outline" asChild>
+          <Button variant="outline" size="sm" asChild>
             <Link href={`/quotes/${quoteId}/edit`}>
               <Edit className="h-4 w-4" />
-              Edit
+              <span className="hidden sm:inline">Edit</span>
             </Link>
           </Button>
         )}
@@ -150,12 +150,13 @@ export function QuoteDetailActions({
           <Button 
             onClick={handleSend}
             disabled={isSending}
+            size="sm"
             variant={status === "draft" ? "default" : "outline"}
           >
             {isSending ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : sendSuccess ? (
-              <Check className="h-4 w-4" />
+              <Check className="h-4 w-4 text-green-500" />
             ) : (
               <Send className="h-4 w-4" />
             )}
@@ -163,57 +164,58 @@ export function QuoteDetailActions({
           </Button>
         )}
         
-        <Button variant="outline" onClick={handleDownloadPDF}>
+        <Button variant="outline" size="sm" onClick={handleDownloadPDF}>
           <Download className="h-4 w-4" />
-          PDF
+          <span className="hidden sm:inline">PDF</span>
         </Button>
 
-        <Button variant="outline" onClick={handleCopyLink}>
+        <Button variant="outline" size="sm" onClick={handleCopyLink}>
           {copied ? (
-            <Check className="h-4 w-4" />
+            <Check className="h-4 w-4 text-green-500" />
           ) : (
             <Copy className="h-4 w-4" />
           )}
-          {copied ? "Copied!" : "Copy Link"}
+          <span className="hidden sm:inline">{copied ? "Copied!" : "Copy Link"}</span>
         </Button>
 
-        <Button variant="outline" onClick={handleViewPublic}>
+        <Button variant="outline" size="sm" onClick={handleViewPublic}>
           <ExternalLink className="h-4 w-4" />
-          Preview
+          <span className="hidden sm:inline">Preview</span>
         </Button>
 
         {canFollowUp && (
           <Button 
             variant="outline" 
+            size="sm"
             onClick={handleFollowUp}
             disabled={isFollowingUp}
           >
             {isFollowingUp ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : followUpSuccess ? (
-              <Check className="h-4 w-4" />
+              <Check className="h-4 w-4 text-green-500" />
             ) : (
               <Bell className="h-4 w-4" />
             )}
-            {followUpSuccess ? "Sent!" : `Follow-up${followUpCount > 0 ? ` (${followUpCount}/3)` : ""}`}
+            <span className="hidden sm:inline">{followUpSuccess ? "Sent!" : `Follow-up${followUpCount > 0 ? ` (${followUpCount}/3)` : ""}`}</span>
           </Button>
         )}
       </div>
 
       {sendError && (
-        <p className="text-sm text-red-600">{sendError}</p>
+        <p className="text-sm text-red-600 bg-red-50 px-3 py-1.5 rounded-lg">{sendError}</p>
       )}
       
       {sendSuccess && (
-        <p className="text-sm text-green-600">Quote sent successfully!</p>
+        <p className="text-sm text-green-600 bg-green-50 px-3 py-1.5 rounded-lg">Quote sent successfully!</p>
       )}
 
       {followUpError && (
-        <p className="text-sm text-red-600">{followUpError}</p>
+        <p className="text-sm text-red-600 bg-red-50 px-3 py-1.5 rounded-lg">{followUpError}</p>
       )}
       
       {followUpSuccess && (
-        <p className="text-sm text-green-600">Follow-up sent successfully!</p>
+        <p className="text-sm text-green-600 bg-green-50 px-3 py-1.5 rounded-lg">Follow-up sent!</p>
       )}
     </div>
   );
