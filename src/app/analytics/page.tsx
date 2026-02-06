@@ -1,6 +1,5 @@
 import { DashboardShell } from "@/components/dashboard-shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { 
   FileText, 
   Send, 
@@ -14,7 +13,9 @@ import {
   Calendar,
   ArrowUp,
   ArrowDown,
-  Minus
+  Minus,
+  Target,
+  Zap
 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import { requireAuthWithProfile } from "@/lib/auth";
@@ -37,7 +38,6 @@ export default async function AnalyticsPage() {
   const profile = await requireAuthWithProfile();
   const supabase = await createClient();
   
-  // Fetch all quotes
   const { data: quotes } = await supabase
     .from("quotes")
     .select("id, status, total, created_at, sent_at, viewed_at, accepted_at, customer_name, customer_id")
@@ -49,14 +49,11 @@ export default async function AnalyticsPage() {
     total: Number(q.total) || 0
   }));
 
-  // Calculate date ranges
   const now = new Date();
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
   const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
   
-  // Current period (last 30 days)
   const currentPeriodQuotes = allQuotes.filter(q => new Date(q.created_at) >= thirtyDaysAgo);
-  // Previous period (30-60 days ago)
   const previousPeriodQuotes = allQuotes.filter(q => {
     const date = new Date(q.created_at);
     return date >= sixtyDaysAgo && date < thirtyDaysAgo;
@@ -71,7 +68,6 @@ export default async function AnalyticsPage() {
   const totalValue = allQuotes.reduce((sum, q) => sum + q.total, 0);
   const acceptedValue = allQuotes.filter(q => q.status === "accepted").reduce((sum, q) => sum + q.total, 0);
   
-  // Rates
   const conversionRate = totalSent > 0 ? Math.round((totalAccepted / totalSent) * 100) : 0;
   const viewRate = totalSent > 0 ? Math.round((totalViewed / totalSent) * 100) : 0;
   const avgQuoteValue = totalQuotes > 0 ? Math.round(totalValue / totalQuotes) : 0;
@@ -165,341 +161,384 @@ export default async function AnalyticsPage() {
   const renderChange = (change: number) => {
     if (change > 0) {
       return (
-        <span className="text-green-600 text-sm flex items-center gap-0.5">
+        <span className="inline-flex items-center gap-0.5 text-xs font-medium text-green-700 bg-green-50 px-1.5 py-0.5 rounded-full">
           <ArrowUp className="h-3 w-3" />
           {change}%
         </span>
       );
     } else if (change < 0) {
       return (
-        <span className="text-red-600 text-sm flex items-center gap-0.5">
+        <span className="inline-flex items-center gap-0.5 text-xs font-medium text-red-700 bg-red-50 px-1.5 py-0.5 rounded-full">
           <ArrowDown className="h-3 w-3" />
           {Math.abs(change)}%
         </span>
       );
     }
     return (
-      <span className="text-surface-500 text-sm flex items-center gap-0.5">
+      <span className="inline-flex items-center gap-0.5 text-xs font-medium text-surface-500 bg-surface-100 px-1.5 py-0.5 rounded-full">
         <Minus className="h-3 w-3" />
         0%
       </span>
     );
   };
 
+  const funnelSteps = [
+    { 
+      label: "Created", 
+      count: totalQuotes, 
+      percentage: 100,
+      icon: FileText,
+      color: "text-surface-600",
+      bg: "bg-surface-100",
+      bar: "bg-surface-400" 
+    },
+    { 
+      label: "Sent", 
+      count: totalSent, 
+      percentage: totalQuotes > 0 ? Math.round((totalSent / totalQuotes) * 100) : 0,
+      icon: Send,
+      color: "text-blue-600",
+      bg: "bg-blue-50",
+      bar: "bg-blue-500" 
+    },
+    { 
+      label: "Viewed", 
+      count: totalViewed, 
+      percentage: totalQuotes > 0 ? Math.round((totalViewed / totalQuotes) * 100) : 0,
+      icon: Eye,
+      color: "text-amber-600",
+      bg: "bg-amber-50",
+      bar: "bg-amber-500" 
+    },
+    { 
+      label: "Accepted", 
+      count: totalAccepted, 
+      percentage: totalQuotes > 0 ? Math.round((totalAccepted / totalQuotes) * 100) : 0,
+      icon: CheckCircle2,
+      color: "text-green-600",
+      bg: "bg-green-50",
+      bar: "bg-green-500" 
+    },
+    ...(totalDeclined > 0 ? [{
+      label: "Declined", 
+      count: totalDeclined, 
+      percentage: totalQuotes > 0 ? Math.round((totalDeclined / totalQuotes) * 100) : 0,
+      icon: XCircle,
+      color: "text-red-600" as const,
+      bg: "bg-red-50" as const,
+      bar: "bg-red-500" as const
+    }] : []),
+  ];
+
+  const performanceMetrics = [
+    {
+      label: "Average Quote Value",
+      value: formatCurrency(avgQuoteValue),
+      icon: PoundSterling,
+      color: "text-brand-600",
+      bg: "bg-brand-50",
+      border: "border-l-brand-500",
+    },
+    {
+      label: "Average Accepted Value",
+      value: formatCurrency(avgAcceptedValue),
+      icon: CheckCircle2,
+      color: "text-green-600",
+      bg: "bg-green-50",
+      border: "border-l-green-500",
+    },
+    {
+      label: "Average Time to Accept",
+      value: avgTimeToAccept > 24 
+        ? `${Math.round(avgTimeToAccept / 24)} days` 
+        : avgTimeToAccept > 0 
+          ? `${avgTimeToAccept} hours`
+          : "N/A",
+      icon: Clock,
+      color: "text-blue-600",
+      bg: "bg-blue-50",
+      border: "border-l-blue-500",
+    },
+    {
+      label: "View Rate",
+      value: `${viewRate}%`,
+      icon: Eye,
+      color: "text-amber-600",
+      bg: "bg-amber-50",
+      border: "border-l-amber-500",
+    },
+  ];
+
   return (
     <DashboardShell user={{ email: profile.email, company_name: profile.company_name }}>
-      <div className="p-6 lg:p-8 space-y-8">
+      <div className="p-6 lg:p-8 space-y-6">
         {/* Header */}
-        <div>
-          <h1 className="text-2xl font-bold text-surface-900">Analytics</h1>
-          <p className="text-surface-600">Track your quoting performance and trends</p>
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-surface-900">Analytics</h1>
+            <p className="text-surface-500 mt-1">Track your quoting performance and trends</p>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-surface-500">
+            <Calendar className="h-4 w-4" />
+            <span>Last 30 days vs previous 30 days</span>
+          </div>
         </div>
 
-        {/* Period Overview */}
+        {/* KPI Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="p-6">
+          <Card className="relative overflow-hidden">
+            <CardContent className="p-5">
               <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm text-surface-500">Quotes (30 days)</p>
-                  <p className="text-2xl font-bold text-surface-900">{currentQuoteCount}</p>
-                  <div className="mt-1">{renderChange(quoteCountChange)}</div>
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-surface-500">Quotes</p>
+                  <p className="text-2xl font-bold text-surface-900 tracking-tight">{currentQuoteCount}</p>
                 </div>
-                <div className="h-10 w-10 rounded-lg bg-surface-100 flex items-center justify-center">
+                <div className="h-10 w-10 rounded-xl bg-surface-100 flex items-center justify-center">
                   <FileText className="h-5 w-5 text-surface-600" />
                 </div>
               </div>
+              <div className="mt-3 flex items-center gap-2">
+                {renderChange(quoteCountChange)}
+                <span className="text-xs text-surface-400">vs prev. period</span>
+              </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="p-6">
+          <Card className="relative overflow-hidden">
+            <CardContent className="p-5">
               <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm text-surface-500">Value (30 days)</p>
-                  <p className="text-2xl font-bold text-surface-900">{formatCurrency(currentValue)}</p>
-                  <div className="mt-1">{renderChange(valueChange)}</div>
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-surface-500">Value</p>
+                  <p className="text-2xl font-bold text-surface-900 tracking-tight">{formatCurrency(currentValue)}</p>
                 </div>
-                <div className="h-10 w-10 rounded-lg bg-brand-100 flex items-center justify-center">
+                <div className="h-10 w-10 rounded-xl bg-brand-50 flex items-center justify-center">
                   <PoundSterling className="h-5 w-5 text-brand-600" />
                 </div>
               </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm text-surface-500">Won (30 days)</p>
-                  <p className="text-2xl font-bold text-surface-900">{currentAccepted}</p>
-                  <div className="mt-1">{renderChange(acceptedChange)}</div>
-                </div>
-                <div className="h-10 w-10 rounded-lg bg-green-100 flex items-center justify-center">
-                  <CheckCircle2 className="h-5 w-5 text-green-600" />
-                </div>
+              <div className="mt-3 flex items-center gap-2">
+                {renderChange(valueChange)}
+                <span className="text-xs text-surface-400">vs prev. period</span>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="p-6">
+          <Card className="relative overflow-hidden">
+            <CardContent className="p-5">
               <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm text-surface-500">Conversion Rate</p>
-                  <p className="text-2xl font-bold text-surface-900">{conversionRate}%</p>
-                  <p className="text-sm text-surface-500 mt-1">of sent quotes</p>
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-surface-500">Won</p>
+                  <p className="text-2xl font-bold text-surface-900 tracking-tight">{currentAccepted}</p>
                 </div>
-                <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                  <TrendingUp className="h-5 w-5 text-blue-600" />
+                <div className="h-10 w-10 rounded-xl bg-green-50 flex items-center justify-center">
+                  <CheckCircle2 className="h-5 w-5 text-green-600" />
                 </div>
+              </div>
+              <div className="mt-3 flex items-center gap-2">
+                {renderChange(acceptedChange)}
+                <span className="text-xs text-surface-400">vs prev. period</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="relative overflow-hidden">
+            <CardContent className="p-5">
+              <div className="flex items-start justify-between">
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-surface-500">Win Rate</p>
+                  <p className="text-2xl font-bold text-surface-900 tracking-tight">{conversionRate}%</p>
+                </div>
+                <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center">
+                  <Target className="h-5 w-5 text-blue-600" />
+                </div>
+              </div>
+              <div className="mt-3">
+                <span className="text-xs text-surface-400">of {totalSent} sent quotes</span>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Charts Section */}
+        {/* Charts */}
         <div className="grid lg:grid-cols-2 gap-6">
           <AnalyticsCharts monthlyData={monthlyData} statusData={statusData} />
         </div>
 
-        {/* Conversion Funnel */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-surface-500" />
-              Quote Funnel
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {/* Funnel visualization */}
-              <div className="flex items-center gap-4">
-                <div className="flex-1">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-surface-700">Created</span>
-                    <span className="text-sm text-surface-600">{totalQuotes}</span>
-                  </div>
-                  <div className="h-8 bg-surface-200 rounded-lg overflow-hidden">
-                    <div className="h-full bg-surface-400 rounded-lg" style={{ width: "100%" }} />
-                  </div>
+        {/* Funnel + Performance Metrics */}
+        <div className="grid lg:grid-cols-5 gap-6">
+          {/* Quote Funnel */}
+          <Card className="lg:col-span-3">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-base flex items-center gap-2">
+                <div className="h-8 w-8 rounded-lg bg-surface-100 flex items-center justify-center">
+                  <TrendingUp className="h-4 w-4 text-surface-600" />
                 </div>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <div className="flex-1">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-surface-700 flex items-center gap-2">
-                      <Send className="h-4 w-4 text-blue-500" />
-                      Sent
-                    </span>
-                    <span className="text-sm text-surface-600">
-                      {totalSent} ({totalQuotes > 0 ? Math.round((totalSent / totalQuotes) * 100) : 0}%)
-                    </span>
-                  </div>
-                  <div className="h-8 bg-surface-200 rounded-lg overflow-hidden">
-                    <div 
-                      className="h-full bg-blue-500 rounded-lg transition-all duration-500" 
-                      style={{ width: `${totalQuotes > 0 ? (totalSent / totalQuotes) * 100 : 0}%` }} 
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <div className="flex-1">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-surface-700 flex items-center gap-2">
-                      <Eye className="h-4 w-4 text-amber-500" />
-                      Viewed
-                    </span>
-                    <span className="text-sm text-surface-600">
-                      {totalViewed} ({totalSent > 0 ? Math.round((totalViewed / totalSent) * 100) : 0}% of sent)
-                    </span>
-                  </div>
-                  <div className="h-8 bg-surface-200 rounded-lg overflow-hidden">
-                    <div 
-                      className="h-full bg-amber-500 rounded-lg transition-all duration-500" 
-                      style={{ width: `${totalQuotes > 0 ? (totalViewed / totalQuotes) * 100 : 0}%` }} 
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <div className="flex-1">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-surface-700 flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-500" />
-                      Accepted
-                    </span>
-                    <span className="text-sm text-surface-600">
-                      {totalAccepted} ({totalSent > 0 ? Math.round((totalAccepted / totalSent) * 100) : 0}% of sent)
-                    </span>
-                  </div>
-                  <div className="h-8 bg-surface-200 rounded-lg overflow-hidden">
-                    <div 
-                      className="h-full bg-green-500 rounded-lg transition-all duration-500" 
-                      style={{ width: `${totalQuotes > 0 ? (totalAccepted / totalQuotes) * 100 : 0}%` }} 
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {totalDeclined > 0 && (
-                <div className="flex items-center gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-surface-700 flex items-center gap-2">
-                        <XCircle className="h-4 w-4 text-red-500" />
-                        Declined
-                      </span>
-                      <span className="text-sm text-surface-600">
-                        {totalDeclined} ({totalSent > 0 ? Math.round((totalDeclined / totalSent) * 100) : 0}% of sent)
-                      </span>
-                    </div>
-                    <div className="h-8 bg-surface-200 rounded-lg overflow-hidden">
-                      <div 
-                        className="h-full bg-red-500 rounded-lg transition-all duration-500" 
-                        style={{ width: `${totalQuotes > 0 ? (totalDeclined / totalQuotes) * 100 : 0}%` }} 
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Bottom Row: Performance Metrics & Top Customers */}
-        <div className="grid lg:grid-cols-2 gap-6">
-          {/* Performance Metrics */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Clock className="h-5 w-5 text-surface-500" />
-                Performance Metrics
+                Quote Funnel
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-6">
-                <div className="flex items-center justify-between p-4 bg-surface-50 rounded-lg">
-                  <div>
-                    <p className="text-sm text-surface-600">Average Quote Value</p>
-                    <p className="text-xl font-semibold text-surface-900">{formatCurrency(avgQuoteValue)}</p>
-                  </div>
-                  <PoundSterling className="h-8 w-8 text-surface-300" />
-                </div>
-
-                <div className="flex items-center justify-between p-4 bg-surface-50 rounded-lg">
-                  <div>
-                    <p className="text-sm text-surface-600">Average Accepted Value</p>
-                    <p className="text-xl font-semibold text-surface-900">{formatCurrency(avgAcceptedValue)}</p>
-                  </div>
-                  <CheckCircle2 className="h-8 w-8 text-surface-300" />
-                </div>
-
-                <div className="flex items-center justify-between p-4 bg-surface-50 rounded-lg">
-                  <div>
-                    <p className="text-sm text-surface-600">Average Time to Accept</p>
-                    <p className="text-xl font-semibold text-surface-900">
-                      {avgTimeToAccept > 24 
-                        ? `${Math.round(avgTimeToAccept / 24)} days` 
-                        : avgTimeToAccept > 0 
-                          ? `${avgTimeToAccept} hours`
-                          : "N/A"}
-                    </p>
-                  </div>
-                  <Clock className="h-8 w-8 text-surface-300" />
-                </div>
-
-                <div className="flex items-center justify-between p-4 bg-surface-50 rounded-lg">
-                  <div>
-                    <p className="text-sm text-surface-600">View Rate</p>
-                    <p className="text-xl font-semibold text-surface-900">{viewRate}%</p>
-                  </div>
-                  <Eye className="h-8 w-8 text-surface-300" />
-                </div>
+              <div className="space-y-3">
+                {funnelSteps.map((step, index) => {
+                  const Icon = step.icon;
+                  return (
+                    <div key={index} className="group">
+                      <div className="flex items-center gap-3 mb-1.5">
+                        <div className={`h-7 w-7 rounded-lg ${step.bg} flex items-center justify-center flex-shrink-0`}>
+                          <Icon className={`h-3.5 w-3.5 ${step.color}`} />
+                        </div>
+                        <div className="flex-1 flex items-center justify-between min-w-0">
+                          <span className="text-sm font-medium text-surface-700">{step.label}</span>
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-sm font-semibold text-surface-900">{step.count}</span>
+                            <span className="text-xs text-surface-400">{step.percentage}%</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="ml-10">
+                        <div className="h-2 bg-surface-100 rounded-full overflow-hidden">
+                          <div 
+                            className={`h-full ${step.bar} rounded-full transition-all duration-700 ease-out`}
+                            style={{ width: `${step.percentage}%`, minWidth: step.count > 0 ? "4px" : "0" }} 
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </CardContent>
           </Card>
 
-          {/* Top Customers */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Users className="h-5 w-5 text-surface-500" />
-                Top Customers
+          {/* Performance Metrics */}
+          <Card className="lg:col-span-2">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-base flex items-center gap-2">
+                <div className="h-8 w-8 rounded-lg bg-surface-100 flex items-center justify-center">
+                  <Zap className="h-4 w-4 text-surface-600" />
+                </div>
+                Key Metrics
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {topCustomers.length > 0 ? (
-                <div className="space-y-4">
-                  {topCustomers.map((customer, index) => (
+              <div className="space-y-3">
+                {performanceMetrics.map((metric, index) => {
+                  const Icon = metric.icon;
+                  return (
                     <div 
                       key={index}
-                      className="flex items-center justify-between p-4 bg-surface-50 rounded-lg"
+                      className={`flex items-center gap-3 p-3 rounded-lg border-l-[3px] ${metric.border} bg-surface-50/80`}
                     >
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-full bg-brand-100 flex items-center justify-center">
-                          <span className="text-brand-600 font-semibold">
-                            {customer.name.charAt(0).toUpperCase()}
-                          </span>
-                        </div>
-                        <div>
-                          <p className="font-medium text-surface-900">{customer.name}</p>
-                          <p className="text-sm text-surface-500">
-                            {customer.count} quote{customer.count !== 1 ? "s" : ""} • {customer.accepted} won
-                          </p>
-                        </div>
+                      <div className={`h-9 w-9 rounded-lg ${metric.bg} flex items-center justify-center flex-shrink-0`}>
+                        <Icon className={`h-4 w-4 ${metric.color}`} />
                       </div>
-                      <div className="text-right">
-                        <p className="font-semibold text-surface-900">{formatCurrency(customer.value)}</p>
-                        <p className="text-sm text-surface-500">total value</p>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-surface-500 leading-none mb-1">{metric.label}</p>
+                        <p className="text-lg font-semibold text-surface-900 leading-tight truncate">{metric.value}</p>
                       </div>
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <Users className="h-12 w-12 text-surface-300 mx-auto mb-3" />
-                  <p className="text-surface-600">No customer data yet</p>
-                  <p className="text-sm text-surface-500">Create quotes to see your top customers</p>
-                </div>
-              )}
+                  );
+                })}
+              </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* All-Time Stats */}
+        {/* Top Customers */}
         <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-surface-500" />
-              All-Time Summary
+          <CardHeader className="pb-4">
+            <CardTitle className="text-base flex items-center gap-2">
+              <div className="h-8 w-8 rounded-lg bg-surface-100 flex items-center justify-center">
+                <Users className="h-4 w-4 text-surface-600" />
+              </div>
+              Top Customers by Value
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              <div className="text-center p-4">
-                <p className="text-3xl font-bold text-surface-900">{totalQuotes}</p>
-                <p className="text-sm text-surface-600">Total Quotes</p>
+            {topCustomers.length > 0 ? (
+              <div className="space-y-2">
+                {topCustomers.map((customer, index) => {
+                  const maxCustomerValue = topCustomers[0]?.value || 1;
+                  const barWidth = (customer.value / maxCustomerValue) * 100;
+                  return (
+                    <div 
+                      key={index}
+                      className="group relative flex items-center gap-4 p-3 rounded-xl hover:bg-surface-50 transition-colors"
+                    >
+                      <div className="flex items-center gap-3 flex-shrink-0">
+                        <span className="text-xs font-bold text-surface-300 w-5 text-right tabular-nums">
+                          {index + 1}
+                        </span>
+                        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-brand-100 to-brand-200 flex items-center justify-center ring-2 ring-white shadow-sm">
+                          <span className="text-brand-700 font-semibold text-sm">
+                            {customer.name.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-1">
+                          <p className="font-medium text-surface-900 truncate">{customer.name}</p>
+                          <p className="font-semibold text-surface-900 ml-4 flex-shrink-0">{formatCurrency(customer.value)}</p>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1 mr-4">
+                            <div className="h-1.5 bg-surface-100 rounded-full overflow-hidden">
+                              <div 
+                                className="h-full bg-brand-400 rounded-full transition-all duration-500"
+                                style={{ width: `${barWidth}%` }}
+                              />
+                            </div>
+                          </div>
+                          <p className="text-xs text-surface-500 flex-shrink-0">
+                            {customer.count} quote{customer.count !== 1 ? "s" : ""} · {customer.accepted} won
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-              <div className="text-center p-4">
-                <p className="text-3xl font-bold text-surface-900">{formatCurrency(totalValue)}</p>
-                <p className="text-sm text-surface-600">Total Value</p>
+            ) : (
+              <div className="text-center py-10">
+                <div className="h-14 w-14 rounded-2xl bg-surface-100 flex items-center justify-center mx-auto mb-4">
+                  <Users className="h-7 w-7 text-surface-300" />
+                </div>
+                <p className="font-medium text-surface-700 mb-1">No customer data yet</p>
+                <p className="text-sm text-surface-500">Create quotes to see your top customers</p>
               </div>
-              <div className="text-center p-4">
-                <p className="text-3xl font-bold text-green-600">{formatCurrency(acceptedValue)}</p>
-                <p className="text-sm text-surface-600">Won Value</p>
-              </div>
-              <div className="text-center p-4">
-                <p className="text-3xl font-bold text-surface-900">{conversionRate}%</p>
-                <p className="text-sm text-surface-600">Win Rate</p>
-              </div>
-            </div>
+            )}
           </CardContent>
         </Card>
+
+        {/* All-Time Summary */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="rounded-xl bg-gradient-to-br from-surface-800 to-surface-900 p-5 text-white shadow-medium">
+            <div className="flex items-center gap-2 mb-3">
+              <FileText className="h-4 w-4 text-surface-400" />
+              <p className="text-sm font-medium text-surface-300">All-Time Quotes</p>
+            </div>
+            <p className="text-2xl font-bold tracking-tight">{totalQuotes}</p>
+          </div>
+          <div className="rounded-xl bg-gradient-to-br from-surface-800 to-surface-900 p-5 text-white shadow-medium">
+            <div className="flex items-center gap-2 mb-3">
+              <PoundSterling className="h-4 w-4 text-surface-400" />
+              <p className="text-sm font-medium text-surface-300">Total Value</p>
+            </div>
+            <p className="text-2xl font-bold tracking-tight">{formatCurrency(totalValue)}</p>
+          </div>
+          <div className="rounded-xl bg-gradient-to-br from-green-600 to-green-700 p-5 text-white shadow-medium">
+            <div className="flex items-center gap-2 mb-3">
+              <CheckCircle2 className="h-4 w-4 text-green-200" />
+              <p className="text-sm font-medium text-green-100">Won Value</p>
+            </div>
+            <p className="text-2xl font-bold tracking-tight">{formatCurrency(acceptedValue)}</p>
+          </div>
+          <div className="rounded-xl bg-gradient-to-br from-brand-600 to-brand-700 p-5 text-white shadow-medium">
+            <div className="flex items-center gap-2 mb-3">
+              <Target className="h-4 w-4 text-brand-200" />
+              <p className="text-sm font-medium text-brand-100">Win Rate</p>
+            </div>
+            <p className="text-2xl font-bold tracking-tight">{conversionRate}%</p>
+          </div>
+        </div>
       </div>
     </DashboardShell>
   );

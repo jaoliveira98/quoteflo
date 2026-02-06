@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
 
 function LoginForm() {
@@ -101,9 +102,7 @@ function LoginForm() {
           </div>
 
           {error && (
-            <div className="p-3 rounded-lg bg-red-50 text-red-700 text-sm">
-              {error}
-            </div>
+            <Alert variant="destructive">{error}</Alert>
           )}
 
           <Button type="submit" className="w-full" size="lg" disabled={isLoading}>

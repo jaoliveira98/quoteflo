@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert } from "@/components/ui/alert";
 import { Loader2, ArrowLeft, CheckCircle2 } from "lucide-react";
 
 export default function ForgotPasswordPage() {
@@ -57,12 +58,13 @@ export default function ForgotPasswordPage() {
           </p>
           <p className="text-sm text-surface-500 mb-6">
             Didn&apos;t receive the email? Check your spam folder or{" "}
-            <button 
+            <Button 
+              variant="link"
+              className="p-0 h-auto text-brand-600"
               onClick={() => setIsSuccess(false)}
-              className="text-brand-600 hover:underline"
             >
               try again
-            </button>
+            </Button>
           </p>
           <Button asChild variant="outline">
             <Link href="/login">
@@ -99,9 +101,7 @@ export default function ForgotPasswordPage() {
           </div>
 
           {error && (
-            <div className="p-3 rounded-lg bg-red-50 text-red-700 text-sm">
-              {error}
-            </div>
+            <Alert variant="destructive">{error}</Alert>
           )}
 
           <Button type="submit" className="w-full" size="lg" disabled={isLoading}>

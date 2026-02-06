@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Alert } from "@/components/ui/alert";
 import { 
   Send, 
   Download, 
@@ -203,19 +204,19 @@ export function QuoteDetailActions({
       </div>
 
       {sendError && (
-        <p className="text-sm text-red-600 bg-red-50 px-3 py-1.5 rounded-lg">{sendError}</p>
+        <Alert variant="destructive">{sendError}</Alert>
       )}
       
       {sendSuccess && (
-        <p className="text-sm text-green-600 bg-green-50 px-3 py-1.5 rounded-lg">Quote sent successfully!</p>
+        <Alert variant="success">Quote sent successfully!</Alert>
       )}
 
       {followUpError && (
-        <p className="text-sm text-red-600 bg-red-50 px-3 py-1.5 rounded-lg">{followUpError}</p>
+        <Alert variant="destructive">{followUpError}</Alert>
       )}
       
       {followUpSuccess && (
-        <p className="text-sm text-green-600 bg-green-50 px-3 py-1.5 rounded-lg">Follow-up sent!</p>
+        <Alert variant="success">Follow-up sent!</Alert>
       )}
     </div>
   );

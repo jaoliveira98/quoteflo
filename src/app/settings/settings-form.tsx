@@ -8,6 +8,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Alert } from "@/components/ui/alert";
 import { 
   Building2, 
   Palette, 
@@ -17,7 +26,6 @@ import {
   Zap,
   Wrench,
   Hammer,
-  AlertCircle,
   Bell,
   Crown,
   ExternalLink,
@@ -126,15 +134,14 @@ function SubscriptionCard({ profile }: { profile: UserProfile }) {
       <CardContent className="space-y-4">
         {/* Success/Cancel Messages */}
         {success && (
-          <div className="p-3 rounded-lg bg-green-50 text-green-700 text-sm flex items-center gap-2">
-            <Check className="h-4 w-4" />
+          <Alert variant="success">
             Welcome to Professional! Your subscription is now active.
-          </div>
+          </Alert>
         )}
         {canceled && (
-          <div className="p-3 rounded-lg bg-amber-50 text-amber-700 text-sm">
+          <Alert variant="warning">
             Checkout was canceled. No charges were made.
-          </div>
+          </Alert>
         )}
         
         {/* Current Plan */}
@@ -252,10 +259,7 @@ function SubscriptionCard({ profile }: { profile: UserProfile }) {
         )}
         
         {error && (
-          <div className="p-3 rounded-lg bg-red-50 text-red-700 text-sm flex items-center gap-2">
-            <AlertCircle className="h-4 w-4" />
-            {error}
-          </div>
+          <Alert variant="destructive">{error}</Alert>
         )}
       </CardContent>
     </Card>
@@ -396,14 +400,15 @@ export function SettingsForm({ profile }: SettingsFormProps) {
             <Label>Trade</Label>
             <div className="grid grid-cols-3 gap-3">
               {trades.map((trade) => (
-                <button
+                <Button
                   key={trade.value}
                   type="button"
+                  variant="outline"
                   onClick={() => setFormData({ ...formData, trade: trade.value })}
                   className={cn(
-                    "flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all",
+                    "flex flex-col items-center gap-2 p-4 h-auto rounded-lg border-2 transition-all",
                     formData.trade === trade.value
-                      ? "border-brand-500 bg-brand-50"
+                      ? "border-brand-500 bg-brand-50 hover:bg-brand-50"
                       : "border-surface-200 hover:border-surface-300"
                   )}
                 >
@@ -417,7 +422,7 @@ export function SettingsForm({ profile }: SettingsFormProps) {
                   )}>
                     {trade.label}
                   </span>
-                </button>
+                </Button>
               ))}
             </div>
             <p className="text-xs text-surface-500">
@@ -443,9 +448,11 @@ export function SettingsForm({ profile }: SettingsFormProps) {
             <Label>Brand Color</Label>
             <div className="flex flex-wrap gap-2">
               {brandColors.map((color) => (
-                <button
+                <Button
                   key={color.value}
                   type="button"
+                  variant="outline"
+                  size="icon"
                   onClick={() => setFormData({ ...formData, brand_color: color.value })}
                   className={cn(
                     "h-10 w-10 rounded-lg border-2 transition-all",
@@ -506,46 +513,36 @@ export function SettingsForm({ profile }: SettingsFormProps) {
               <div>
                 <p className="font-medium text-surface-900">Auto follow-up emails</p>
                 <p className="text-sm text-surface-500">
-                  Send automatic reminders for quotes that haven't been viewed
+                  Send automatic reminders for quotes that haven&apos;t been viewed
                 </p>
               </div>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={formData.auto_followup_enabled}
-                onClick={() => setFormData({ ...formData, auto_followup_enabled: !formData.auto_followup_enabled })}
-                className={cn(
-                  "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors",
-                  formData.auto_followup_enabled ? "bg-brand-500" : "bg-surface-200"
-                )}
-              >
-                <span
-                  className={cn(
-                    "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition-transform",
-                    formData.auto_followup_enabled ? "translate-x-5" : "translate-x-0"
-                  )}
-                />
-              </button>
+              <Switch
+                checked={formData.auto_followup_enabled}
+                onCheckedChange={(checked) => setFormData({ ...formData, auto_followup_enabled: checked })}
+              />
             </div>
             
             {formData.auto_followup_enabled && (
-              <div className="ml-0 pl-0 border-l-0 space-y-3">
+              <div className="space-y-3">
                 <div className="flex items-center gap-3 p-3 rounded-lg bg-surface-50">
                   <Label htmlFor="auto_followup_days" className="text-sm text-surface-600 whitespace-nowrap">
                     Send first follow-up after
                   </Label>
-                  <select
-                    id="auto_followup_days"
-                    value={formData.auto_followup_days}
-                    onChange={(e) => setFormData({ ...formData, auto_followup_days: Number(e.target.value) })}
-                    className="w-24 h-9 rounded-md border border-surface-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                  <Select
+                    value={String(formData.auto_followup_days)}
+                    onValueChange={(value) => setFormData({ ...formData, auto_followup_days: Number(value) })}
                   >
-                    <option value={1}>1 day</option>
-                    <option value={2}>2 days</option>
-                    <option value={3}>3 days</option>
-                    <option value={5}>5 days</option>
-                    <option value={7}>7 days</option>
-                  </select>
+                    <SelectTrigger className="w-28 h-9">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">1 day</SelectItem>
+                      <SelectItem value="2">2 days</SelectItem>
+                      <SelectItem value="3">3 days</SelectItem>
+                      <SelectItem value="5">5 days</SelectItem>
+                      <SelectItem value="7">7 days</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <p className="text-xs text-surface-500">
                   Up to 3 follow-up emails will be sent automatically. Subsequent emails are sent 3 days apart.
@@ -563,23 +560,10 @@ export function SettingsForm({ profile }: SettingsFormProps) {
                   Remind customers before their quote expires
                 </p>
               </div>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={formData.expiry_reminder_enabled}
-                onClick={() => setFormData({ ...formData, expiry_reminder_enabled: !formData.expiry_reminder_enabled })}
-                className={cn(
-                  "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors",
-                  formData.expiry_reminder_enabled ? "bg-brand-500" : "bg-surface-200"
-                )}
-              >
-                <span
-                  className={cn(
-                    "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition-transform",
-                    formData.expiry_reminder_enabled ? "translate-x-5" : "translate-x-0"
-                  )}
-                />
-              </button>
+              <Switch
+                checked={formData.expiry_reminder_enabled}
+                onCheckedChange={(checked) => setFormData({ ...formData, expiry_reminder_enabled: checked })}
+              />
             </div>
             
             {formData.expiry_reminder_enabled && (
@@ -588,18 +572,21 @@ export function SettingsForm({ profile }: SettingsFormProps) {
                   <Label htmlFor="expiry_reminder_days" className="text-sm text-surface-600 whitespace-nowrap">
                     Send reminder
                   </Label>
-                  <select
-                    id="expiry_reminder_days"
-                    value={formData.expiry_reminder_days}
-                    onChange={(e) => setFormData({ ...formData, expiry_reminder_days: Number(e.target.value) })}
-                    className="w-32 h-9 rounded-md border border-surface-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                  <Select
+                    value={String(formData.expiry_reminder_days)}
+                    onValueChange={(value) => setFormData({ ...formData, expiry_reminder_days: Number(value) })}
                   >
-                    <option value={1}>1 day before</option>
-                    <option value={2}>2 days before</option>
-                    <option value={3}>3 days before</option>
-                    <option value={5}>5 days before</option>
-                    <option value={7}>7 days before</option>
-                  </select>
+                    <SelectTrigger className="w-36 h-9">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">1 day before</SelectItem>
+                      <SelectItem value="2">2 days before</SelectItem>
+                      <SelectItem value="3">3 days before</SelectItem>
+                      <SelectItem value="5">5 days before</SelectItem>
+                      <SelectItem value="7">7 days before</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <span className="text-sm text-surface-600">expiry</span>
                 </div>
               </div>
@@ -613,17 +600,11 @@ export function SettingsForm({ profile }: SettingsFormProps) {
 
       {/* Error/Success Messages */}
       {error && (
-        <div className="p-4 rounded-lg bg-red-50 text-red-700 flex items-center gap-2">
-          <AlertCircle className="h-5 w-5 flex-shrink-0" />
-          {error}
-        </div>
+        <Alert variant="destructive">{error}</Alert>
       )}
 
       {success && (
-        <div className="p-4 rounded-lg bg-green-50 text-green-700 flex items-center gap-2">
-          <Check className="h-5 w-5 flex-shrink-0" />
-          Settings saved successfully!
-        </div>
+        <Alert variant="success">Settings saved successfully!</Alert>
       )}
 
       {/* Save Button */}

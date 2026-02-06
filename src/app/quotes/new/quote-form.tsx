@@ -8,6 +8,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
+import { Alert } from "@/components/ui/alert";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { 
   ArrowLeft, 
   Plus, 
@@ -18,11 +27,9 @@ import {
   Send,
   User,
   FileText,
-  X,
-  AlertCircle
 } from "lucide-react";
 import Link from "next/link";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, cn } from "@/lib/utils";
 import type { UserProfile, ServiceItem, Customer } from "@/types";
 
 interface LineItem {
@@ -345,10 +352,7 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
       </div>
 
       {error && (
-        <div className="p-4 rounded-lg bg-red-50 text-red-700 flex items-center gap-2">
-          <AlertCircle className="h-5 w-5 flex-shrink-0" />
-          {error}
-        </div>
+        <Alert variant="destructive">{error}</Alert>
       )}
 
       {/* Customer Details */}
@@ -365,17 +369,20 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
             <div className="flex flex-wrap gap-2 pb-4 border-b border-surface-200">
               <span className="text-sm text-surface-500 mr-2">Quick select:</span>
               {customers.slice(0, 5).map(customer => (
-                <button
+                <Button
                   key={customer.id}
+                  variant="outline"
+                  size="sm"
                   onClick={() => selectCustomer(customer)}
-                  className={`text-sm px-3 py-1 rounded-full transition-colors ${
+                  className={cn(
+                    "rounded-full",
                     selectedCustomerId === customer.id
-                      ? "bg-brand-100 text-brand-700 ring-1 ring-brand-300"
-                      : "bg-surface-100 hover:bg-surface-200 text-surface-700"
-                  }`}
+                      ? "bg-brand-100 text-brand-700 border-brand-300 hover:bg-brand-100"
+                      : "bg-surface-50 text-surface-700 hover:bg-surface-100"
+                  )}
                 >
                   {customer.name}
-                </button>
+                </Button>
               ))}
             </div>
           )}
@@ -442,11 +449,11 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <textarea
+          <Textarea
             value={jobDescription}
             onChange={(e) => setJobDescription(e.target.value)}
             placeholder="Describe the work to be carried out..."
-            className="w-full h-24 px-4 py-3 rounded-lg border border-input bg-background text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1 placeholder:text-muted-foreground transition-colors"
+            className="h-24 resize-none"
           />
         </CardContent>
       </Card>
@@ -479,13 +486,15 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
                         className="font-medium bg-white"
                       />
                     </div>
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={() => removeLineItem(item.id)}
-                      className="p-2 text-surface-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0"
+                      className="flex-shrink-0 text-surface-400 hover:text-red-500 hover:bg-red-50"
                       title="Remove item"
                     >
                       <Trash2 className="h-4 w-4" />
-                    </button>
+                    </Button>
                   </div>
                   <div className="grid grid-cols-3 gap-3">
                     <div>
@@ -575,89 +584,82 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
         </Button>
       </div>
 
-      {/* Service Picker Modal */}
-      {showServicePicker && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/50">
-          <div className="bg-white rounded-t-2xl sm:rounded-xl shadow-strong w-full sm:max-w-lg max-h-[85vh] sm:max-h-[80vh] flex flex-col animate-slide-up sm:animate-scale-in">
-            <div className="flex flex-col">
-              {/* Mobile drag handle */}
-              <div className="sm:hidden flex justify-center pt-3 pb-1">
-                <div className="w-10 h-1 rounded-full bg-surface-300" />
-              </div>
-              <div className="flex items-center justify-between p-4 border-b border-surface-200">
-                <h3 className="font-semibold text-surface-900">Add Line Item</h3>
-                <button 
-                  onClick={() => { setShowServicePicker(false); setServiceSearch(""); }}
-                  className="p-1.5 rounded-lg hover:bg-surface-100 transition-colors"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-            </div>
+      {/* Service Picker Dialog */}
+      <Dialog open={showServicePicker} onOpenChange={(open) => { setShowServicePicker(open); if (!open) setServiceSearch(""); }}>
+        <DialogContent className="sm:max-w-lg max-h-[85vh] sm:max-h-[80vh] flex flex-col p-0">
+          <DialogHeader className="p-4 pb-0">
+            <DialogTitle>Add Line Item</DialogTitle>
+            <DialogDescription>
+              Choose a service from your library or add a custom item.
+            </DialogDescription>
+          </DialogHeader>
             
-            <div className="p-4 border-b border-surface-200">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-surface-400" />
-                <Input
-                  value={serviceSearch}
-                  onChange={(e) => setServiceSearch(e.target.value)}
-                  placeholder="Search services..."
-                  className="pl-9"
-                  autoFocus
-                />
-              </div>
+          <div className="px-4 pb-3 border-b border-surface-200">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-surface-400" />
+              <Input
+                value={serviceSearch}
+                onChange={(e) => setServiceSearch(e.target.value)}
+                placeholder="Search services..."
+                className="pl-9"
+                autoFocus
+              />
             </div>
+          </div>
 
-            <div className="flex-1 overflow-y-auto p-4">
-              {/* Custom item option */}
-              <button
-                onClick={() => addLineItem()}
-                className="w-full text-left p-3 rounded-lg border-2 border-dashed border-surface-300 hover:border-brand-400 hover:bg-brand-50 mb-4 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-lg bg-surface-100 flex items-center justify-center">
-                    <Plus className="h-5 w-5 text-surface-500" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-surface-900">Custom Item</p>
-                    <p className="text-sm text-surface-500">Add a custom line item</p>
-                  </div>
+          <div className="flex-1 overflow-y-auto p-4">
+            {/* Custom item option */}
+            <Button
+              variant="outline"
+              onClick={() => addLineItem()}
+              className="w-full justify-start p-3 h-auto rounded-lg border-2 border-dashed border-surface-300 hover:border-brand-400 hover:bg-brand-50 mb-4 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-lg bg-surface-100 flex items-center justify-center flex-shrink-0">
+                  <Plus className="h-5 w-5 text-surface-500" />
                 </div>
-              </button>
+                <div className="text-left">
+                  <p className="font-medium text-surface-900">Custom Item</p>
+                  <p className="text-sm text-surface-500 font-normal">Add a custom line item</p>
+                </div>
+              </div>
+            </Button>
 
-              {/* Service library */}
-              {Object.keys(groupedServices).length > 0 ? (
-                <div className="space-y-4">
-                  {Object.entries(groupedServices).map(([category, categoryServices]) => (
-                    <div key={category}>
-                      <h4 className="text-xs font-semibold text-surface-500 uppercase tracking-wider mb-2">
-                        {category}
-                      </h4>
-                      <div className="space-y-2">
-                        {categoryServices.map(service => (
-                          <button
-                            key={service.id}
-                            onClick={() => addLineItem(service)}
-                            className="w-full text-left p-3 rounded-lg border border-surface-200 hover:border-brand-300 hover:bg-brand-50 transition-colors"
-                          >
+            {/* Service library */}
+            {Object.keys(groupedServices).length > 0 ? (
+              <div className="space-y-4">
+                {Object.entries(groupedServices).map(([category, categoryServices]) => (
+                  <div key={category}>
+                    <h4 className="text-xs font-semibold text-surface-500 uppercase tracking-wider mb-2">
+                      {category}
+                    </h4>
+                    <div className="space-y-2">
+                      {categoryServices.map(service => (
+                        <Button
+                          key={service.id}
+                          variant="outline"
+                          onClick={() => addLineItem(service)}
+                          className="w-full justify-start p-3 h-auto rounded-lg border-surface-200 hover:border-brand-300 hover:bg-brand-50 transition-colors"
+                        >
+                          <div className="w-full space-y-2">
                             <div className="flex items-center justify-between">
-                              <div>
+                              <div className="text-left">
                                 <p className="font-medium text-surface-900">{service.service_name}</p>
                                 {service.description && (
-                                  <p className="text-sm text-surface-500">{service.description}</p>
+                                  <p className="text-sm text-surface-500 font-normal">{service.description}</p>
                                 )}
                               </div>
-                              <div className="text-right">
+                              <div className="text-right flex-shrink-0">
                                 <p className="font-medium text-surface-900">
                                   {formatCurrency((service.typical_price_min + service.typical_price_max) / 2)}
                                 </p>
-                                <p className="text-xs text-surface-500">
+                                <p className="text-xs text-surface-500 font-normal">
                                   {formatCurrency(service.typical_price_min)} - {formatCurrency(service.typical_price_max)}
                                 </p>
                               </div>
                             </div>
                             {(service.part_p_required || service.gas_safe_required || service.building_reg_required) && (
-                              <div className="flex gap-1 mt-2">
+                              <div className="flex gap-1">
                                 {service.part_p_required && (
                                   <Badge variant="info" className="text-xs">Part P</Badge>
                                 )}
@@ -669,21 +671,21 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
                                 )}
                               </div>
                             )}
-                          </button>
-                        ))}
-                      </div>
+                          </div>
+                        </Button>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-center text-surface-500 py-8">
-                  No services found matching &quot;{serviceSearch}&quot;
-                </p>
-              )}
-            </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-center text-surface-500 py-8">
+                No services found matching &quot;{serviceSearch}&quot;
+              </p>
+            )}
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

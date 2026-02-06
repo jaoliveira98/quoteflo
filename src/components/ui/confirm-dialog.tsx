@@ -1,8 +1,16 @@
 "use client";
 
-import * as React from "react";
-import { Button } from "./button";
-import { AlertTriangle, X } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ConfirmDialogProps {
@@ -28,19 +36,10 @@ export function ConfirmDialog({
   variant = "danger",
   isLoading = false,
 }: ConfirmDialogProps) {
-  if (!open) return null;
-
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/50 animate-fade-in"
-        onClick={onClose}
-      />
-      
-      {/* Dialog */}
-      <div className="relative bg-white rounded-xl shadow-strong w-full max-w-md animate-scale-in">
-        <div className="p-6">
+    <AlertDialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
           <div className="flex items-start gap-4">
             <div className={cn(
               "h-10 w-10 rounded-full flex items-center justify-center flex-shrink-0",
@@ -52,31 +51,28 @@ export function ConfirmDialog({
               )} />
             </div>
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-surface-900 mb-1">{title}</h3>
-              <p className="text-sm text-surface-600">{description}</p>
+              <AlertDialogTitle>{title}</AlertDialogTitle>
+              <AlertDialogDescription className="mt-1">
+                {description}
+              </AlertDialogDescription>
             </div>
-            <button
-              onClick={onClose}
-              className="p-1 rounded-lg hover:bg-surface-100 text-surface-400"
-            >
-              <X className="h-5 w-5" />
-            </button>
           </div>
-        </div>
-        
-        <div className="flex items-center gap-3 px-6 pb-6 justify-end">
-          <Button variant="outline" onClick={onClose} disabled={isLoading}>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={isLoading}>
             {cancelLabel}
-          </Button>
-          <Button 
-            variant={variant === "danger" ? "destructive" : "default"}
+          </AlertDialogCancel>
+          <AlertDialogAction
             onClick={onConfirm}
             disabled={isLoading}
+            className={cn(
+              variant === "danger" && "bg-red-600 hover:bg-red-700 text-white"
+            )}
           >
             {confirmLabel}
-          </Button>
-        </div>
-      </div>
-    </div>
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

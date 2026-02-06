@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert } from "@/components/ui/alert";
 import { Zap, Wrench, Hammer, Loader2, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -125,19 +126,20 @@ export default function SignupPage() {
         {step === 1 ? (
           <div className="space-y-3">
             {trades.map((trade) => (
-              <button
+              <Button
                 key={trade.value}
+                variant="outline"
                 onClick={() => handleTradeSelect(trade.value)}
                 className={cn(
-                  "w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left",
+                  "w-full flex items-center gap-4 p-4 h-auto rounded-xl border-2 transition-all text-left justify-start",
                   "hover:border-brand-300 hover:bg-brand-50",
                   selectedTrade === trade.value
-                    ? "border-brand-500 bg-brand-50"
+                    ? "border-brand-500 bg-brand-50 hover:bg-brand-50"
                     : "border-surface-200"
                 )}
               >
                 <div className={cn(
-                  "h-12 w-12 rounded-xl flex items-center justify-center",
+                  "h-12 w-12 rounded-xl flex items-center justify-center flex-shrink-0",
                   selectedTrade === trade.value ? "bg-brand-500" : "bg-surface-100"
                 )}>
                   <trade.icon className={cn(
@@ -147,9 +149,9 @@ export default function SignupPage() {
                 </div>
                 <div className="flex-1">
                   <p className="font-medium text-surface-900">{trade.label}</p>
-                  <p className="text-sm text-surface-500">{trade.description}</p>
+                  <p className="text-sm text-surface-500 font-normal">{trade.description}</p>
                 </div>
-              </button>
+              </Button>
             ))}
 
             <div className="pt-4 text-center text-sm text-surface-500">
@@ -167,13 +169,14 @@ export default function SignupPage() {
               <span>
                 Signing up as: <strong className="capitalize">{selectedTrade}</strong>
               </span>
-              <button 
+              <Button 
                 type="button"
+                variant="link"
+                className="ml-auto p-0 h-auto text-brand-600"
                 onClick={() => setStep(1)}
-                className="ml-auto text-brand-600 hover:underline"
               >
                 Change
-              </button>
+              </Button>
             </div>
 
             <div className="space-y-2">
@@ -214,9 +217,7 @@ export default function SignupPage() {
             </div>
 
             {error && (
-              <div className="p-3 rounded-lg bg-red-50 text-red-700 text-sm">
-                {error}
-              </div>
+              <Alert variant="destructive">{error}</Alert>
             )}
 
             <Button type="submit" className="w-full" size="lg" disabled={isLoading}>

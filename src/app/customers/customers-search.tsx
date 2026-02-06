@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Search, X } from "lucide-react";
 
 interface CustomersSearchProps {
@@ -38,13 +39,15 @@ export function CustomersSearch({ currentSearch }: CustomersSearchProps) {
         className="pl-9 pr-9"
       />
       {search && (
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="icon"
           onClick={handleSearchClear}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-surface-400 hover:text-surface-600"
+          className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-surface-400 hover:text-surface-600"
         >
           <X className="h-4 w-4" />
-        </button>
+        </Button>
       )}
     </form>
   );
