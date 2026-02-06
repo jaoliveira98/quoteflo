@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert } from "@/components/ui/alert";
 import {
@@ -38,7 +38,7 @@ interface LineItem {
   quantity: number;
   unit_price: number;
   service_id?: string;
-  isNew?: boolean; // Track if this is a new item
+  isNew?: boolean;
 }
 
 interface EditQuoteFormProps {
@@ -70,7 +70,9 @@ export function EditQuoteForm({ profile, quote, existingLineItems, services }: E
   };
 
   const [jobDescription, setJobDescription] = useState(quote.job_description || "");
-  const [vatRate, setVatRate] = useState(Number(quote.vat_rate) || 20);
+  const quoteVatRate = Number(quote.vat_rate) || 0;
+  const [vatEnabled, setVatEnabled] = useState(quoteVatRate > 0);
+  const [vatRate, setVatRate] = useState(quoteVatRate > 0 ? quoteVatRate : (profile.default_vat_rate ?? 20));
 
   const [lineItems, setLineItems] = useState<LineItem[]>(
     existingLineItems.map(item => ({
@@ -86,7 +88,7 @@ export function EditQuoteForm({ profile, quote, existingLineItems, services }: E
   const [deletedItemIds, setDeletedItemIds] = useState<string[]>([]);
 
   const subtotal = lineItems.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0);
-  const vatAmount = subtotal * (vatRate / 100);
+  const vatAmount = vatEnabled ? subtotal * (vatRate / 100) : 0;
   const total = subtotal + vatAmount;
 
   const filteredServices = services.filter(service =>
@@ -125,7 +127,7 @@ export function EditQuoteForm({ profile, quote, existingLineItems, services }: E
       id: crypto.randomUUID(),
       description: service?.service_name || "",
       quantity: 1,
-      unit_price: service ? (service.typical_price_min + service.typical_price_max) / 2 : 0,
+      unit_price: service?.price ?? 0,
       service_id: service?.id,
       isNew: true,
     };
@@ -146,6 +148,28 @@ export function EditQuoteForm({ profile, quote, existingLineItems, services }: E
       setDeletedItemIds([...deletedItemIds, id]);
     }
     setLineItems(lineItems.filter(item => item.id !== id));
+  };
+
+  const autoSaveNewItems = async (supabase: ReturnType<typeof createClient>) => {
+    const customItems = lineItems.filter(
+      item => !item.service_id && item.description.trim() && item.isNew
+    );
+
+    for (const item of customItems) {
+      const alreadyExists = services.some(
+        s => s.service_name.toLowerCase() === item.description.trim().toLowerCase()
+      );
+      if (alreadyExists) continue;
+
+      await supabase.from("service_library").insert({
+        user_id: profile.id,
+        service_name: item.description.trim(),
+        category: "General",
+        price: item.unit_price,
+        unit: "each",
+        is_active: true,
+      });
+    }
   };
 
   const handleSubmit = async () => {
@@ -184,7 +208,7 @@ export function EditQuoteForm({ profile, quote, existingLineItems, services }: E
           customer_postcode: customerPostcode.trim() || null,
           job_description: jobDescription || null,
           subtotal: subtotal,
-          vat_rate: vatRate,
+          vat_rate: vatEnabled ? vatRate : 0,
           vat_amount: vatAmount,
           total: total,
         })
@@ -235,6 +259,9 @@ export function EditQuoteForm({ profile, quote, existingLineItems, services }: E
             .eq("id", item.id);
         }
       }
+
+      // Auto-save any new custom items to the service library
+      await autoSaveNewItems(supabase);
 
       router.push(`/quotes/${quote.id}`);
       router.refresh();
@@ -438,15 +465,41 @@ export function EditQuoteForm({ profile, quote, existingLineItems, services }: E
                 <span className="text-surface-600">Subtotal</span>
                 <span className="font-medium w-28 text-right">{formatCurrency(subtotal)}</span>
               </div>
-              <div className="flex items-center gap-8">
-                <span className="text-surface-600">VAT ({vatRate}%)</span>
-                <span className="font-medium w-28 text-right">{formatCurrency(vatAmount)}</span>
-              </div>
+              {vatEnabled && (
+                <div className="flex items-center gap-8">
+                  <span className="text-surface-600">VAT ({vatRate}%)</span>
+                  <span className="font-medium w-28 text-right">{formatCurrency(vatAmount)}</span>
+                </div>
+              )}
               <div className="flex items-center gap-8 pt-2 border-t border-surface-200">
                 <span className="text-lg font-semibold text-surface-900">Total</span>
                 <span className="text-xl font-bold w-28 text-right text-brand-600">
                   {formatCurrency(total)}
                 </span>
+              </div>
+              <div className="flex items-center gap-3 pt-3 mt-1 border-t border-surface-100">
+                <Switch
+                  id="vat-toggle-edit"
+                  checked={vatEnabled}
+                  onCheckedChange={setVatEnabled}
+                />
+                <Label htmlFor="vat-toggle-edit" className="text-sm text-surface-500 cursor-pointer">
+                  Include VAT
+                </Label>
+                {vatEnabled && (
+                  <div className="flex items-center gap-1 ml-2">
+                    <Input
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="0.5"
+                      value={vatRate}
+                      onChange={(e) => setVatRate(parseFloat(e.target.value) || 0)}
+                      className="w-16 h-8 text-sm"
+                    />
+                    <span className="text-sm text-surface-500">%</span>
+                  </div>
+                )}
               </div>
             </div>
           </CardContent>
@@ -482,7 +535,7 @@ export function EditQuoteForm({ profile, quote, existingLineItems, services }: E
           <DialogHeader className="p-4 pb-0">
             <DialogTitle>Add Line Item</DialogTitle>
             <DialogDescription>
-              Choose a service from your library or add a custom item.
+              Choose from your saved items or add a custom one.
             </DialogDescription>
           </DialogHeader>
 
@@ -492,7 +545,7 @@ export function EditQuoteForm({ profile, quote, existingLineItems, services }: E
               <Input
                 value={serviceSearch}
                 onChange={(e) => setServiceSearch(e.target.value)}
-                placeholder="Search services..."
+                placeholder="Search items..."
                 className="pl-9"
                 autoFocus
               />
@@ -512,7 +565,7 @@ export function EditQuoteForm({ profile, quote, existingLineItems, services }: E
                 </div>
                 <div className="text-left">
                   <p className="font-medium text-surface-900">Custom Item</p>
-                  <p className="text-sm text-surface-500 font-normal">Add a custom line item</p>
+                  <p className="text-sm text-surface-500 font-normal">Add a custom line item (auto-saved to your library)</p>
                 </div>
               </div>
             </Button>
@@ -533,36 +586,18 @@ export function EditQuoteForm({ profile, quote, existingLineItems, services }: E
                           onClick={() => addLineItem(service)}
                           className="w-full justify-start p-3 h-auto rounded-lg border-surface-200 hover:border-brand-300 hover:bg-brand-50 transition-colors"
                         >
-                          <div className="w-full space-y-2">
-                            <div className="flex items-center justify-between">
-                              <div className="text-left">
-                                <p className="font-medium text-surface-900">{service.service_name}</p>
-                                {service.description && (
-                                  <p className="text-sm text-surface-500 font-normal">{service.description}</p>
-                                )}
-                              </div>
-                              <div className="text-right flex-shrink-0">
-                                <p className="font-medium text-surface-900">
-                                  {formatCurrency((service.typical_price_min + service.typical_price_max) / 2)}
-                                </p>
-                                <p className="text-xs text-surface-500 font-normal">
-                                  {formatCurrency(service.typical_price_min)} - {formatCurrency(service.typical_price_max)}
-                                </p>
-                              </div>
+                          <div className="w-full flex items-center justify-between">
+                            <div className="text-left">
+                              <p className="font-medium text-surface-900">{service.service_name}</p>
+                              {service.description && (
+                                <p className="text-sm text-surface-500 font-normal">{service.description}</p>
+                              )}
                             </div>
-                            {(service.part_p_required || service.gas_safe_required || service.building_reg_required) && (
-                              <div className="flex gap-1">
-                                {service.part_p_required && (
-                                  <Badge variant="info" className="text-xs">Part P</Badge>
-                                )}
-                                {service.gas_safe_required && (
-                                  <Badge variant="warning" className="text-xs">Gas Safe</Badge>
-                                )}
-                                {service.building_reg_required && (
-                                  <Badge variant="secondary" className="text-xs">Building Regs</Badge>
-                                )}
-                              </div>
-                            )}
+                            <div className="text-right flex-shrink-0 ml-4">
+                              <p className="font-medium text-surface-900">
+                                {formatCurrency(service.price)}
+                              </p>
+                            </div>
                           </div>
                         </Button>
                       ))}
@@ -570,9 +605,17 @@ export function EditQuoteForm({ profile, quote, existingLineItems, services }: E
                   </div>
                 ))}
               </div>
+            ) : services.length === 0 && !serviceSearch ? (
+              <p className="text-center text-surface-500 py-4 text-sm">
+                You haven&apos;t added any items yet. Add custom items above, or go to{" "}
+                <a href="/services" className="text-brand-600 hover:underline font-medium">
+                  Services & Items
+                </a>{" "}
+                to build your library.
+              </p>
             ) : (
               <p className="text-center text-surface-500 py-8">
-                No services found matching &quot;{serviceSearch}&quot;
+                No items found matching &quot;{serviceSearch}&quot;
               </p>
             )}
           </div>

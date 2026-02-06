@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert } from "@/components/ui/alert";
 import {
@@ -27,6 +27,7 @@ import {
   Send,
   User,
   FileText,
+  X,
 } from "lucide-react";
 import Link from "next/link";
 import { formatCurrency, cn } from "@/lib/utils";
@@ -55,6 +56,11 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
   const [showServicePicker, setShowServicePicker] = useState(false);
   const [serviceSearch, setServiceSearch] = useState("");
   
+  // Customer search state
+  const [customerSearch, setCustomerSearch] = useState("");
+  const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
+  const customerSearchRef = useRef<HTMLDivElement>(null);
+  
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(
     preselectedCustomer?.id || null
   );
@@ -64,20 +70,38 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
   const [customerAddress, setCustomerAddress] = useState(preselectedCustomer?.address || "");
   const [customerPostcode, setCustomerPostcode] = useState(preselectedCustomer?.postcode || "");
 
-  // Clear quick-select when any customer field is manually edited
   const handleCustomerFieldChange = (setter: (val: string) => void) => (value: string) => {
     setter(value);
     setSelectedCustomerId(null);
   };
   
   const [jobDescription, setJobDescription] = useState("");
-  const [vatRate, setVatRate] = useState(20);
-  const [validDays, setValidDays] = useState(30);
+  const [vatEnabled, setVatEnabled] = useState(profile.vat_enabled ?? true);
+  const [vatRate, setVatRate] = useState(profile.default_vat_rate ?? 20);
+  const [validDays, setValidDays] = useState(profile.default_quote_expiry_days ?? 30);
   const [lineItems, setLineItems] = useState<LineItem[]>([]);
 
   const subtotal = lineItems.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0);
-  const vatAmount = subtotal * (vatRate / 100);
+  const vatAmount = vatEnabled ? subtotal * (vatRate / 100) : 0;
   const total = subtotal + vatAmount;
+
+  // Customer search filtering
+  const filteredCustomers = customers.filter(c =>
+    c.name.toLowerCase().includes(customerSearch.toLowerCase()) ||
+    (c.email && c.email.toLowerCase().includes(customerSearch.toLowerCase())) ||
+    (c.phone && c.phone.toLowerCase().includes(customerSearch.toLowerCase()))
+  );
+
+  // Close customer dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (customerSearchRef.current && !customerSearchRef.current.contains(event.target as Node)) {
+        setShowCustomerDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const filteredServices = services.filter(service =>
     service.service_name.toLowerCase().includes(serviceSearch.toLowerCase()) ||
@@ -115,7 +139,7 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
       id: crypto.randomUUID(),
       description: service?.service_name || "",
       quantity: 1,
-      unit_price: service ? (service.typical_price_min + service.typical_price_max) / 2 : 0,
+      unit_price: service?.price ?? 0,
       service_id: service?.id,
     };
     setLineItems([...lineItems, newItem]);
@@ -140,6 +164,30 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
     setCustomerPhone(customer.phone || "");
     setCustomerAddress(customer.address || "");
     setCustomerPostcode(customer.postcode || "");
+    setCustomerSearch("");
+    setShowCustomerDropdown(false);
+  };
+
+  const autoSaveNewItems = async (supabase: ReturnType<typeof createClient>) => {
+    const customItems = lineItems.filter(
+      item => !item.service_id && item.description.trim()
+    );
+
+    for (const item of customItems) {
+      const alreadyExists = services.some(
+        s => s.service_name.toLowerCase() === item.description.trim().toLowerCase()
+      );
+      if (alreadyExists) continue;
+
+      await supabase.from("service_library").insert({
+        user_id: profile.id,
+        service_name: item.description.trim(),
+        category: "General",
+        price: item.unit_price,
+        unit: "each",
+        is_active: true,
+      });
+    }
   };
 
   const handleSubmit = async (status: "draft" | "sent") => {
@@ -197,7 +245,7 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
           job_description: jobDescription || null,
           status: "draft",
           subtotal: subtotal,
-          vat_rate: vatRate,
+          vat_rate: vatEnabled ? vatRate : 0,
           vat_amount: vatAmount,
           total: total,
           valid_until: validUntil.toISOString().split("T")[0],
@@ -228,6 +276,9 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
         console.error("Line items error:", itemsError);
         throw new Error("Failed to create line items");
       }
+
+      // Auto-save any new custom items to the service library
+      await autoSaveNewItems(supabase);
 
       if (status === "sent") {
         const sendResponse = await fetch(`/api/quotes/${quote.id}/send`, {
@@ -279,26 +330,60 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Quick select existing customer */}
+          {/* Customer search */}
           {customers.length > 0 && (
-            <div className="flex flex-wrap gap-2 pb-4 border-b border-surface-200">
-              <span className="text-sm text-surface-500 mr-2">Quick select:</span>
-              {customers.slice(0, 5).map(customer => (
-                <Button
-                  key={customer.id}
-                  variant="outline"
-                  size="sm"
-                  onClick={() => selectCustomer(customer)}
-                  className={cn(
-                    "rounded-full",
-                    selectedCustomerId === customer.id
-                      ? "bg-brand-100 text-brand-700 border-brand-300 hover:bg-brand-100"
-                      : "bg-surface-50 text-surface-700 hover:bg-surface-100"
-                  )}
-                >
-                  {customer.name}
-                </Button>
-              ))}
+            <div ref={customerSearchRef} className="relative pb-4 border-b border-surface-200">
+              <Label className="text-sm text-surface-500 mb-2 block">Search existing customers</Label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-surface-400" />
+                <Input
+                  value={customerSearch}
+                  onChange={(e) => {
+                    setCustomerSearch(e.target.value);
+                    setShowCustomerDropdown(true);
+                  }}
+                  onFocus={() => setShowCustomerDropdown(true)}
+                  placeholder="Search by name, email, or phone..."
+                  className="pl-9 pr-9"
+                />
+                {customerSearch && (
+                  <button
+                    type="button"
+                    onClick={() => { setCustomerSearch(""); setShowCustomerDropdown(false); }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-surface-400 hover:text-surface-600"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+
+              {showCustomerDropdown && (customerSearch || filteredCustomers.length > 0) && (
+                <div className="absolute z-50 w-full mt-1 bg-white border border-surface-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                  {filteredCustomers.length > 0 ? (
+                    filteredCustomers.slice(0, 10).map(customer => (
+                      <button
+                        key={customer.id}
+                        type="button"
+                        onClick={() => selectCustomer(customer)}
+                        className={cn(
+                          "w-full text-left px-4 py-3 hover:bg-surface-50 transition-colors border-b border-surface-100 last:border-0",
+                          selectedCustomerId === customer.id && "bg-brand-50"
+                        )}
+                      >
+                        <p className="font-medium text-surface-900">{customer.name}</p>
+                        <div className="flex items-center gap-3 text-sm text-surface-500">
+                          {customer.email && <span>{customer.email}</span>}
+                          {customer.phone && <span>{customer.phone}</span>}
+                        </div>
+                      </button>
+                    ))
+                  ) : customerSearch ? (
+                    <div className="px-4 py-3 text-sm text-surface-500">
+                      No customers found matching &quot;{customerSearch}&quot;
+                    </div>
+                  ) : null}
+                </div>
+              )}
             </div>
           )}
           
@@ -387,7 +472,7 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
         <CardContent>
           {lineItems.length > 0 ? (
             <div className="space-y-3">
-              {lineItems.map((item, index) => (
+              {lineItems.map((item) => (
                 <div 
                   key={item.id}
                   className="p-4 rounded-lg border border-surface-200 bg-surface-50 space-y-3"
@@ -465,15 +550,43 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
                 <span className="text-surface-600">Subtotal</span>
                 <span className="font-medium w-28 text-right">{formatCurrency(subtotal)}</span>
               </div>
-              <div className="flex items-center gap-8">
-                <span className="text-surface-600">VAT ({vatRate}%)</span>
-                <span className="font-medium w-28 text-right">{formatCurrency(vatAmount)}</span>
-              </div>
+              {vatEnabled && (
+                <div className="flex items-center gap-8">
+                  <div className="flex items-center gap-2">
+                    <span className="text-surface-600">VAT ({vatRate}%)</span>
+                  </div>
+                  <span className="font-medium w-28 text-right">{formatCurrency(vatAmount)}</span>
+                </div>
+              )}
               <div className="flex items-center gap-8 pt-2 border-t border-surface-200">
                 <span className="text-lg font-semibold text-surface-900">Total</span>
                 <span className="text-xl font-bold w-28 text-right text-brand-600">
                   {formatCurrency(total)}
                 </span>
+              </div>
+              <div className="flex items-center gap-3 pt-3 mt-1 border-t border-surface-100">
+                <Switch
+                  id="vat-toggle"
+                  checked={vatEnabled}
+                  onCheckedChange={setVatEnabled}
+                />
+                <Label htmlFor="vat-toggle" className="text-sm text-surface-500 cursor-pointer">
+                  Include VAT
+                </Label>
+                {vatEnabled && (
+                  <div className="flex items-center gap-1 ml-2">
+                    <Input
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="0.5"
+                      value={vatRate}
+                      onChange={(e) => setVatRate(parseFloat(e.target.value) || 0)}
+                      className="w-16 h-8 text-sm"
+                    />
+                    <span className="text-sm text-surface-500">%</span>
+                  </div>
+                )}
               </div>
             </div>
           </CardContent>
@@ -505,7 +618,7 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
           <DialogHeader className="p-4 pb-0">
             <DialogTitle>Add Line Item</DialogTitle>
             <DialogDescription>
-              Choose a service from your library or add a custom item.
+              Choose from your saved items or add a custom one.
             </DialogDescription>
           </DialogHeader>
             
@@ -515,7 +628,7 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
               <Input
                 value={serviceSearch}
                 onChange={(e) => setServiceSearch(e.target.value)}
-                placeholder="Search services..."
+                placeholder="Search items..."
                 className="pl-9"
                 autoFocus
               />
@@ -535,7 +648,7 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
                 </div>
                 <div className="text-left">
                   <p className="font-medium text-surface-900">Custom Item</p>
-                  <p className="text-sm text-surface-500 font-normal">Add a custom line item</p>
+                  <p className="text-sm text-surface-500 font-normal">Add a custom line item (auto-saved to your library)</p>
                 </div>
               </div>
             </Button>
@@ -556,36 +669,18 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
                           onClick={() => addLineItem(service)}
                           className="w-full justify-start p-3 h-auto rounded-lg border-surface-200 hover:border-brand-300 hover:bg-brand-50 transition-colors"
                         >
-                          <div className="w-full space-y-2">
-                            <div className="flex items-center justify-between">
-                              <div className="text-left">
-                                <p className="font-medium text-surface-900">{service.service_name}</p>
-                                {service.description && (
-                                  <p className="text-sm text-surface-500 font-normal">{service.description}</p>
-                                )}
-                              </div>
-                              <div className="text-right flex-shrink-0">
-                                <p className="font-medium text-surface-900">
-                                  {formatCurrency((service.typical_price_min + service.typical_price_max) / 2)}
-                                </p>
-                                <p className="text-xs text-surface-500 font-normal">
-                                  {formatCurrency(service.typical_price_min)} - {formatCurrency(service.typical_price_max)}
-                                </p>
-                              </div>
+                          <div className="w-full flex items-center justify-between">
+                            <div className="text-left">
+                              <p className="font-medium text-surface-900">{service.service_name}</p>
+                              {service.description && (
+                                <p className="text-sm text-surface-500 font-normal">{service.description}</p>
+                              )}
                             </div>
-                            {(service.part_p_required || service.gas_safe_required || service.building_reg_required) && (
-                              <div className="flex gap-1">
-                                {service.part_p_required && (
-                                  <Badge variant="info" className="text-xs">Part P</Badge>
-                                )}
-                                {service.gas_safe_required && (
-                                  <Badge variant="warning" className="text-xs">Gas Safe</Badge>
-                                )}
-                                {service.building_reg_required && (
-                                  <Badge variant="secondary" className="text-xs">Building Regs</Badge>
-                                )}
-                              </div>
-                            )}
+                            <div className="text-right flex-shrink-0 ml-4">
+                              <p className="font-medium text-surface-900">
+                                {formatCurrency(service.price)}
+                              </p>
+                            </div>
                           </div>
                         </Button>
                       ))}
@@ -593,9 +688,17 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
                   </div>
                 ))}
               </div>
+            ) : services.length === 0 && !serviceSearch ? (
+              <p className="text-center text-surface-500 py-4 text-sm">
+                You haven&apos;t added any items yet. Add custom items above, or go to{" "}
+                <a href="/services" className="text-brand-600 hover:underline font-medium">
+                  Services & Items
+                </a>{" "}
+                to build your library.
+              </p>
             ) : (
               <p className="text-center text-surface-500 py-8">
-                No services found matching &quot;{serviceSearch}&quot;
+                No items found matching &quot;{serviceSearch}&quot;
               </p>
             )}
           </div>
