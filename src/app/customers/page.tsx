@@ -33,7 +33,7 @@ export default async function CustomersPage({
     .select("*")
     .eq("user_id", profile.id)
     .order("name", { ascending: true });
-  
+
   // Get quote stats per customer (count and total value)
   const { data: allQuotes } = await supabase
     .from("quotes")

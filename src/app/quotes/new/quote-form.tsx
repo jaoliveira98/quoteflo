@@ -48,11 +48,20 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
   const [serviceSearch, setServiceSearch] = useState("");
   
   // Customer details - pre-populate if customer provided
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(
+    preselectedCustomer?.id || null
+  );
   const [customerName, setCustomerName] = useState(preselectedCustomer?.name || "");
   const [customerEmail, setCustomerEmail] = useState(preselectedCustomer?.email || "");
   const [customerPhone, setCustomerPhone] = useState(preselectedCustomer?.phone || "");
   const [customerAddress, setCustomerAddress] = useState(preselectedCustomer?.address || "");
   const [customerPostcode, setCustomerPostcode] = useState(preselectedCustomer?.postcode || "");
+
+  // Wrapper setters that clear the selected customer when any field is manually edited
+  const handleCustomerFieldChange = (setter: (val: string) => void) => (value: string) => {
+    setter(value);
+    setSelectedCustomerId(null);
+  };
   
   // Quote details
   const [jobDescription, setJobDescription] = useState("");
@@ -127,11 +136,87 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
   };
 
   const selectCustomer = (customer: Customer) => {
+    setSelectedCustomerId(customer.id);
     setCustomerName(customer.name);
     setCustomerEmail(customer.email || "");
     setCustomerPhone(customer.phone || "");
     setCustomerAddress(customer.address || "");
     setCustomerPostcode(customer.postcode || "");
+  };
+
+  const findOrCreateCustomer = async (supabase: ReturnType<typeof createClient>): Promise<string> => {
+    // If user picked a customer via quick-select and didn't change any fields, use it directly
+    if (selectedCustomerId) {
+      return selectedCustomerId;
+    }
+
+    const trimmedName = customerName.trim();
+    const trimmedEmail = customerEmail.trim() || null;
+    const trimmedPhone = customerPhone.trim() || null;
+    const trimmedAddress = customerAddress.trim() || null;
+    const trimmedPostcode = customerPostcode.trim() || null;
+
+    // Try to find existing customer by email first
+    if (trimmedEmail) {
+      const { data: byEmail } = await supabase
+        .from("customers")
+        .select("id")
+        .eq("user_id", profile.id)
+        .eq("email", trimmedEmail)
+        .limit(1)
+        .maybeSingle();
+
+      if (byEmail) return byEmail.id;
+    }
+
+    // Try to find by exact name match (case-insensitive)
+    const { data: byName } = await supabase
+      .from("customers")
+      .select("id")
+      .eq("user_id", profile.id)
+      .ilike("name", trimmedName)
+      .limit(1)
+      .maybeSingle();
+
+    if (byName) {
+      const updates: Record<string, string | null> = {};
+      if (trimmedEmail) updates.email = trimmedEmail;
+      if (trimmedPhone) updates.phone = trimmedPhone;
+      if (trimmedAddress) updates.address = trimmedAddress;
+      if (trimmedPostcode) updates.postcode = trimmedPostcode;
+
+      if (Object.keys(updates).length > 0) {
+        await supabase
+          .from("customers")
+          .update({ ...updates, updated_at: new Date().toISOString() })
+          .eq("id", byName.id);
+      }
+
+      return byName.id;
+    }
+
+    // Create new customer
+    const { data: newCustomer, error: customerError } = await supabase
+      .from("customers")
+      .insert({
+        user_id: profile.id,
+        name: trimmedName,
+        email: trimmedEmail,
+        phone: trimmedPhone,
+        address: trimmedAddress,
+        postcode: trimmedPostcode,
+        emails: trimmedEmail ? [trimmedEmail] : [],
+        phones: trimmedPhone ? [trimmedPhone] : [],
+      })
+      .select("id")
+      .single();
+
+    if (customerError) {
+      console.error("Customer creation error:", customerError);
+      throw new Error("Failed to create customer");
+    }
+
+    return newCustomer.id;
   };
 
   const handleSubmit = async (status: "draft" | "sent") => {
@@ -145,12 +230,20 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
       return;
     }
 
+    if (status === "sent" && !customerEmail.trim()) {
+      setError("Customer email is required to send a quote. Save as draft or add an email address.");
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
     try {
       const supabase = createClient();
       
+      // Find or create customer first
+      const customerId = await findOrCreateCustomer(supabase);
+
       // Generate quote number
       const { data: quoteNumber, error: rpcError } = await supabase
         .rpc("generate_quote_number", { p_user_id: profile.id });
@@ -164,25 +257,25 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
       const validUntil = new Date();
       validUntil.setDate(validUntil.getDate() + validDays);
 
-      // Create quote
+      // Create quote with customer_id already set
       const { data: quote, error: quoteError } = await supabase
         .from("quotes")
         .insert({
           user_id: profile.id,
           quote_number: quoteNumber,
-          customer_name: customerName,
-          customer_email: customerEmail || null,
-          customer_phone: customerPhone || null,
-          customer_address: customerAddress || null,
-          customer_postcode: customerPostcode || null,
+          customer_id: customerId,
+          customer_name: customerName.trim(),
+          customer_email: customerEmail.trim() || null,
+          customer_phone: customerPhone.trim() || null,
+          customer_address: customerAddress.trim() || null,
+          customer_postcode: customerPostcode.trim() || null,
           job_description: jobDescription || null,
-          status: status,
+          status: "draft",
           subtotal: subtotal,
           vat_rate: vatRate,
           vat_amount: vatAmount,
           total: total,
           valid_until: validUntil.toISOString().split("T")[0],
-          sent_at: status === "sent" ? new Date().toISOString() : null,
         })
         .select()
         .single();
@@ -212,24 +305,15 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
         throw new Error("Failed to create line items");
       }
 
-      // Save customer if new
-      if (customerName && customerEmail) {
-        const { data: existingCustomer } = await supabase
-          .from("customers")
-          .select("id")
-          .eq("user_id", profile.id)
-          .eq("email", customerEmail)
-          .single();
+      // If user chose "Send", call the send API to deliver the email
+      if (status === "sent") {
+        const sendResponse = await fetch(`/api/quotes/${quote.id}/send`, {
+          method: "POST",
+        });
 
-        if (!existingCustomer) {
-          await supabase.from("customers").insert({
-            user_id: profile.id,
-            name: customerName,
-            email: customerEmail,
-            phone: customerPhone || null,
-            address: customerAddress || null,
-            postcode: customerPostcode || null,
-          });
+        if (!sendResponse.ok) {
+          const sendData = await sendResponse.json();
+          console.error("Send error:", sendData);
         }
       }
 
@@ -284,7 +368,11 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
                 <button
                   key={customer.id}
                   onClick={() => selectCustomer(customer)}
-                  className="text-sm px-3 py-1 rounded-full bg-surface-100 hover:bg-surface-200 text-surface-700 transition-colors"
+                  className={`text-sm px-3 py-1 rounded-full transition-colors ${
+                    selectedCustomerId === customer.id
+                      ? "bg-brand-100 text-brand-700 ring-1 ring-brand-300"
+                      : "bg-surface-100 hover:bg-surface-200 text-surface-700"
+                  }`}
                 >
                   {customer.name}
                 </button>
@@ -298,7 +386,7 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
               <Input
                 id="customerName"
                 value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
+                onChange={(e) => handleCustomerFieldChange(setCustomerName)(e.target.value)}
                 placeholder="John Smith"
                 required
               />
@@ -309,7 +397,7 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
                 id="customerEmail"
                 type="email"
                 value={customerEmail}
-                onChange={(e) => setCustomerEmail(e.target.value)}
+                onChange={(e) => handleCustomerFieldChange(setCustomerEmail)(e.target.value)}
                 placeholder="john@example.com"
               />
             </div>
@@ -319,7 +407,7 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
                 id="customerPhone"
                 type="tel"
                 value={customerPhone}
-                onChange={(e) => setCustomerPhone(e.target.value)}
+                onChange={(e) => handleCustomerFieldChange(setCustomerPhone)(e.target.value)}
                 placeholder="07123 456789"
               />
             </div>
@@ -328,7 +416,7 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
               <Input
                 id="customerPostcode"
                 value={customerPostcode}
-                onChange={(e) => setCustomerPostcode(e.target.value)}
+                onChange={(e) => handleCustomerFieldChange(setCustomerPostcode)(e.target.value)}
                 placeholder="SW1A 1AA"
               />
             </div>
@@ -338,7 +426,7 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
             <Input
               id="customerAddress"
               value={customerAddress}
-              onChange={(e) => setCustomerAddress(e.target.value)}
+              onChange={(e) => handleCustomerFieldChange(setCustomerAddress)(e.target.value)}
               placeholder="123 Main Street, London"
             />
           </div>

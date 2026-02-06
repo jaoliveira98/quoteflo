@@ -6,6 +6,17 @@ All notable changes to this project are documented in this file.
 
 ## [Step 13] - UX/UI Comprehensive Improvements
 
+### Critical Bug Fixes
+- **Bug: Email not sent on "Save & Send"** — The quote form was setting `status: "sent"` directly in the database insert but never calling the `/api/quotes/[id]/send` endpoint. The email was only delivered when clicking "Resend" on the detail page. Fixed by: creating quote as draft first, then calling the send API endpoint which handles both email delivery and status update.
+- **Bug: Customer not created for new customers** — Two issues: (1) The client-side customer creation only ran when the customer had an email address, so phone-only customers were never saved. (2) The client code created duplicate customers because the DB trigger `ensure_customer_from_quote` already handles customer creation on quote insert. Fixed by: removing the duplicate client-side customer creation entirely and relying on the robust DB trigger.
+- **Bug: Orphan quotes not linked to customers** — New migration backfills `customer_id` for any existing quotes missing the link.
+- **Improved DB trigger** — Better handling of empty strings vs nulls, TRIM on all comparisons, COALESCE for array fields.
+- **Email validation on send** — Quote form now validates that customer email exists before allowing "Save & Send" (shows helpful error suggesting to save as draft instead).
+- **Email branding** — Quote emails now use the tradesperson's brand color instead of hardcoded green.
+
+### New Migration
+- `supabase/migrations/step13_fix_customers.sql` — Improved customer trigger + orphan quote backfill
+
 ### Landing Page Overhaul
 - **Social proof improved**: Replaced empty gray circles with initial-based avatars (JB, SM, DR, KW, PT) for more authentic feel
 - **New "How It Works" section**: 3-step visual flow (Pick Services → Send Instantly → Get Accepted) with numbered badges and connecting line
