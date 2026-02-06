@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { formatCurrency } from "@/lib/utils";
+import { findOrCreateCustomer } from "@/lib/customers";
 import type { UserProfile, ServiceItem, Quote, QuoteLineItem } from "@/types";
 
 interface LineItem {
@@ -54,7 +55,6 @@ export function EditQuoteForm({ profile, quote, existingLineItems, services }: E
   const [showServicePicker, setShowServicePicker] = useState(false);
   const [serviceSearch, setServiceSearch] = useState("");
 
-  // Customer details
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(
     quote.customer_id || null
   );
@@ -69,11 +69,9 @@ export function EditQuoteForm({ profile, quote, existingLineItems, services }: E
     setSelectedCustomerId(null);
   };
 
-  // Quote details
   const [jobDescription, setJobDescription] = useState(quote.job_description || "");
   const [vatRate, setVatRate] = useState(Number(quote.vat_rate) || 20);
 
-  // Line items - convert existing items to editable format
   const [lineItems, setLineItems] = useState<LineItem[]>(
     existingLineItems.map(item => ({
       id: item.id,
@@ -85,21 +83,17 @@ export function EditQuoteForm({ profile, quote, existingLineItems, services }: E
     }))
   );
 
-  // Track deleted items
   const [deletedItemIds, setDeletedItemIds] = useState<string[]>([]);
 
-  // Calculations
   const subtotal = lineItems.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0);
   const vatAmount = subtotal * (vatRate / 100);
   const total = subtotal + vatAmount;
 
-  // Filter services based on search
   const filteredServices = services.filter(service =>
     service.service_name.toLowerCase().includes(serviceSearch.toLowerCase()) ||
     service.category.toLowerCase().includes(serviceSearch.toLowerCase())
   );
 
-  // Group services by category
   const groupedServices = filteredServices.reduce((acc, service) => {
     if (!acc[service.category]) {
       acc[service.category] = [];
@@ -109,14 +103,12 @@ export function EditQuoteForm({ profile, quote, existingLineItems, services }: E
   }, {} as Record<string, ServiceItem[]>);
 
   const addLineItem = (service?: ServiceItem) => {
-    // Check if this service is already in the line items
     if (service) {
       const existingItemIndex = lineItems.findIndex(
         item => item.service_id === service.id
       );
       
       if (existingItemIndex !== -1) {
-        // Increment quantity of existing item
         const updatedItems = [...lineItems];
         updatedItems[existingItemIndex] = {
           ...updatedItems[existingItemIndex],
@@ -129,7 +121,6 @@ export function EditQuoteForm({ profile, quote, existingLineItems, services }: E
       }
     }
     
-    // Add new item
     const newItem: LineItem = {
       id: crypto.randomUUID(),
       description: service?.service_name || "",
@@ -152,85 +143,9 @@ export function EditQuoteForm({ profile, quote, existingLineItems, services }: E
   const removeLineItem = (id: string) => {
     const item = lineItems.find(i => i.id === id);
     if (item && !item.isNew) {
-      // Track deletion of existing items
       setDeletedItemIds([...deletedItemIds, id]);
     }
     setLineItems(lineItems.filter(item => item.id !== id));
-  };
-
-  const findOrCreateCustomer = async (supabase: ReturnType<typeof createClient>): Promise<string> => {
-    // If user didn't change any customer fields, keep the existing link
-    if (selectedCustomerId) {
-      return selectedCustomerId;
-    }
-
-    const trimmedName = customerName.trim();
-    const trimmedEmail = customerEmail.trim() || null;
-    const trimmedPhone = customerPhone.trim() || null;
-    const trimmedAddress = customerAddress.trim() || null;
-    const trimmedPostcode = customerPostcode.trim() || null;
-
-    // Try to find existing customer by email first
-    if (trimmedEmail) {
-      const { data: byEmail } = await supabase
-        .from("customers")
-        .select("id")
-        .eq("user_id", profile.id)
-        .eq("email", trimmedEmail)
-        .limit(1)
-        .maybeSingle();
-
-      if (byEmail) return byEmail.id;
-    }
-
-    // Try to find by exact name match (case-insensitive)
-    const { data: byName } = await supabase
-      .from("customers")
-      .select("id")
-      .eq("user_id", profile.id)
-      .ilike("name", trimmedName)
-      .limit(1)
-      .maybeSingle();
-
-    if (byName) {
-      const updates: Record<string, string | null> = {};
-      if (trimmedEmail) updates.email = trimmedEmail;
-      if (trimmedPhone) updates.phone = trimmedPhone;
-      if (trimmedAddress) updates.address = trimmedAddress;
-      if (trimmedPostcode) updates.postcode = trimmedPostcode;
-
-      if (Object.keys(updates).length > 0) {
-        await supabase
-          .from("customers")
-          .update({ ...updates, updated_at: new Date().toISOString() })
-          .eq("id", byName.id);
-      }
-
-      return byName.id;
-    }
-
-    // Create new customer
-    const { data: newCustomer, error: customerError } = await supabase
-      .from("customers")
-      .insert({
-        user_id: profile.id,
-        name: trimmedName,
-        email: trimmedEmail,
-        phone: trimmedPhone,
-        address: trimmedAddress,
-        postcode: trimmedPostcode,
-        emails: trimmedEmail ? [trimmedEmail] : [],
-        phones: trimmedPhone ? [trimmedPhone] : [],
-      })
-      .select("id")
-      .single();
-
-    if (customerError) {
-      console.error("Customer creation error:", customerError);
-      throw new Error("Failed to create customer");
-    }
-
-    return newCustomer.id;
   };
 
   const handleSubmit = async () => {
@@ -250,10 +165,14 @@ export function EditQuoteForm({ profile, quote, existingLineItems, services }: E
     try {
       const supabase = createClient();
 
-      // Ensure customer exists and is linked
-      const customerId = await findOrCreateCustomer(supabase);
+      const customerId = await findOrCreateCustomer(supabase, profile.id, {
+        name: customerName,
+        email: customerEmail,
+        phone: customerPhone,
+        address: customerAddress,
+        postcode: customerPostcode,
+      }, selectedCustomerId);
 
-      // Update quote
       const { error: quoteError } = await supabase
         .from("quotes")
         .update({
@@ -277,7 +196,6 @@ export function EditQuoteForm({ profile, quote, existingLineItems, services }: E
         throw new Error("Failed to update quote");
       }
 
-      // Delete removed line items
       if (deletedItemIds.length > 0) {
         const { error: deleteError } = await supabase
           .from("quote_line_items")
@@ -289,12 +207,10 @@ export function EditQuoteForm({ profile, quote, existingLineItems, services }: E
         }
       }
 
-      // Update existing items and insert new ones
       for (let i = 0; i < lineItems.length; i++) {
         const item = lineItems[i];
         
         if (item.isNew) {
-          // Insert new item
           await supabase
             .from("quote_line_items")
             .insert({
@@ -307,7 +223,6 @@ export function EditQuoteForm({ profile, quote, existingLineItems, services }: E
               line_total: item.quantity * item.unit_price,
             });
         } else {
-          // Update existing item
           await supabase
             .from("quote_line_items")
             .update({
@@ -321,7 +236,6 @@ export function EditQuoteForm({ profile, quote, existingLineItems, services }: E
         }
       }
 
-      // Redirect to quote detail page
       router.push(`/quotes/${quote.id}`);
       router.refresh();
 
@@ -337,7 +251,7 @@ export function EditQuoteForm({ profile, quote, existingLineItems, services }: E
     <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" asChild>
+        <Button variant="ghost" size="icon" asChild aria-label="Back to quote">
           <Link href={`/quotes/${quote.id}`}>
             <ArrowLeft className="h-5 w-5" />
           </Link>

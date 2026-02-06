@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { Resend } from "resend";
+import { formatCurrency } from "@/lib/utils";
 
-// Use service role key for cron jobs to bypass RLS
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -10,12 +10,10 @@ const supabase = createClient(
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
-// Verify cron secret to prevent unauthorized access
 function verifyCronSecret(request: NextRequest): boolean {
   const authHeader = request.headers.get("authorization");
   const cronSecret = process.env.CRON_SECRET;
   
-  // If no cron secret is set, allow all requests (for development)
   if (!cronSecret) {
     console.warn("CRON_SECRET not set - allowing all requests");
     return true;
@@ -24,14 +22,6 @@ function verifyCronSecret(request: NextRequest): boolean {
   return authHeader === `Bearer ${cronSecret}`;
 }
 
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat("en-GB", {
-    style: "currency",
-    currency: "GBP",
-  }).format(amount);
-};
-
-// Send follow-up email
 async function sendFollowUpEmail(quote: {
   quote_id: string;
   user_id: string;
@@ -130,7 +120,6 @@ async function sendFollowUpEmail(quote: {
   return { success: true, followUpNumber, simulated: true };
 }
 
-// Send expiry reminder email
 async function sendExpiryReminderEmail(quote: {
   quote_id: string;
   user_id: string;
@@ -218,7 +207,6 @@ async function sendExpiryReminderEmail(quote: {
 }
 
 export async function POST(request: NextRequest) {
-  // Verify the request is from a trusted source
   if (!verifyCronSecret(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -228,7 +216,6 @@ export async function POST(request: NextRequest) {
     expiryReminders: { processed: 0, sent: 0, failed: 0 },
   };
 
-  // Process follow-ups
   const { data: followUpQuotes, error: followUpError } = await supabase
     .rpc("get_quotes_needing_followup");
 
@@ -243,7 +230,6 @@ export async function POST(request: NextRequest) {
       if (result.success) {
         results.followUps.sent++;
         
-        // Update quote
         await supabase
           .from("quotes")
           .update({
@@ -253,7 +239,6 @@ export async function POST(request: NextRequest) {
           })
           .eq("id", quote.quote_id);
 
-        // Log notification
         await supabase.from("notification_log").insert({
           user_id: quote.user_id,
           quote_id: quote.quote_id,
@@ -266,7 +251,6 @@ export async function POST(request: NextRequest) {
       } else {
         results.followUps.failed++;
         
-        // Log failed notification
         await supabase.from("notification_log").insert({
           user_id: quote.user_id,
           quote_id: quote.quote_id,
@@ -280,7 +264,6 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  // Process expiry reminders
   const { data: expiryQuotes, error: expiryError } = await supabase
     .rpc("get_quotes_expiring_soon");
 
@@ -295,7 +278,6 @@ export async function POST(request: NextRequest) {
       if (result.success) {
         results.expiryReminders.sent++;
         
-        // Update quote
         await supabase
           .from("quotes")
           .update({
@@ -304,7 +286,6 @@ export async function POST(request: NextRequest) {
           })
           .eq("id", quote.quote_id);
 
-        // Log notification
         await supabase.from("notification_log").insert({
           user_id: quote.user_id,
           quote_id: quote.quote_id,
@@ -317,7 +298,6 @@ export async function POST(request: NextRequest) {
       } else {
         results.expiryReminders.failed++;
         
-        // Log failed notification
         await supabase.from("notification_log").insert({
           user_id: quote.user_id,
           quote_id: quote.quote_id,
@@ -338,7 +318,6 @@ export async function POST(request: NextRequest) {
   });
 }
 
-// Also support GET for easier testing
 export async function GET(request: NextRequest) {
   return POST(request);
 }

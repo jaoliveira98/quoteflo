@@ -13,7 +13,6 @@ export default async function EditQuotePage({
   const profile = await requireAuthWithProfile();
   const supabase = await createClient();
 
-  // Fetch the quote
   const { data: quote, error: quoteError } = await supabase
     .from("quotes")
     .select("*")
@@ -25,14 +24,12 @@ export default async function EditQuotePage({
     notFound();
   }
 
-  // Fetch line items
   const { data: lineItems } = await supabase
     .from("quote_line_items")
     .select("*")
     .eq("quote_id", quote.id)
     .order("item_order", { ascending: true });
 
-  // Fetch service library for user's trade
   const { data: services } = await supabase
     .from("service_library")
     .select("*")

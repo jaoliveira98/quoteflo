@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { Resend } from "resend";
+import { formatCurrency } from "@/lib/utils";
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
@@ -11,13 +12,11 @@ export async function POST(
   const { id } = await params;
   const supabase = await createClient();
 
-  // Get current user
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Fetch quote
   const { data: quote, error: quoteError } = await supabase
     .from("quotes")
     .select("*")
@@ -33,36 +32,23 @@ export async function POST(
     return NextResponse.json({ error: "Customer email is required" }, { status: 400 });
   }
 
-  // Fetch user profile
   const { data: profile } = await supabase
     .from("user_profiles")
     .select("*")
     .eq("id", user.id)
     .single();
 
-  // Fetch line items
   const { data: lineItems } = await supabase
     .from("quote_line_items")
     .select("*")
     .eq("quote_id", quote.id)
     .order("item_order", { ascending: true });
 
-  // Generate quote view URL
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
   const quoteUrl = `${baseUrl}/q/${quote.access_token}`;
 
-  // Format currency
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-GB", {
-      style: "currency",
-      currency: "GBP",
-    }).format(amount);
-  };
-
-  // Use profile brand color or default green
   const brandColor = profile?.brand_color || "#22c55e";
 
-  // Generate email HTML
   const emailHtml = `
 <!DOCTYPE html>
 <html>
@@ -114,7 +100,6 @@ export async function POST(
 </html>
   `;
 
-  // Send email if Resend is configured
   if (resend) {
     try {
       await resend.emails.send({
@@ -132,7 +117,6 @@ export async function POST(
     console.log("Quote URL:", quoteUrl);
   }
 
-  // Update quote status
   await supabase
     .from("quotes")
     .update({

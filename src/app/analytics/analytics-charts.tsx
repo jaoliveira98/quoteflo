@@ -27,9 +27,7 @@ export function AnalyticsCharts({ monthlyData, statusData }: AnalyticsChartsProp
   const maxQuotes = Math.max(...monthlyData.map(d => d.quotes), 1);
   const totalStatusValue = statusData.reduce((sum, d) => sum + d.value, 0);
 
-  // Generate Y-axis ticks (0, 25%, 50%, 75%, max)
   const yTicks = [0, 1, 2, 3, 4].map(i => Math.round((maxQuotes / 4) * i));
-  // Deduplicate and ensure max is always included
   const uniqueTicks = [...new Set([...yTicks, maxQuotes])].sort((a, b) => a - b);
 
   return (

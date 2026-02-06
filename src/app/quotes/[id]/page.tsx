@@ -5,9 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import { 
   ArrowLeft,
   Send,
-  Download,
-  Copy,
-  Trash2,
   Edit,
   CheckCircle2,
   Clock,
@@ -15,7 +12,6 @@ import {
   Mail,
   Phone,
   MapPin,
-  ExternalLink,
   Bell
 } from "lucide-react";
 import Link from "next/link";
@@ -23,17 +19,10 @@ import { notFound } from "next/navigation";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { requireAuthWithProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { STATUS_CONFIG } from "@/lib/constants";
+import type { QuoteStatus } from "@/types";
 import { QuoteDetailActions } from "./quote-detail-actions";
 import { DeleteQuoteCard } from "./delete-quote-card";
-
-const statusConfig: Record<string, { label: string; variant: "success" | "warning" | "info" | "secondary"; icon: React.ElementType }> = {
-  draft: { label: "Draft", variant: "secondary", icon: Edit },
-  sent: { label: "Sent", variant: "info", icon: Send },
-  viewed: { label: "Viewed", variant: "warning", icon: Eye },
-  accepted: { label: "Accepted", variant: "success", icon: CheckCircle2 },
-  declined: { label: "Declined", variant: "secondary", icon: Clock },
-  expired: { label: "Expired", variant: "secondary", icon: Clock },
-};
 
 export default async function QuoteDetailPage({
   params,
@@ -44,7 +33,6 @@ export default async function QuoteDetailPage({
   const profile = await requireAuthWithProfile();
   const supabase = await createClient();
   
-  // Fetch quote with line items
   const { data: quote, error } = await supabase
     .from("quotes")
     .select("*")
@@ -56,14 +44,13 @@ export default async function QuoteDetailPage({
     notFound();
   }
 
-  // Fetch line items separately
   const { data: lineItems } = await supabase
     .from("quote_line_items")
     .select("*")
     .eq("quote_id", quote.id)
     .order("item_order", { ascending: true });
 
-  const status = statusConfig[quote.status] || statusConfig.draft;
+  const status = STATUS_CONFIG[quote.status as QuoteStatus] || STATUS_CONFIG.draft;
   const StatusIcon = status.icon;
 
   return (
@@ -72,7 +59,7 @@ export default async function QuoteDetailPage({
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
           <div className="flex items-start gap-4">
-            <Button variant="ghost" size="icon" asChild>
+            <Button variant="ghost" size="icon" asChild aria-label="Back to quotes">
               <Link href="/quotes">
                 <ArrowLeft className="h-5 w-5" />
               </Link>

@@ -10,25 +10,9 @@ import Link from "next/link";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { requireAuthWithProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { STATUS_COLORS, STATUS_LABELS } from "@/lib/constants";
+import type { QuoteStatus } from "@/types";
 import { QuotesFilter } from "./quotes-filter";
-
-const statusColors: Record<string, "success" | "warning" | "info" | "secondary"> = {
-  draft: "secondary",
-  sent: "info",
-  viewed: "warning",
-  accepted: "success",
-  declined: "secondary",
-  expired: "secondary",
-};
-
-const statusLabels: Record<string, string> = {
-  draft: "Draft",
-  sent: "Sent",
-  viewed: "Viewed",
-  accepted: "Accepted",
-  declined: "Declined",
-  expired: "Expired",
-};
 
 export default async function QuotesPage({
   searchParams,
@@ -39,14 +23,12 @@ export default async function QuotesPage({
   const profile = await requireAuthWithProfile();
   const supabase = await createClient();
   
-  // Build query
   let query = supabase
     .from("quotes")
     .select("*")
     .eq("user_id", profile.id)
     .order("created_at", { ascending: false });
   
-  // Apply status filter
   if (status && status !== "all") {
     query = query.eq("status", status);
   }
@@ -55,7 +37,6 @@ export default async function QuotesPage({
   
   let filteredQuotes = quotes || [];
   
-  // Apply search filter (client-side for simplicity)
   if (search) {
     const searchLower = search.toLowerCase();
     filteredQuotes = filteredQuotes.filter(quote => 
@@ -65,7 +46,6 @@ export default async function QuotesPage({
     );
   }
 
-  // Get counts for filter badges
   const allQuotes = quotes || [];
   const counts = {
     all: allQuotes.length,
@@ -124,8 +104,8 @@ export default async function QuotesPage({
                             <p className="font-medium text-surface-900 truncate">
                               {quote.customer_name}
                             </p>
-                            <Badge variant={statusColors[quote.status]} className="flex-shrink-0">
-                              {statusLabels[quote.status]}
+                            <Badge variant={STATUS_COLORS[quote.status as QuoteStatus]} className="flex-shrink-0">
+                              {STATUS_LABELS[quote.status as QuoteStatus]}
                             </Badge>
                           </div>
                           <div className="flex items-center gap-2 text-sm text-surface-500">

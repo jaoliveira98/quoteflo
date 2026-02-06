@@ -8,13 +8,11 @@ export async function DELETE(
   const { id } = await params;
   const supabase = await createClient();
 
-  // Get current user
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Delete the quote (line items will be cascade deleted)
   const { error } = await supabase
     .from("quotes")
     .delete()

@@ -27,24 +27,20 @@ export default async function CustomersPage({
   const profile = await requireAuthWithProfile();
   const supabase = await createClient();
   
-  // Fetch customers
   const { data: customers } = await supabase
     .from("customers")
     .select("*")
     .eq("user_id", profile.id)
     .order("name", { ascending: true });
 
-  // Get quote stats per customer (count and total value)
   const { data: allQuotes } = await supabase
     .from("quotes")
     .select("customer_id, customer_name, customer_email, total, status")
     .eq("user_id", profile.id);
 
-  // Build customer stats including both linked and unlinked quotes
   const customerStats: Record<string, { count: number; value: number; accepted: number }> = {};
   
   (allQuotes || []).forEach(quote => {
-    // Try to match by customer_id first
     if (quote.customer_id) {
       if (!customerStats[quote.customer_id]) {
         customerStats[quote.customer_id] = { count: 0, value: 0, accepted: 0 };
@@ -59,7 +55,6 @@ export default async function CustomersPage({
 
   let filteredCustomers = customers || [];
   
-  // Apply search filter
   if (search) {
     const searchLower = search.toLowerCase();
     filteredCustomers = filteredCustomers.filter(customer => 
@@ -72,7 +67,6 @@ export default async function CustomersPage({
     );
   }
 
-  // Get count of quotes without customer_id (orphan quotes)
   const orphanQuotes = (allQuotes || []).filter(q => !q.customer_id);
   const uniqueOrphanCustomers = new Set(orphanQuotes.map(q => `${q.customer_name}|${q.customer_email || ''}`));
 

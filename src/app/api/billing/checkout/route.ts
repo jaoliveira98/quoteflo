@@ -12,7 +12,6 @@ export async function POST(request: NextRequest) {
 
   const supabase = await createClient();
 
-  // Get current user
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -21,7 +20,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Get user profile
   const { data: profile } = await supabase
     .from("user_profiles")
     .select("*")
@@ -36,7 +34,6 @@ export async function POST(request: NextRequest) {
     const appUrl = getAppUrl();
     let customerId = profile.stripe_customer_id;
 
-    // Create or retrieve Stripe customer
     if (!customerId) {
       const customer = await stripe.customers.create({
         email: user.email,
@@ -47,14 +44,12 @@ export async function POST(request: NextRequest) {
       });
       customerId = customer.id;
 
-      // Save customer ID to profile
       await supabase
         .from("user_profiles")
         .update({ stripe_customer_id: customerId })
         .eq("id", user.id);
     }
 
-    // Create checkout session
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       mode: "subscription",

@@ -77,6 +77,7 @@ export function QuotesFilter({ currentSearch, currentStatus, counts }: QuotesFil
             size="icon"
             onClick={handleSearchClear}
             className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-surface-400 hover:text-surface-600"
+            aria-label="Clear search"
           >
             <X className="h-4 w-4" />
           </Button>

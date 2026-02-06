@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { ToastProvider } from "@/components/ui/toast";
 import "./globals.css";
@@ -7,6 +7,12 @@ const inter = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
 });
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#22c55e",
+};
 
 export const metadata: Metadata = {
   title: "QuoteFlo - Professional Quotes in 5 Minutes",
@@ -26,13 +32,6 @@ export const metadata: Metadata = {
     title: "QuoteFlo - Professional Quotes in 5 Minutes",
     description: "Create professional quotes from your phone in under 5 minutes.",
   },
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-  },
-  themeColor: "#22c55e",
 };
 
 export default function RootLayout({

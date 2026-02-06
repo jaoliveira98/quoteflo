@@ -23,9 +23,6 @@ import {
   CreditCard, 
   Loader2, 
   Check,
-  Zap,
-  Wrench,
-  Hammer,
   Bell,
   Crown,
   ExternalLink,
@@ -33,32 +30,13 @@ import {
 } from "lucide-react";
 import type { UserProfile } from "@/types";
 import { cn } from "@/lib/utils";
+import { TRADES_CONFIG, BRAND_COLORS } from "@/lib/constants";
 import { Suspense } from "react";
 
 interface SettingsFormProps {
   profile: UserProfile;
 }
 
-const trades = [
-  { value: "electrician", label: "Electrician", icon: Zap },
-  { value: "plumber", label: "Plumber", icon: Wrench },
-  { value: "builder", label: "Builder", icon: Hammer },
-] as const;
-
-const brandColors = [
-  { value: "#22c55e", label: "Green" },
-  { value: "#3b82f6", label: "Blue" },
-  { value: "#f59e0b", label: "Amber" },
-  { value: "#ef4444", label: "Red" },
-  { value: "#8b5cf6", label: "Purple" },
-  { value: "#ec4899", label: "Pink" },
-  { value: "#14b8a6", label: "Teal" },
-  { value: "#f97316", label: "Orange" },
-  { value: "#6366f1", label: "Indigo" },
-  { value: "#0f172a", label: "Dark" },
-];
-
-// Subscription Card Component
 function SubscriptionCard({ profile }: { profile: UserProfile }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -72,7 +50,6 @@ function SubscriptionCard({ profile }: { profile: UserProfile }) {
   const isPastDue = profile.subscription_status === "past_due";
   const hasStripeCustomer = !!profile.stripe_customer_id;
   
-  // Calculate trial days remaining
   const trialDaysRemaining = profile.trial_ends_at 
     ? Math.max(0, Math.ceil((new Date(profile.trial_ends_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
     : 0;
@@ -92,7 +69,6 @@ function SubscriptionCard({ profile }: { profile: UserProfile }) {
         throw new Error(data.error || "Failed to create checkout session");
       }
       
-      // Redirect to Stripe Checkout
       window.location.href = data.url;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
@@ -115,7 +91,6 @@ function SubscriptionCard({ profile }: { profile: UserProfile }) {
         throw new Error(data.error || "Failed to open billing portal");
       }
       
-      // Redirect to Stripe Customer Portal
       window.location.href = data.url;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
@@ -266,7 +241,6 @@ function SubscriptionCard({ profile }: { profile: UserProfile }) {
   );
 }
 
-// Wrapped SubscriptionCard with Suspense for useSearchParams
 function SubscriptionCardWrapper({ profile }: { profile: UserProfile }) {
   return (
     <Suspense fallback={
@@ -299,7 +273,6 @@ export function SettingsForm({ profile }: SettingsFormProps) {
     postcode: profile.postcode || "",
     trade: profile.trade,
     brand_color: profile.brand_color || "#22c55e",
-    // Notification preferences
     auto_followup_enabled: profile.auto_followup_enabled ?? true,
     auto_followup_days: profile.auto_followup_days ?? 3,
     expiry_reminder_enabled: profile.expiry_reminder_enabled ?? true,
@@ -323,7 +296,6 @@ export function SettingsForm({ profile }: SettingsFormProps) {
           postcode: formData.postcode || null,
           trade: formData.trade,
           brand_color: formData.brand_color,
-          // Notification preferences
           auto_followup_enabled: formData.auto_followup_enabled,
           auto_followup_days: formData.auto_followup_days,
           expiry_reminder_enabled: formData.expiry_reminder_enabled,
@@ -339,7 +311,6 @@ export function SettingsForm({ profile }: SettingsFormProps) {
       setSuccess(true);
       router.refresh();
 
-      // Hide success message after 3 seconds
       setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
       console.error("Update error:", err);
@@ -399,7 +370,7 @@ export function SettingsForm({ profile }: SettingsFormProps) {
           <div className="space-y-2">
             <Label>Trade</Label>
             <div className="grid grid-cols-3 gap-3">
-              {trades.map((trade) => (
+              {TRADES_CONFIG.map((trade) => (
                 <Button
                   key={trade.value}
                   type="button"
@@ -447,7 +418,7 @@ export function SettingsForm({ profile }: SettingsFormProps) {
           <div className="space-y-2">
             <Label>Brand Color</Label>
             <div className="flex flex-wrap gap-2">
-              {brandColors.map((color) => (
+              {BRAND_COLORS.map((color) => (
                 <Button
                   key={color.value}
                   type="button"
