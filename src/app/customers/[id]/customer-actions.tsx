@@ -206,7 +206,7 @@ export function CustomerActions({ customer, otherCustomers }: CustomerActionsPro
       {/* Dropdown Menu */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="icon">
+          <Button variant="outline" size="icon" aria-label="Customer actions">
             <MoreHorizontal className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
@@ -288,6 +288,7 @@ export function CustomerActions({ customer, otherCustomers }: CustomerActionsPro
                         variant="ghost"
                         size="icon"
                         onClick={() => removeEmail(i)}
+                        aria-label="Remove email"
                       >
                         <X className="h-4 w-4" />
                       </Button>
@@ -328,6 +329,7 @@ export function CustomerActions({ customer, otherCustomers }: CustomerActionsPro
                         variant="ghost"
                         size="icon"
                         onClick={() => removePhone(i)}
+                        aria-label="Remove phone"
                       >
                         <X className="h-4 w-4" />
                       </Button>

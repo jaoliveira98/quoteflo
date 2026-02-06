@@ -15,21 +15,13 @@ import Link from "next/link";
 import { formatCurrency } from "@/lib/utils";
 import { requireAuthWithProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-
-const statusColors: Record<string, "success" | "warning" | "info" | "secondary"> = {
-  draft: "secondary",
-  sent: "info",
-  viewed: "warning",
-  accepted: "success",
-  declined: "secondary",
-  expired: "secondary",
-};
+import { STATUS_COLORS } from "@/lib/constants";
+import type { QuoteStatus } from "@/types";
 
 export default async function DashboardPage() {
   const profile = await requireAuthWithProfile();
   const supabase = await createClient();
   
-  // Fetch quotes for stats
   const { data: quotes } = await supabase
     .from("quotes")
     .select("*")
@@ -38,26 +30,30 @@ export default async function DashboardPage() {
   
   const allQuotes = quotes || [];
   
-  // Calculate stats
-  const draftCount = allQuotes.filter(q => q.status === "draft").length;
-  const awaitingCount = allQuotes.filter(q => q.status === "sent" || q.status === "viewed").length;
+  const { draftCount, awaitingCount, acceptedCount, totalValue } = allQuotes.reduce(
+    (acc, q) => {
+      const val = Number(q.total) || 0;
+      acc.totalValue += val;
+      if (q.status === "draft") acc.draftCount++;
+      if (q.status === "sent" || q.status === "viewed") acc.awaitingCount++;
+      if (q.status === "accepted") acc.acceptedCount++;
+      return acc;
+    },
+    { draftCount: 0, awaitingCount: 0, acceptedCount: 0, totalValue: 0 }
+  );
   
+  const sentQuotes = allQuotes.length - draftCount;
   const stats = {
     totalQuotes: allQuotes.length,
-    sentQuotes: allQuotes.filter(q => q.status !== "draft").length,
-    acceptedQuotes: allQuotes.filter(q => q.status === "accepted").length,
-    totalValue: allQuotes.reduce((sum, q) => sum + (Number(q.total) || 0), 0),
-    acceptanceRate: allQuotes.length > 0 
-      ? Math.round((allQuotes.filter(q => q.status === "accepted").length / allQuotes.filter(q => q.status !== "draft").length) * 100) || 0
-      : 0,
-    avgQuoteValue: allQuotes.length > 0 
-      ? Math.round(allQuotes.reduce((sum, q) => sum + (Number(q.total) || 0), 0) / allQuotes.length)
-      : 0,
+    sentQuotes,
+    acceptedQuotes: acceptedCount,
+    totalValue,
+    acceptanceRate: sentQuotes > 0 ? Math.round((acceptedCount / sentQuotes) * 100) : 0,
+    avgQuoteValue: allQuotes.length > 0 ? Math.round(totalValue / allQuotes.length) : 0,
     draftCount,
     awaitingCount,
   };
   
-  // Get recent quotes (last 4)
   const recentQuotes = allQuotes.slice(0, 4);
   return (
     <DashboardShell user={{ email: profile.email, company_name: profile.company_name }}>
@@ -173,7 +169,7 @@ export default async function DashboardPage() {
                         </div>
                       </div>
                       <div className="flex items-center gap-4">
-                        <Badge variant={statusColors[quote.status]}>
+                        <Badge variant={STATUS_COLORS[quote.status as QuoteStatus]}>
                           {quote.status.charAt(0).toUpperCase() + quote.status.slice(1)}
                         </Badge>
                         <span className="font-medium text-surface-900">

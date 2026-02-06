@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { formatCurrency, cn } from "@/lib/utils";
+import { findOrCreateCustomer } from "@/lib/customers";
 import type { UserProfile, ServiceItem, Customer } from "@/types";
 
 interface LineItem {
@@ -54,7 +55,6 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
   const [showServicePicker, setShowServicePicker] = useState(false);
   const [serviceSearch, setServiceSearch] = useState("");
   
-  // Customer details - pre-populate if customer provided
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(
     preselectedCustomer?.id || null
   );
@@ -64,32 +64,26 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
   const [customerAddress, setCustomerAddress] = useState(preselectedCustomer?.address || "");
   const [customerPostcode, setCustomerPostcode] = useState(preselectedCustomer?.postcode || "");
 
-  // Wrapper setters that clear the selected customer when any field is manually edited
+  // Clear quick-select when any customer field is manually edited
   const handleCustomerFieldChange = (setter: (val: string) => void) => (value: string) => {
     setter(value);
     setSelectedCustomerId(null);
   };
   
-  // Quote details
   const [jobDescription, setJobDescription] = useState("");
   const [vatRate, setVatRate] = useState(20);
   const [validDays, setValidDays] = useState(30);
-  
-  // Line items
   const [lineItems, setLineItems] = useState<LineItem[]>([]);
 
-  // Calculations
   const subtotal = lineItems.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0);
   const vatAmount = subtotal * (vatRate / 100);
   const total = subtotal + vatAmount;
 
-  // Filter services based on search
   const filteredServices = services.filter(service =>
     service.service_name.toLowerCase().includes(serviceSearch.toLowerCase()) ||
     service.category.toLowerCase().includes(serviceSearch.toLowerCase())
   );
 
-  // Group services by category
   const groupedServices = filteredServices.reduce((acc, service) => {
     if (!acc[service.category]) {
       acc[service.category] = [];
@@ -99,14 +93,12 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
   }, {} as Record<string, ServiceItem[]>);
 
   const addLineItem = (service?: ServiceItem) => {
-    // Check if this service is already in the line items
     if (service) {
       const existingItemIndex = lineItems.findIndex(
         item => item.service_id === service.id
       );
       
       if (existingItemIndex !== -1) {
-        // Increment quantity of existing item
         const updatedItems = [...lineItems];
         updatedItems[existingItemIndex] = {
           ...updatedItems[existingItemIndex],
@@ -119,7 +111,6 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
       }
     }
     
-    // Add new item
     const newItem: LineItem = {
       id: crypto.randomUUID(),
       description: service?.service_name || "",
@@ -151,81 +142,6 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
     setCustomerPostcode(customer.postcode || "");
   };
 
-  const findOrCreateCustomer = async (supabase: ReturnType<typeof createClient>): Promise<string> => {
-    // If user picked a customer via quick-select and didn't change any fields, use it directly
-    if (selectedCustomerId) {
-      return selectedCustomerId;
-    }
-
-    const trimmedName = customerName.trim();
-    const trimmedEmail = customerEmail.trim() || null;
-    const trimmedPhone = customerPhone.trim() || null;
-    const trimmedAddress = customerAddress.trim() || null;
-    const trimmedPostcode = customerPostcode.trim() || null;
-
-    // Try to find existing customer by email first
-    if (trimmedEmail) {
-      const { data: byEmail } = await supabase
-        .from("customers")
-        .select("id")
-        .eq("user_id", profile.id)
-        .eq("email", trimmedEmail)
-        .limit(1)
-        .maybeSingle();
-
-      if (byEmail) return byEmail.id;
-    }
-
-    // Try to find by exact name match (case-insensitive)
-    const { data: byName } = await supabase
-      .from("customers")
-      .select("id")
-      .eq("user_id", profile.id)
-      .ilike("name", trimmedName)
-      .limit(1)
-      .maybeSingle();
-
-    if (byName) {
-      const updates: Record<string, string | null> = {};
-      if (trimmedEmail) updates.email = trimmedEmail;
-      if (trimmedPhone) updates.phone = trimmedPhone;
-      if (trimmedAddress) updates.address = trimmedAddress;
-      if (trimmedPostcode) updates.postcode = trimmedPostcode;
-
-      if (Object.keys(updates).length > 0) {
-        await supabase
-          .from("customers")
-          .update({ ...updates, updated_at: new Date().toISOString() })
-          .eq("id", byName.id);
-      }
-
-      return byName.id;
-    }
-
-    // Create new customer
-    const { data: newCustomer, error: customerError } = await supabase
-      .from("customers")
-      .insert({
-        user_id: profile.id,
-        name: trimmedName,
-        email: trimmedEmail,
-        phone: trimmedPhone,
-        address: trimmedAddress,
-        postcode: trimmedPostcode,
-        emails: trimmedEmail ? [trimmedEmail] : [],
-        phones: trimmedPhone ? [trimmedPhone] : [],
-      })
-      .select("id")
-      .single();
-
-    if (customerError) {
-      console.error("Customer creation error:", customerError);
-      throw new Error("Failed to create customer");
-    }
-
-    return newCustomer.id;
-  };
-
   const handleSubmit = async (status: "draft" | "sent") => {
     if (!customerName.trim()) {
       setError("Please enter a customer name");
@@ -248,10 +164,14 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
     try {
       const supabase = createClient();
       
-      // Find or create customer first
-      const customerId = await findOrCreateCustomer(supabase);
+      const customerId = await findOrCreateCustomer(supabase, profile.id, {
+        name: customerName,
+        email: customerEmail,
+        phone: customerPhone,
+        address: customerAddress,
+        postcode: customerPostcode,
+      }, selectedCustomerId);
 
-      // Generate quote number
       const { data: quoteNumber, error: rpcError } = await supabase
         .rpc("generate_quote_number", { p_user_id: profile.id });
       
@@ -260,11 +180,9 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
         throw new Error("Failed to generate quote number");
       }
 
-      // Calculate valid until date
       const validUntil = new Date();
       validUntil.setDate(validUntil.getDate() + validDays);
 
-      // Create quote with customer_id already set
       const { data: quote, error: quoteError } = await supabase
         .from("quotes")
         .insert({
@@ -292,7 +210,6 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
         throw new Error("Failed to create quote");
       }
 
-      // Create line items
       const lineItemsToInsert = lineItems.map((item, index) => ({
         quote_id: quote.id,
         item_order: index,
@@ -312,7 +229,6 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
         throw new Error("Failed to create line items");
       }
 
-      // If user chose "Send", call the send API to deliver the email
       if (status === "sent") {
         const sendResponse = await fetch(`/api/quotes/${quote.id}/send`, {
           method: "POST",
@@ -324,7 +240,6 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
         }
       }
 
-      // Redirect to quote detail page
       router.push(`/quotes/${quote.id}`);
       router.refresh();
       
@@ -340,7 +255,7 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
     <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" asChild>
+        <Button variant="ghost" size="icon" asChild aria-label="Back to quotes">
           <Link href="/quotes">
             <ArrowLeft className="h-5 w-5" />
           </Link>

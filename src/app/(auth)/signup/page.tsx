@@ -9,16 +9,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
-import { Zap, Wrench, Hammer, Loader2, CheckCircle2 } from "lucide-react";
+import { Loader2, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-type Trade = "electrician" | "plumber" | "builder";
-
-const trades: { value: Trade; label: string; icon: React.ElementType; description: string }[] = [
-  { value: "electrician", label: "Electrician", icon: Zap, description: "Electrical work & testing" },
-  { value: "plumber", label: "Plumber", icon: Wrench, description: "Plumbing & heating" },
-  { value: "builder", label: "Builder", icon: Hammer, description: "Construction & renovation" },
-];
+import { TRADES_CONFIG } from "@/lib/constants";
+import type { Trade } from "@/types";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -48,12 +42,6 @@ export default function SignupPage() {
     try {
       const supabase = createClient();
       
-      console.log("Attempting signup with:", {
-        email: formData.email,
-        trade: selectedTrade,
-        company_name: formData.companyName,
-      });
-      
       const { data, error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -65,24 +53,17 @@ export default function SignupPage() {
         },
       });
 
-      console.log("Signup response:", { data, error: signUpError });
-
       if (signUpError) {
-        console.error("Signup error:", signUpError);
         setError(signUpError.message);
         return;
       }
 
-      // Check if email confirmation is required
       if (data.user && !data.session) {
         setError("Please check your email to confirm your account, then log in.");
         return;
       }
 
       if (data.user && data.session) {
-        console.log("User created:", data.user.id);
-        
-        // Try to create profile manually if trigger didn't work
         const { error: profileError } = await supabase
           .from("user_profiles")
           .upsert({
@@ -96,15 +77,12 @@ export default function SignupPage() {
         
         if (profileError) {
           console.error("Profile creation error:", profileError);
-          // Don't block signup if profile creation fails - user can still log in
         }
         
-        // Redirect to dashboard
         router.push("/dashboard");
         router.refresh();
       }
     } catch (err) {
-      console.error("Caught error:", err);
       setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
@@ -125,7 +103,7 @@ export default function SignupPage() {
       <CardContent>
         {step === 1 ? (
           <div className="space-y-3">
-            {trades.map((trade) => (
+            {TRADES_CONFIG.map((trade) => (
               <Button
                 key={trade.value}
                 variant="outline"
@@ -163,7 +141,6 @@ export default function SignupPage() {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Selected trade indicator */}
             <div className="flex items-center gap-2 p-3 rounded-lg bg-brand-50 text-brand-700 text-sm">
               <CheckCircle2 className="h-4 w-4" />
               <span>

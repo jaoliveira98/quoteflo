@@ -19,16 +19,16 @@ export default function ResetPasswordPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  // Check for valid session from reset link
   useEffect(() => {
     const supabase = createClient();
     
-    supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === "PASSWORD_RECOVERY") {
-        // User clicked the reset link and is now in recovery mode
-        console.log("Password recovery mode active");
+        // Recovery mode is now active — form is ready for submission
       }
     });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -61,7 +61,6 @@ export default function ResetPasswordPage() {
 
       setIsSuccess(true);
       
-      // Redirect to dashboard after 2 seconds
       setTimeout(() => {
         router.push("/dashboard");
       }, 2000);

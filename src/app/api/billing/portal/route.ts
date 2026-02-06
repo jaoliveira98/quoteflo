@@ -12,7 +12,6 @@ export async function POST(request: NextRequest) {
 
   const supabase = await createClient();
 
-  // Get current user
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -21,7 +20,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Get user profile
   const { data: profile } = await supabase
     .from("user_profiles")
     .select("stripe_customer_id")
@@ -38,7 +36,6 @@ export async function POST(request: NextRequest) {
   try {
     const appUrl = getAppUrl();
 
-    // Create portal session
     const session = await stripe.billingPortal.sessions.create({
       customer: profile.stripe_customer_id,
       return_url: `${appUrl}/settings`,

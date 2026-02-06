@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { formatCurrency, formatDateLong } from "@/lib/utils";
 import type { Quote, QuoteLineItem, UserProfile } from "@/types";
 
 export async function GET(
@@ -9,13 +10,11 @@ export async function GET(
   const { id } = await params;
   const supabase = await createClient();
 
-  // Get current user
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Fetch quote with user profile
   const { data: quote, error: quoteError } = await supabase
     .from("quotes")
     .select("*")
@@ -27,21 +26,18 @@ export async function GET(
     return NextResponse.json({ error: "Quote not found" }, { status: 404 });
   }
 
-  // Fetch line items
   const { data: lineItems } = await supabase
     .from("quote_line_items")
     .select("*")
     .eq("quote_id", quote.id)
     .order("item_order", { ascending: true });
 
-  // Fetch user profile
   const { data: profile } = await supabase
     .from("user_profiles")
     .select("*")
     .eq("id", user.id)
     .single();
 
-  // Generate HTML for PDF
   const html = generateQuoteHTML(quote as Quote, (lineItems || []) as QuoteLineItem[], profile as UserProfile | null);
 
   return new NextResponse(html, {
@@ -56,21 +52,6 @@ function generateQuoteHTML(
   lineItems: QuoteLineItem[],
   profile: UserProfile | null
 ) {
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-GB", {
-      style: "currency",
-      currency: "GBP",
-    }).format(amount);
-  };
-
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString("en-GB", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
-  };
-
   return `
 <!DOCTYPE html>
 <html lang="en">
@@ -263,10 +244,10 @@ function generateQuoteHTML(
     </div>
     <div class="detail-section" style="text-align: right;">
       <h3>Quote Date</h3>
-      <p>${formatDate(quote.created_at)}</p>
+      <p>${formatDateLong(quote.created_at)}</p>
       ${quote.valid_until ? `
         <h3 style="margin-top: 16px;">Valid Until</h3>
-        <p>${formatDate(quote.valid_until)}</p>
+        <p>${formatDateLong(quote.valid_until)}</p>
       ` : ""}
     </div>
   </div>
@@ -316,7 +297,7 @@ function generateQuoteHTML(
 
   ${quote.valid_until ? `
     <div class="valid-until">
-      This quote is valid until <strong>${formatDate(quote.valid_until)}</strong>
+      This quote is valid until <strong>${formatDateLong(quote.valid_until)}</strong>
     </div>
   ` : ""}
 

@@ -59,21 +59,31 @@ export default async function AnalyticsPage() {
     return date >= sixtyDaysAgo && date < thirtyDaysAgo;
   });
 
-  // ===== OVERVIEW STATS =====
   const totalQuotes = allQuotes.length;
-  const totalSent = allQuotes.filter(q => q.status !== "draft").length;
-  const totalViewed = allQuotes.filter(q => ["viewed", "accepted", "declined"].includes(q.status)).length;
-  const totalAccepted = allQuotes.filter(q => q.status === "accepted").length;
-  const totalDeclined = allQuotes.filter(q => q.status === "declined").length;
-  const totalValue = allQuotes.reduce((sum, q) => sum + q.total, 0);
-  const acceptedValue = allQuotes.filter(q => q.status === "accepted").reduce((sum, q) => sum + q.total, 0);
+
+  const statusCounts = allQuotes.reduce(
+    (acc, q) => {
+      acc.totalValue += q.total;
+      acc.byStatus[q.status] = (acc.byStatus[q.status] || 0) + 1;
+      if (q.status !== "draft") acc.nonDraft++;
+      if (["viewed", "accepted", "declined"].includes(q.status)) acc.viewedOrResolved++;
+      if (q.status === "accepted") acc.acceptedValue += q.total;
+      return acc;
+    },
+    { totalValue: 0, acceptedValue: 0, nonDraft: 0, viewedOrResolved: 0, byStatus: {} as Record<string, number> }
+  );
+
+  const totalSent = statusCounts.nonDraft;
+  const totalViewed = statusCounts.viewedOrResolved;
+  const totalAccepted = statusCounts.byStatus["accepted"] || 0;
+  const totalDeclined = statusCounts.byStatus["declined"] || 0;
+  const { totalValue, acceptedValue } = statusCounts;
   
   const conversionRate = totalSent > 0 ? Math.round((totalAccepted / totalSent) * 100) : 0;
   const viewRate = totalSent > 0 ? Math.round((totalViewed / totalSent) * 100) : 0;
   const avgQuoteValue = totalQuotes > 0 ? Math.round(totalValue / totalQuotes) : 0;
   const avgAcceptedValue = totalAccepted > 0 ? Math.round(acceptedValue / totalAccepted) : 0;
 
-  // ===== PERIOD COMPARISONS =====
   const currentQuoteCount = currentPeriodQuotes.length;
   const previousQuoteCount = previousPeriodQuotes.length;
   const quoteCountChange = previousQuoteCount > 0 
@@ -92,16 +102,14 @@ export default async function AnalyticsPage() {
     ? Math.round(((currentAccepted - previousAccepted) / previousAccepted) * 100) 
     : currentAccepted > 0 ? 100 : 0;
 
-  // ===== FUNNEL DATA =====
   const funnelData = {
-    draft: allQuotes.filter(q => q.status === "draft").length,
-    sent: allQuotes.filter(q => q.status === "sent").length,
-    viewed: allQuotes.filter(q => q.status === "viewed").length,
+    draft: statusCounts.byStatus["draft"] || 0,
+    sent: statusCounts.byStatus["sent"] || 0,
+    viewed: statusCounts.byStatus["viewed"] || 0,
     accepted: totalAccepted,
     declined: totalDeclined,
   };
 
-  // ===== TIME TO ACCEPT =====
   const acceptedQuotes = allQuotes.filter(q => q.status === "accepted" && q.sent_at && q.accepted_at);
   let avgTimeToAccept = 0;
   if (acceptedQuotes.length > 0) {
@@ -113,7 +121,6 @@ export default async function AnalyticsPage() {
     avgTimeToAccept = Math.round(totalHours / acceptedQuotes.length);
   }
 
-  // ===== TOP CUSTOMERS =====
   const customerStats = new Map<string, { name: string; count: number; value: number; accepted: number }>();
   allQuotes.forEach(q => {
     const key = q.customer_id || q.customer_name;
@@ -127,7 +134,6 @@ export default async function AnalyticsPage() {
     .sort((a, b) => b.value - a.value)
     .slice(0, 5);
 
-  // ===== MONTHLY DATA FOR CHARTS =====
   const monthlyData: { month: string; quotes: number; value: number; accepted: number }[] = [];
   const last6Months = Array.from({ length: 6 }, (_, i) => {
     const d = new Date();
@@ -149,7 +155,6 @@ export default async function AnalyticsPage() {
     });
   });
 
-  // ===== STATUS BREAKDOWN FOR CHARTS =====
   const statusData = [
     { name: "Draft", value: funnelData.draft, color: "#94a3b8" },
     { name: "Sent", value: funnelData.sent, color: "#3b82f6" },

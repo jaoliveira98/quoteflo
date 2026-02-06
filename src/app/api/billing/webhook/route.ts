@@ -107,7 +107,6 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     return;
   }
 
-  // Log the event
   await supabase.from("billing_events").insert({
     user_id: userId,
     stripe_customer_id: session.customer as string,
@@ -129,7 +128,6 @@ async function handleSubscriptionChange(subscription: Stripe.Subscription) {
     return;
   }
 
-  // Map Stripe status to our status
   let status: "active" | "cancelled" | "past_due" | "trialing" = "active";
   if (subscription.status === "canceled" || subscription.status === "unpaid") {
     status = "cancelled";
@@ -139,7 +137,6 @@ async function handleSubscriptionChange(subscription: Stripe.Subscription) {
     status = "trialing";
   }
 
-  // Update user profile
   await supabase
     .from("user_profiles")
     .update({
@@ -151,7 +148,6 @@ async function handleSubscriptionChange(subscription: Stripe.Subscription) {
     })
     .eq("id", userId);
 
-  // Log the event
   await supabase.from("billing_events").insert({
     user_id: userId,
     stripe_customer_id: subscription.customer as string,
@@ -174,7 +170,6 @@ async function handleSubscriptionCanceled(subscription: Stripe.Subscription) {
     return;
   }
 
-  // Update user profile - revert to starter tier
   await supabase
     .from("user_profiles")
     .update({
@@ -186,7 +181,6 @@ async function handleSubscriptionCanceled(subscription: Stripe.Subscription) {
     })
     .eq("id", userId);
 
-  // Log the event
   await supabase.from("billing_events").insert({
     user_id: userId,
     stripe_customer_id: subscription.customer as string,
@@ -209,7 +203,6 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
 
   if (!userId) return;
 
-  // Log the event
   await supabase.from("billing_events").insert({
     user_id: userId,
     stripe_customer_id: invoice.customer as string,
@@ -233,7 +226,6 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
 
   if (!userId) return;
 
-  // Update status to past_due
   await supabase
     .from("user_profiles")
     .update({
@@ -242,7 +234,6 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
     })
     .eq("id", userId);
 
-  // Log the event
   await supabase.from("billing_events").insert({
     user_id: userId,
     stripe_customer_id: invoice.customer as string,

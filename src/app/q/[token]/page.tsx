@@ -17,7 +17,6 @@ import { formatCurrency, formatDate } from "@/lib/utils";
 import { QuoteActions } from "./quote-actions";
 import { DownloadPDFButton } from "./download-pdf-button";
 
-// Create a public Supabase client (no auth required)
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -30,7 +29,6 @@ export default async function PublicQuotePage({
 }) {
   const { token } = await params;
 
-  // Fetch quote by access token
   const { data: quote, error } = await supabase
     .from("quotes")
     .select("*")
@@ -41,21 +39,18 @@ export default async function PublicQuotePage({
     notFound();
   }
 
-  // Fetch line items
   const { data: lineItems } = await supabase
     .from("quote_line_items")
     .select("*")
     .eq("quote_id", quote.id)
     .order("item_order", { ascending: true });
 
-  // Fetch company profile
   const { data: profile } = await supabase
     .from("user_profiles")
     .select("company_name, phone, email, trade, logo_url, brand_color")
     .eq("id", quote.user_id)
     .single();
 
-  // Mark as viewed if not already
   if (quote.status === "sent" && !quote.viewed_at) {
     await supabase
       .from("quotes")

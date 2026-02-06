@@ -12,7 +12,6 @@ export default async function NewQuotePage({
   const supabase = await createClient();
   const { customer: customerId } = await searchParams;
   
-  // Fetch service library for user's trade
   const { data: services } = await supabase
     .from("service_library")
     .select("*")
@@ -21,14 +20,12 @@ export default async function NewQuotePage({
     .order("category", { ascending: true })
     .order("service_name", { ascending: true });
   
-  // Fetch existing customers for autocomplete
   const { data: customers } = await supabase
     .from("customers")
     .select("*")
     .eq("user_id", profile.id)
     .order("name", { ascending: true });
 
-  // Find pre-selected customer if provided
   const selectedCustomer = customerId 
     ? customers?.find(c => c.id === customerId) || null
     : null;

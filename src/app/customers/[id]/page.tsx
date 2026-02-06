@@ -11,37 +11,16 @@ import {
   Calendar,
   PoundSterling,
   CheckCircle2,
-  Clock,
-  Send,
-  Eye,
-  XCircle,
   Plus,
-  MoreHorizontal
 } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireAuthWithProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { formatCurrency } from "@/lib/utils";
+import { STATUS_COLORS, STATUS_ICONS } from "@/lib/constants";
+import type { QuoteStatus } from "@/types";
 import { CustomerActions } from "./customer-actions";
-
-const statusColors: Record<string, "success" | "warning" | "info" | "secondary"> = {
-  draft: "secondary",
-  sent: "info",
-  viewed: "warning",
-  accepted: "success",
-  declined: "secondary",
-  expired: "secondary",
-};
-
-const statusIcons: Record<string, typeof FileText> = {
-  draft: FileText,
-  sent: Send,
-  viewed: Eye,
-  accepted: CheckCircle2,
-  declined: XCircle,
-  expired: Clock,
-};
 
 export default async function CustomerDetailPage({
   params,
@@ -52,7 +31,6 @@ export default async function CustomerDetailPage({
   const profile = await requireAuthWithProfile();
   const supabase = await createClient();
 
-  // Fetch customer
   const { data: customer, error } = await supabase
     .from("customers")
     .select("*")
@@ -64,7 +42,6 @@ export default async function CustomerDetailPage({
     notFound();
   }
 
-  // Fetch all quotes for this customer
   const { data: quotes } = await supabase
     .from("quotes")
     .select("*")
@@ -74,7 +51,6 @@ export default async function CustomerDetailPage({
 
   const customerQuotes = quotes || [];
 
-  // Calculate stats
   const totalQuotes = customerQuotes.length;
   const acceptedQuotes = customerQuotes.filter(q => q.status === "accepted").length;
   const totalValue = customerQuotes.reduce((sum, q) => sum + (Number(q.total) || 0), 0);
@@ -82,7 +58,6 @@ export default async function CustomerDetailPage({
     .filter(q => q.status === "accepted")
     .reduce((sum, q) => sum + (Number(q.total) || 0), 0);
 
-  // Get all emails and phones (combine legacy fields with arrays)
   const allEmails = [
     ...(customer.email ? [customer.email] : []),
     ...(customer.emails || []),
@@ -93,7 +68,6 @@ export default async function CustomerDetailPage({
     ...(customer.phones || []),
   ].filter((p, i, arr) => p && arr.indexOf(p) === i);
 
-  // Fetch other customers for merge functionality
   const { data: otherCustomers } = await supabase
     .from("customers")
     .select("id, name, email")
@@ -107,7 +81,7 @@ export default async function CustomerDetailPage({
         {/* Header */}
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-start gap-4">
-            <Button variant="ghost" size="icon" asChild>
+            <Button variant="ghost" size="icon" asChild aria-label="Back to customers">
               <Link href="/customers">
                 <ArrowLeft className="h-5 w-5" />
               </Link>
@@ -282,7 +256,7 @@ export default async function CustomerDetailPage({
               {customerQuotes.length > 0 ? (
                 <div className="space-y-3">
                   {customerQuotes.map((quote) => {
-                    const StatusIcon = statusIcons[quote.status] || FileText;
+                    const StatusIcon = STATUS_ICONS[quote.status as QuoteStatus] || FileText;
                     return (
                       <Link
                         key={quote.id}
@@ -312,7 +286,7 @@ export default async function CustomerDetailPage({
                           </div>
                         </div>
                         <div className="flex items-center gap-4">
-                          <Badge variant={statusColors[quote.status]}>
+                          <Badge variant={STATUS_COLORS[quote.status as QuoteStatus]}>
                             {quote.status.charAt(0).toUpperCase() + quote.status.slice(1)}
                           </Badge>
                           <span className="font-semibold text-surface-900">

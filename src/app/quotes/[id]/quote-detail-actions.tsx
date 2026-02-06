@@ -72,7 +72,6 @@ export function QuoteDetailActions({
       setSendSuccess(true);
       router.refresh();
       
-      // Reset success state after 3 seconds
       setTimeout(() => setSendSuccess(false), 3000);
     } catch (err) {
       setSendError(err instanceof Error ? err.message : "Failed to send quote");
@@ -82,7 +81,6 @@ export function QuoteDetailActions({
   };
 
   const handleDownloadPDF = () => {
-    // Open PDF in new tab for printing
     window.open(`/api/quotes/${quoteId}/pdf`, "_blank");
   };
 
@@ -123,7 +121,6 @@ export function QuoteDetailActions({
       setFollowUpSuccess(true);
       router.refresh();
       
-      // Reset success state after 3 seconds
       setTimeout(() => setFollowUpSuccess(false), 3000);
     } catch (err) {
       setFollowUpError(err instanceof Error ? err.message : "Failed to send follow-up");
