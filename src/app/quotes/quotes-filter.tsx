@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -70,13 +71,15 @@ export function QuotesFilter({ currentSearch, currentStatus, counts }: QuotesFil
           className="pl-9 pr-9"
         />
         {search && (
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon"
             onClick={handleSearchClear}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-surface-400 hover:text-surface-600"
+            className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-surface-400 hover:text-surface-600"
           >
             <X className="h-4 w-4" />
-          </button>
+          </Button>
         )}
       </form>
 
@@ -87,27 +90,32 @@ export function QuotesFilter({ currentSearch, currentStatus, counts }: QuotesFil
           const isActive = currentStatus === filter.value || (filter.value === "all" && !currentStatus);
           
           return (
-            <button
+            <Button
               key={filter.value}
               onClick={() => handleStatusChange(filter.value)}
               disabled={isPending}
+              variant={isActive ? "default" : "outline"}
+              size="sm"
               className={cn(
-                "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors",
+                "rounded-full gap-1.5",
                 isActive
-                  ? "bg-brand-100 text-brand-700"
-                  : "bg-surface-100 text-surface-600 hover:bg-surface-200"
+                  ? "bg-brand-100 text-brand-700 hover:bg-brand-200 border-brand-200"
+                  : "bg-surface-50 text-surface-600 hover:bg-surface-100"
               )}
             >
               {filter.label}
               {count > 0 && (
-                <span className={cn(
-                  "text-xs px-1.5 py-0.5 rounded-full",
-                  isActive ? "bg-brand-200 text-brand-800" : "bg-surface-200 text-surface-500"
-                )}>
+                <Badge
+                  variant={isActive ? "default" : "secondary"}
+                  className={cn(
+                    "ml-0.5 px-1.5 py-0 text-xs h-5",
+                    isActive ? "bg-brand-200 text-brand-800" : "bg-surface-200 text-surface-500"
+                  )}
+                >
                   {count}
-                </span>
+                </Badge>
               )}
-            </button>
+            </Button>
           );
         })}
       </div>

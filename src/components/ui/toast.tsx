@@ -3,6 +3,7 @@
 import * as React from "react";
 import { CheckCircle2, XCircle, AlertCircle, X, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 interface Toast {
   id: string;
@@ -101,15 +102,17 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                   </p>
                 )}
               </div>
-              <button
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={() => removeToast(toast.id)}
                 className={cn(
-                  "flex-shrink-0 p-0.5 rounded hover:bg-black/5 transition-colors",
+                  "flex-shrink-0 h-6 w-6 hover:bg-black/5",
                   toastTitleStyles[toast.type]
                 )}
               >
-                <X className="h-4 w-4" />
-              </button>
+                <X className="h-3.5 w-3.5" />
+              </Button>
             </div>
           );
         })}

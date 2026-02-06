@@ -280,42 +280,108 @@ export function SkeletonDashboard() {
 
 export function SkeletonAnalytics() {
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="space-y-2">
-        <Skeleton className="h-7 w-28" />
-        <Skeleton className="h-4 w-64" />
+      <div className="flex justify-between items-end">
+        <div className="space-y-2">
+          <Skeleton className="h-7 w-28" />
+          <Skeleton className="h-4 w-64" />
+        </div>
+        <Skeleton className="h-4 w-48" />
       </div>
 
-      {/* Stats */}
+      {/* KPI Cards */}
       <SkeletonStats />
 
       {/* Charts */}
       <div className="grid lg:grid-cols-2 gap-6">
         <div className="rounded-xl border border-surface-200 bg-white p-6">
-          <Skeleton className="h-5 w-36 mb-4" />
-          <Skeleton className="h-64 w-full rounded-lg" />
+          <div className="flex items-center gap-2 mb-4">
+            <Skeleton className="h-8 w-8 rounded-lg" />
+            <Skeleton className="h-5 w-36" />
+          </div>
+          <Skeleton className="h-72 w-full rounded-lg" />
         </div>
         <div className="rounded-xl border border-surface-200 bg-white p-6">
-          <Skeleton className="h-5 w-44 mb-4" />
-          <Skeleton className="h-64 w-full rounded-lg" />
+          <div className="flex items-center gap-2 mb-4">
+            <Skeleton className="h-8 w-8 rounded-lg" />
+            <Skeleton className="h-5 w-36" />
+          </div>
+          <Skeleton className="h-72 w-full rounded-lg" />
         </div>
       </div>
 
-      {/* Funnel */}
-      <div className="rounded-xl border border-surface-200 bg-white p-6">
-        <Skeleton className="h-5 w-28 mb-4" />
-        <div className="space-y-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i}>
-              <div className="flex justify-between mb-2">
-                <Skeleton className="h-4 w-20" />
-                <Skeleton className="h-4 w-16" />
+      {/* Funnel + Metrics */}
+      <div className="grid lg:grid-cols-5 gap-6">
+        <div className="lg:col-span-3 rounded-xl border border-surface-200 bg-white p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Skeleton className="h-8 w-8 rounded-lg" />
+            <Skeleton className="h-5 w-28" />
+          </div>
+          <div className="space-y-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i}>
+                <div className="flex items-center gap-3 mb-1.5">
+                  <Skeleton className="h-7 w-7 rounded-lg" />
+                  <div className="flex-1 flex justify-between">
+                    <Skeleton className="h-4 w-16" />
+                    <Skeleton className="h-4 w-12" />
+                  </div>
+                </div>
+                <div className="ml-10">
+                  <Skeleton className="h-2 w-full rounded-full" />
+                </div>
               </div>
-              <Skeleton className="h-8 w-full rounded-lg" />
+            ))}
+          </div>
+        </div>
+        <div className="lg:col-span-2 rounded-xl border border-surface-200 bg-white p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Skeleton className="h-8 w-8 rounded-lg" />
+            <Skeleton className="h-5 w-24" />
+          </div>
+          <div className="space-y-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-3 p-3 rounded-lg bg-surface-50">
+                <Skeleton className="h-9 w-9 rounded-lg" />
+                <div className="flex-1">
+                  <Skeleton className="h-3 w-28 mb-1.5" />
+                  <Skeleton className="h-5 w-20" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Top Customers */}
+      <div className="rounded-xl border border-surface-200 bg-white p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <Skeleton className="h-8 w-8 rounded-lg" />
+          <Skeleton className="h-5 w-40" />
+        </div>
+        <div className="space-y-3">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="flex items-center gap-4 p-3">
+              <Skeleton className="h-4 w-4" />
+              <Skeleton className="h-10 w-10 rounded-full" />
+              <div className="flex-1">
+                <div className="flex justify-between mb-1">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-4 w-20" />
+                </div>
+                <Skeleton className="h-1.5 w-full rounded-full" />
+              </div>
             </div>
           ))}
         </div>
+      </div>
+
+      {/* All-Time Summary */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Skeleton key={i} className="h-24 w-full rounded-xl" />
+        ))}
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Alert } from "@/components/ui/alert";
 import { CheckCircle2, X, Loader2 } from "lucide-react";
 
 interface QuoteActionsProps {
@@ -83,9 +84,7 @@ export function QuoteActions({ quoteId, token }: QuoteActionsProps) {
         </p>
 
         {error && (
-          <div className="p-3 rounded-lg bg-red-100 text-red-700 text-sm mb-4 text-center">
-            {error}
-          </div>
+          <Alert variant="destructive" className="mb-4">{error}</Alert>
         )}
 
         <div className="flex flex-col sm:flex-row gap-3">
