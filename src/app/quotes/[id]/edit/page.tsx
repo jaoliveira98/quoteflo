@@ -33,7 +33,7 @@ export default async function EditQuotePage({
   const { data: services } = await supabase
     .from("service_library")
     .select("*")
-    .eq("trade", profile.trade)
+    .eq("user_id", profile.id)
     .eq("is_active", true)
     .order("category", { ascending: true })
     .order("service_name", { ascending: true });

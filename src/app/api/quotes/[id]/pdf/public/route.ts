@@ -283,10 +283,12 @@ function generateQuoteHTML(
       <span>Subtotal</span>
       <span>${formatCurrency(Number(quote.subtotal))}</span>
     </div>
+    ${Number(quote.vat_amount) > 0 ? `
     <div class="totals-row">
       <span>VAT (${quote.vat_rate}%)</span>
       <span>${formatCurrency(Number(quote.vat_amount))}</span>
     </div>
+    ` : ""}
     <div class="totals-row total">
       <span>Total</span>
       <span class="amount">${formatCurrency(Number(quote.total))}</span>

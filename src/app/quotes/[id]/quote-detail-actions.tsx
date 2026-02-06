@@ -5,6 +5,13 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { 
   Send, 
   Download, 
@@ -13,7 +20,8 @@ import {
   Check,
   Copy,
   Edit,
-  Bell
+  Bell,
+  MoreHorizontal,
 } from "lucide-react";
 
 interface QuoteDetailActionsProps {
@@ -130,90 +138,111 @@ export function QuoteDetailActions({
   };
 
   const canEdit = status === "draft" || status === "sent" || status === "viewed";
+  const canSend = status === "draft" || status === "sent" || status === "viewed";
   const canFollowUp = (status === "sent" || status === "viewed") && hasEmail && followUpCount < 3;
 
   return (
-    <div className="flex flex-col gap-2 ml-14 sm:ml-0">
-      <div className="flex flex-wrap gap-2">
-        {canEdit && (
-          <Button variant="outline" size="sm" asChild>
-            <Link href={`/quotes/${quoteId}/edit`}>
-              <Edit className="h-4 w-4" />
-              <span className="hidden sm:inline">Edit</span>
-            </Link>
-          </Button>
-        )}
-        
-        {(status === "draft" || status === "sent" || status === "viewed") && (
-          <Button 
+    <div className="flex flex-col gap-2">
+      <div className="flex items-center gap-2">
+        {/* Primary action: Send/Resend */}
+        {canSend && (
+          <Button
             onClick={handleSend}
             disabled={isSending}
             size="sm"
-            variant={status === "draft" ? "default" : "outline"}
+            className="gap-1.5"
           >
             {isSending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
             ) : sendSuccess ? (
-              <Check className="h-4 w-4 text-green-500" />
+              <Check className="h-3.5 w-3.5" />
             ) : (
-              <Send className="h-4 w-4" />
+              <Send className="h-3.5 w-3.5" />
             )}
-            {status === "draft" ? "Send Quote" : "Resend"}
+            {status === "draft" ? "Send" : "Resend"}
           </Button>
         )}
-        
-        <Button variant="outline" size="sm" onClick={handleDownloadPDF}>
-          <Download className="h-4 w-4" />
-          <span className="hidden sm:inline">PDF</span>
-        </Button>
 
-        <Button variant="outline" size="sm" onClick={handleCopyLink}>
-          {copied ? (
-            <Check className="h-4 w-4 text-green-500" />
-          ) : (
-            <Copy className="h-4 w-4" />
-          )}
-          <span className="hidden sm:inline">{copied ? "Copied!" : "Copy Link"}</span>
-        </Button>
-
-        <Button variant="outline" size="sm" onClick={handleViewPublic}>
-          <ExternalLink className="h-4 w-4" />
-          <span className="hidden sm:inline">Preview</span>
-        </Button>
-
-        {canFollowUp && (
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={handleFollowUp}
-            disabled={isFollowingUp}
-          >
-            {isFollowingUp ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : followUpSuccess ? (
-              <Check className="h-4 w-4 text-green-500" />
-            ) : (
-              <Bell className="h-4 w-4" />
-            )}
-            <span className="hidden sm:inline">{followUpSuccess ? "Sent!" : `Follow-up${followUpCount > 0 ? ` (${followUpCount}/3)` : ""}`}</span>
+        {/* Edit button */}
+        {canEdit && (
+          <Button variant="outline" size="sm" className="gap-1.5" asChild>
+            <Link href={`/quotes/${quoteId}/edit`}>
+              <Edit className="h-3.5 w-3.5" />
+              Edit
+            </Link>
           </Button>
         )}
+
+        {/* More actions dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="icon" className="h-9 w-9 flex-shrink-0">
+              <MoreHorizontal className="h-4 w-4" />
+              <span className="sr-only">More actions</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuItem onClick={handleDownloadPDF} className="gap-2">
+              <Download className="h-4 w-4" />
+              Download PDF
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleCopyLink} className="gap-2">
+              {copied ? (
+                <>
+                  <Check className="h-4 w-4 text-green-500" />
+                  Copied!
+                </>
+              ) : (
+                <>
+                  <Copy className="h-4 w-4" />
+                  Copy Link
+                </>
+              )}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleViewPublic} className="gap-2">
+              <ExternalLink className="h-4 w-4" />
+              Preview
+            </DropdownMenuItem>
+            {canFollowUp && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem 
+                  onClick={handleFollowUp} 
+                  disabled={isFollowingUp}
+                  className="gap-2"
+                >
+                  {isFollowingUp ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : followUpSuccess ? (
+                    <Check className="h-4 w-4 text-green-500" />
+                  ) : (
+                    <Bell className="h-4 w-4" />
+                  )}
+                  {followUpSuccess 
+                    ? "Sent!" 
+                    : `Follow-up${followUpCount > 0 ? ` (${followUpCount}/3)` : ""}`
+                  }
+                </DropdownMenuItem>
+              </>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {sendError && (
-        <Alert variant="destructive">{sendError}</Alert>
+        <Alert variant="destructive" className="text-sm">{sendError}</Alert>
       )}
       
       {sendSuccess && (
-        <Alert variant="success">Quote sent successfully!</Alert>
+        <Alert variant="success" className="text-sm">Quote sent successfully!</Alert>
       )}
 
       {followUpError && (
-        <Alert variant="destructive">{followUpError}</Alert>
+        <Alert variant="destructive" className="text-sm">{followUpError}</Alert>
       )}
       
       {followUpSuccess && (
-        <Alert variant="success">Follow-up sent!</Alert>
+        <Alert variant="success" className="text-sm">Follow-up sent!</Alert>
       )}
     </div>
   );

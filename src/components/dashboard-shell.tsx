@@ -11,6 +11,7 @@ import {
   Menu,
   LogOut,
   BarChart3,
+  Package,
   Loader2
 } from "lucide-react";
 import { useState, useTransition, useEffect } from "react";
@@ -24,12 +25,28 @@ import {
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 
-const navigation = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Quotes", href: "/quotes", icon: FileText },
-  { name: "Customers", href: "/customers", icon: Users },
-  { name: "Analytics", href: "/analytics", icon: BarChart3 },
-  { name: "Settings", href: "/settings", icon: Settings },
+const navigationGroups = [
+  {
+    label: "Overview",
+    items: [
+      { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+      { name: "Analytics", href: "/analytics", icon: BarChart3 },
+    ],
+  },
+  {
+    label: "Work",
+    items: [
+      { name: "Quotes", href: "/quotes", icon: FileText },
+      { name: "Customers", href: "/customers", icon: Users },
+      { name: "Services", href: "/services", icon: Package },
+    ],
+  },
+  {
+    label: "Account",
+    items: [
+      { name: "Settings", href: "/settings", icon: Settings },
+    ],
+  },
 ];
 
 interface DashboardShellProps {
@@ -82,34 +99,43 @@ function SidebarContent({
         </Button>
       </div>
 
-      <nav className="flex-1 px-3 pt-2 space-y-0.5">
-        {navigation.map((item) => {
-          const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
-          const isLoading = loadingPath === item.href;
-          
-          return (
-            <Button
-              key={item.name}
-              variant="ghost"
-              onClick={() => handleNavigation(item.href)}
-              disabled={isNavigating && !isLoading}
-              className={cn(
-                "w-full justify-start gap-3 px-3 py-2.5 h-auto rounded-lg text-sm font-medium transition-all",
-                isActive
-                  ? "bg-brand-50 text-brand-700 shadow-sm hover:bg-brand-50"
-                  : "text-surface-600 hover:bg-surface-50 hover:text-surface-900 active:bg-surface-100",
-                isLoading && "bg-surface-50"
-              )}
-            >
-              {isLoading ? (
-                <Loader2 className="h-5 w-5 animate-spin text-brand-600" />
-              ) : (
-                <item.icon className={cn("h-5 w-5", isActive ? "text-brand-600" : "text-surface-400")} />
-              )}
-              {item.name}
-            </Button>
-          );
-        })}
+      <nav className="flex-1 px-3 pt-2 overflow-y-auto">
+        {navigationGroups.map((group, groupIdx) => (
+          <div key={group.label} className={cn(groupIdx > 0 && "mt-4")}>
+            <p className="px-3 mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-surface-400">
+              {group.label}
+            </p>
+            <div className="space-y-0.5">
+              {group.items.map((item) => {
+                const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+                const isLoading = loadingPath === item.href;
+                
+                return (
+                  <Button
+                    key={item.name}
+                    variant="ghost"
+                    onClick={() => handleNavigation(item.href)}
+                    disabled={isNavigating && !isLoading}
+                    className={cn(
+                      "w-full justify-start gap-3 px-3 py-2.5 h-auto rounded-lg text-sm font-medium transition-all",
+                      isActive
+                        ? "bg-brand-50 text-brand-700 shadow-sm hover:bg-brand-50"
+                        : "text-surface-600 hover:bg-surface-50 hover:text-surface-900 active:bg-surface-100",
+                      isLoading && "bg-surface-50"
+                    )}
+                  >
+                    {isLoading ? (
+                      <Loader2 className="h-5 w-5 animate-spin text-brand-600" />
+                    ) : (
+                      <item.icon className={cn("h-5 w-5", isActive ? "text-brand-600" : "text-surface-400")} />
+                    )}
+                    {item.name}
+                  </Button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
 
       <div className="p-4 border-t border-surface-200">

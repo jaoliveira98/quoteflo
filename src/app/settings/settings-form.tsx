@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -26,16 +26,87 @@ import {
   Bell,
   Crown,
   ExternalLink,
-  Clock
+  Clock,
+  KeyRound,
+  CalendarDays,
+  Receipt,
+  RotateCcw,
 } from "lucide-react";
 import type { UserProfile } from "@/types";
 import { cn } from "@/lib/utils";
 import { TRADES_CONFIG, BRAND_COLORS } from "@/lib/constants";
 import { Suspense } from "react";
 
+// ──────────────────────────────────────────────
+// Shared components
+// ──────────────────────────────────────────────
+
 interface SettingsFormProps {
   profile: UserProfile;
 }
+
+function CardActions({
+  isLoading,
+  success,
+  isDirty,
+  onUndo,
+}: {
+  isLoading: boolean;
+  success: boolean;
+  isDirty: boolean;
+  onUndo: () => void;
+}) {
+  return (
+    <div className="flex items-center justify-end gap-2 pt-4 border-t border-surface-100">
+      {isDirty && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={onUndo}
+          className="text-surface-500 hover:text-surface-700 gap-1.5"
+        >
+          <RotateCcw className="h-3.5 w-3.5" />
+          Undo
+        </Button>
+      )}
+      <Button type="submit" disabled={isLoading || !isDirty} size="sm" className="min-w-[80px]">
+        {isLoading ? (
+          <>
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            Saving…
+          </>
+        ) : success ? (
+          <>
+            <Check className="h-3.5 w-3.5" />
+            Saved
+          </>
+        ) : (
+          "Save"
+        )}
+      </Button>
+    </div>
+  );
+}
+
+function SectionHeading({
+  title,
+  description,
+}: {
+  title: string;
+  description: string;
+}) {
+  return (
+    <div className="pb-1">
+      <h2 className="text-lg font-semibold text-surface-900">{title}</h2>
+      <p className="text-sm text-surface-500">{description}</p>
+    </div>
+  );
+}
+
+// ──────────────────────────────────────────────
+// Subscription Card
+// ──────────────────────────────────────────────
 
 function SubscriptionCard({ profile }: { profile: UserProfile }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -101,13 +172,12 @@ function SubscriptionCard({ profile }: { profile: UserProfile }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg flex items-center gap-2">
-          <CreditCard className="h-5 w-5 text-surface-400" />
-          Subscription
+        <CardTitle className="text-base flex items-center gap-2">
+          <CreditCard className="h-4 w-4 text-surface-400" />
+          Plan &amp; Billing
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Success/Cancel Messages */}
         {success && (
           <Alert variant="success">
             Welcome to Professional! Your subscription is now active.
@@ -119,7 +189,6 @@ function SubscriptionCard({ profile }: { profile: UserProfile }) {
           </Alert>
         )}
         
-        {/* Current Plan */}
         <div className="flex items-center justify-between p-4 rounded-lg bg-surface-50">
           <div>
             <div className="flex items-center gap-2">
@@ -162,6 +231,7 @@ function SubscriptionCard({ profile }: { profile: UserProfile }) {
               variant="outline" 
               onClick={handleManageBilling}
               disabled={isLoading}
+              size="sm"
             >
               {isLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -173,7 +243,7 @@ function SubscriptionCard({ profile }: { profile: UserProfile }) {
               )}
             </Button>
           ) : (
-            <Button onClick={handleUpgrade} disabled={isLoading}>
+            <Button onClick={handleUpgrade} disabled={isLoading} size="sm">
               {isLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
@@ -186,7 +256,6 @@ function SubscriptionCard({ profile }: { profile: UserProfile }) {
           )}
         </div>
         
-        {/* Upgrade prompt for trial users */}
         {isTrialing && (
           <div className="p-4 rounded-lg border-2 border-brand-200 bg-brand-50">
             <div className="flex items-start gap-3">
@@ -217,7 +286,7 @@ function SubscriptionCard({ profile }: { profile: UserProfile }) {
                   </li>
                 </ul>
                 {!hasStripeCustomer && (
-                  <Button onClick={handleUpgrade} disabled={isLoading} className="mt-4">
+                  <Button onClick={handleUpgrade} disabled={isLoading} className="mt-4" size="sm">
                     {isLoading ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
@@ -246,9 +315,9 @@ function SubscriptionCardWrapper({ profile }: { profile: UserProfile }) {
     <Suspense fallback={
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <CreditCard className="h-5 w-5 text-surface-400" />
-            Subscription
+          <CardTitle className="text-base flex items-center gap-2">
+            <CreditCard className="h-4 w-4 text-surface-400" />
+            Plan &amp; Billing
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -261,23 +330,36 @@ function SubscriptionCardWrapper({ profile }: { profile: UserProfile }) {
   );
 }
 
-export function SettingsForm({ profile }: SettingsFormProps) {
+// ──────────────────────────────────────────────
+// Company Details Card
+// ──────────────────────────────────────────────
+
+function CompanyDetailsCard({ profile }: { profile: UserProfile }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [formData, setFormData] = useState({
+  const initialValues = useMemo(() => ({
     company_name: profile.company_name || "",
     phone: profile.phone || "",
     postcode: profile.postcode || "",
-    trade: profile.trade,
-    brand_color: profile.brand_color || "#22c55e",
-    auto_followup_enabled: profile.auto_followup_enabled ?? true,
-    auto_followup_days: profile.auto_followup_days ?? 3,
-    expiry_reminder_enabled: profile.expiry_reminder_enabled ?? true,
-    expiry_reminder_days: profile.expiry_reminder_days ?? 2,
-  });
+  }), [profile]);
+
+  const [formData, setFormData] = useState(initialValues);
+
+  const isDirty = formData.company_name !== initialValues.company_name ||
+    formData.phone !== initialValues.phone ||
+    formData.postcode !== initialValues.postcode;
+
+  const handleUndo = useCallback(() => {
+    setFormData(initialValues);
+  }, [initialValues]);
+
+  const tradeConfig = TRADES_CONFIG.find(t => t.value === profile.trade);
+  const tradeName = profile.trade === "other"
+    ? profile.custom_trade_name || "Other"
+    : tradeConfig?.label || profile.trade;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -287,46 +369,34 @@ export function SettingsForm({ profile }: SettingsFormProps) {
 
     try {
       const supabase = createClient();
-
       const { error: updateError } = await supabase
         .from("user_profiles")
         .update({
           company_name: formData.company_name,
           phone: formData.phone || null,
           postcode: formData.postcode || null,
-          trade: formData.trade,
-          brand_color: formData.brand_color,
-          auto_followup_enabled: formData.auto_followup_enabled,
-          auto_followup_days: formData.auto_followup_days,
-          expiry_reminder_enabled: formData.expiry_reminder_enabled,
-          expiry_reminder_days: formData.expiry_reminder_days,
           updated_at: new Date().toISOString(),
         })
         .eq("id", profile.id);
 
-      if (updateError) {
-        throw updateError;
-      }
+      if (updateError) throw updateError;
 
       setSuccess(true);
       router.refresh();
-
       setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
-      console.error("Update error:", err);
-      setError(err instanceof Error ? err.message : "Failed to update settings");
+      setError(err instanceof Error ? err.message : "Failed to update");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Company Details */}
+    <form onSubmit={handleSubmit}>
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Building2 className="h-5 w-5 text-surface-400" />
+          <CardTitle className="text-base flex items-center gap-2">
+            <Building2 className="h-4 w-4 text-surface-400" />
             Company Details
           </CardTitle>
           <CardDescription>
@@ -369,122 +439,359 @@ export function SettingsForm({ profile }: SettingsFormProps) {
 
           <div className="space-y-2">
             <Label>Trade</Label>
-            <div className="grid grid-cols-3 gap-3">
-              {TRADES_CONFIG.map((trade) => (
-                <Button
-                  key={trade.value}
-                  type="button"
-                  variant="outline"
-                  onClick={() => setFormData({ ...formData, trade: trade.value })}
-                  className={cn(
-                    "flex flex-col items-center gap-2 p-4 h-auto rounded-lg border-2 transition-all",
-                    formData.trade === trade.value
-                      ? "border-brand-500 bg-brand-50 hover:bg-brand-50"
-                      : "border-surface-200 hover:border-surface-300"
-                  )}
-                >
-                  <trade.icon className={cn(
-                    "h-6 w-6",
-                    formData.trade === trade.value ? "text-brand-600" : "text-surface-400"
-                  )} />
-                  <span className={cn(
-                    "text-sm font-medium",
-                    formData.trade === trade.value ? "text-brand-700" : "text-surface-600"
-                  )}>
-                    {trade.label}
-                  </span>
-                </Button>
-              ))}
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-surface-50 border border-surface-200">
+              {tradeConfig && (
+                <tradeConfig.icon className="h-5 w-5 text-brand-600" />
+              )}
+              <span className="font-medium text-surface-700 capitalize">
+                {tradeName}
+              </span>
+              <Badge variant="secondary" className="ml-auto text-xs">
+                Set during signup
+              </Badge>
             </div>
-            <p className="text-xs text-surface-500">
-              This determines which services appear in your quote builder
-            </p>
           </div>
+
+          {error && <Alert variant="destructive">{error}</Alert>}
+          <CardActions isLoading={isLoading} success={success} isDirty={isDirty} onUndo={handleUndo} />
         </CardContent>
       </Card>
+    </form>
+  );
+}
 
-      {/* Branding */}
+// ──────────────────────────────────────────────
+// Branding Card
+// ──────────────────────────────────────────────
+
+function BrandingCard({ profile }: { profile: UserProfile }) {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const initialColor = profile.brand_color || "#22c55e";
+  const [brandColor, setBrandColor] = useState(initialColor);
+  const companyName = profile.company_name || "Your Company";
+  const phone = profile.phone || "Phone number";
+
+  const isDirty = brandColor !== initialColor;
+
+  const handleUndo = useCallback(() => {
+    setBrandColor(initialColor);
+  }, [initialColor]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
+    setSuccess(false);
+
+    try {
+      const supabase = createClient();
+      const { error: updateError } = await supabase
+        .from("user_profiles")
+        .update({
+          brand_color: brandColor,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", profile.id);
+
+      if (updateError) throw updateError;
+
+      setSuccess(true);
+      router.refresh();
+      setTimeout(() => setSuccess(false), 3000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Palette className="h-5 w-5 text-surface-400" />
-            Branding
+          <CardTitle className="text-base flex items-center gap-2">
+            <Palette className="h-4 w-4 text-surface-400" />
+            Brand Color
           </CardTitle>
           <CardDescription>
-            Customize how your quotes look
+            Used on your quotes and customer-facing pages
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label>Brand Color</Label>
-            <div className="flex flex-wrap gap-2">
-              {BRAND_COLORS.map((color) => (
-                <Button
-                  key={color.value}
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setFormData({ ...formData, brand_color: color.value })}
-                  className={cn(
-                    "h-10 w-10 rounded-lg border-2 transition-all",
-                    formData.brand_color === color.value
-                      ? "border-surface-900 scale-110"
-                      : "border-transparent hover:scale-105"
-                  )}
-                  style={{ backgroundColor: color.value }}
-                  title={color.label}
-                />
-              ))}
-            </div>
-            <p className="text-xs text-surface-500">
-              This color will be used on your quotes and customer-facing pages
-            </p>
+          <div className="flex flex-wrap gap-2">
+            {BRAND_COLORS.map((color) => (
+              <button
+                key={color.value}
+                type="button"
+                onClick={() => setBrandColor(color.value)}
+                className={cn(
+                  "h-9 w-9 rounded-lg border-2 transition-all hover:scale-105",
+                  brandColor === color.value
+                    ? "border-surface-900 scale-110 ring-2 ring-surface-900/20"
+                    : "border-transparent"
+                )}
+                style={{ backgroundColor: color.value }}
+                title={color.label}
+              />
+            ))}
           </div>
 
-          {/* Preview */}
-          <div className="pt-4 border-t border-surface-200">
-            <Label className="text-surface-500">Preview</Label>
-            <div className="mt-2 p-4 rounded-lg border border-surface-200 bg-white">
-              <div className="flex items-center gap-3">
-                <div 
-                  className="h-10 w-10 rounded-lg flex items-center justify-center text-white font-bold"
-                  style={{ backgroundColor: formData.brand_color }}
-                >
-                  {formData.company_name.charAt(0) || "Q"}
-                </div>
-                <div>
-                  <p className="font-semibold" style={{ color: formData.brand_color }}>
-                    {formData.company_name || "Your Company"}
-                  </p>
-                  <p className="text-sm text-surface-500">
-                    {formData.phone || "Phone number"}
-                  </p>
-                </div>
+          <div className="p-4 rounded-lg border border-surface-200 bg-white">
+            <p className="text-xs font-medium text-surface-400 uppercase tracking-wider mb-3">Preview</p>
+            <div className="flex items-center gap-3">
+              <div 
+                className="h-10 w-10 rounded-lg flex items-center justify-center text-white font-bold text-sm"
+                style={{ backgroundColor: brandColor }}
+              >
+                {companyName.charAt(0) || "Q"}
+              </div>
+              <div>
+                <p className="font-semibold text-sm" style={{ color: brandColor }}>
+                  {companyName}
+                </p>
+                <p className="text-xs text-surface-500">
+                  {phone}
+                </p>
               </div>
             </div>
           </div>
+
+          {error && <Alert variant="destructive">{error}</Alert>}
+          <CardActions isLoading={isLoading} success={success} isDirty={isDirty} onUndo={handleUndo} />
         </CardContent>
       </Card>
+    </form>
+  );
+}
 
-      {/* Notifications */}
+// ──────────────────────────────────────────────
+// Quote Defaults Card
+// ──────────────────────────────────────────────
+
+function QuoteDefaultsCard({ profile }: { profile: UserProfile }) {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const initialValues = useMemo(() => ({
+    expiryDays: profile.default_quote_expiry_days ?? 30,
+    vatEnabled: profile.vat_enabled ?? true,
+    vatRate: profile.default_vat_rate ?? 20,
+  }), [profile]);
+
+  const [expiryDays, setExpiryDays] = useState(initialValues.expiryDays);
+  const [vatEnabled, setVatEnabled] = useState(initialValues.vatEnabled);
+  const [vatRate, setVatRate] = useState(initialValues.vatRate);
+
+  const isDirty = expiryDays !== initialValues.expiryDays ||
+    vatEnabled !== initialValues.vatEnabled ||
+    vatRate !== initialValues.vatRate;
+
+  const handleUndo = useCallback(() => {
+    setExpiryDays(initialValues.expiryDays);
+    setVatEnabled(initialValues.vatEnabled);
+    setVatRate(initialValues.vatRate);
+  }, [initialValues]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
+    setSuccess(false);
+
+    try {
+      const supabase = createClient();
+      const { error: updateError } = await supabase
+        .from("user_profiles")
+        .update({
+          default_quote_expiry_days: expiryDays,
+          vat_enabled: vatEnabled,
+          default_vat_rate: vatRate,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", profile.id);
+
+      if (updateError) throw updateError;
+
+      setSuccess(true);
+      router.refresh();
+      setTimeout(() => setSuccess(false), 3000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Bell className="h-5 w-5 text-surface-400" />
+          <CardTitle className="text-base flex items-center gap-2">
+            <CalendarDays className="h-4 w-4 text-surface-400" />
+            Quote Defaults
+          </CardTitle>
+          <CardDescription>
+            Default values applied to new quotes — you can override per quote
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-5">
+          {/* Expiry */}
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-sm font-medium text-surface-900">Quote validity</p>
+              <p className="text-xs text-surface-500">How long quotes are valid for</p>
+            </div>
+            <Select
+              value={String(expiryDays)}
+              onValueChange={(value) => setExpiryDays(Number(value))}
+            >
+              <SelectTrigger className="w-32 h-9">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="7">7 days</SelectItem>
+                <SelectItem value="14">14 days</SelectItem>
+                <SelectItem value="21">21 days</SelectItem>
+                <SelectItem value="30">30 days</SelectItem>
+                <SelectItem value="45">45 days</SelectItem>
+                <SelectItem value="60">60 days</SelectItem>
+                <SelectItem value="90">90 days</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="border-t border-surface-100" />
+
+          {/* VAT */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-2">
+                <Receipt className="h-4 w-4 text-surface-400" />
+                <div>
+                  <p className="text-sm font-medium text-surface-900">VAT / Tax</p>
+                  <p className="text-xs text-surface-500">Add VAT or sales tax to quotes</p>
+                </div>
+              </div>
+              <Switch
+                checked={vatEnabled}
+                onCheckedChange={setVatEnabled}
+              />
+            </div>
+
+            {vatEnabled && (
+              <div className="flex items-center gap-3 ml-6 pl-2 border-l-2 border-surface-100">
+                <Label className="text-sm text-surface-600 whitespace-nowrap">
+                  Default rate
+                </Label>
+                <div className="flex items-center gap-1.5">
+                  <Input
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.5"
+                    value={vatRate}
+                    onChange={(e) => setVatRate(parseFloat(e.target.value) || 0)}
+                    className="w-20 h-8 text-sm"
+                  />
+                  <span className="text-sm text-surface-500">%</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {error && <Alert variant="destructive">{error}</Alert>}
+          <CardActions isLoading={isLoading} success={success} isDirty={isDirty} onUndo={handleUndo} />
+        </CardContent>
+      </Card>
+    </form>
+  );
+}
+
+// ──────────────────────────────────────────────
+// Automated Follow-ups Card
+// ──────────────────────────────────────────────
+
+function NotificationsCard({ profile }: { profile: UserProfile }) {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const initialValues = useMemo(() => ({
+    auto_followup_enabled: profile.auto_followup_enabled ?? true,
+    auto_followup_days: profile.auto_followup_days ?? 3,
+    expiry_reminder_enabled: profile.expiry_reminder_enabled ?? true,
+    expiry_reminder_days: profile.expiry_reminder_days ?? 2,
+  }), [profile]);
+
+  const [formData, setFormData] = useState(initialValues);
+
+  const isDirty = formData.auto_followup_enabled !== initialValues.auto_followup_enabled ||
+    formData.auto_followup_days !== initialValues.auto_followup_days ||
+    formData.expiry_reminder_enabled !== initialValues.expiry_reminder_enabled ||
+    formData.expiry_reminder_days !== initialValues.expiry_reminder_days;
+
+  const handleUndo = useCallback(() => {
+    setFormData(initialValues);
+  }, [initialValues]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
+    setSuccess(false);
+
+    try {
+      const supabase = createClient();
+      const { error: updateError } = await supabase
+        .from("user_profiles")
+        .update({
+          auto_followup_enabled: formData.auto_followup_enabled,
+          auto_followup_days: formData.auto_followup_days,
+          expiry_reminder_enabled: formData.expiry_reminder_enabled,
+          expiry_reminder_days: formData.expiry_reminder_days,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", profile.id);
+
+      if (updateError) throw updateError;
+
+      setSuccess(true);
+      router.refresh();
+      setTimeout(() => setSuccess(false), 3000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <Bell className="h-4 w-4 text-surface-400" />
             Automated Follow-ups
           </CardTitle>
           <CardDescription>
             Automatically chase unviewed quotes and remind customers before expiry
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Auto Follow-up */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
+        <CardContent className="space-y-5">
+          {/* Follow-up */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="font-medium text-surface-900">Auto follow-up emails</p>
-                <p className="text-sm text-surface-500">
-                  Send automatic reminders for quotes that haven&apos;t been viewed
+                <p className="text-sm font-medium text-surface-900">Follow-up emails</p>
+                <p className="text-xs text-surface-500">
+                  Remind customers about unviewed quotes
                 </p>
               </div>
               <Switch
@@ -494,41 +801,39 @@ export function SettingsForm({ profile }: SettingsFormProps) {
             </div>
             
             {formData.auto_followup_enabled && (
-              <div className="space-y-3">
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-surface-50">
-                  <Label htmlFor="auto_followup_days" className="text-sm text-surface-600 whitespace-nowrap">
-                    Send first follow-up after
-                  </Label>
-                  <Select
-                    value={String(formData.auto_followup_days)}
-                    onValueChange={(value) => setFormData({ ...formData, auto_followup_days: Number(value) })}
-                  >
-                    <SelectTrigger className="w-28 h-9">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1">1 day</SelectItem>
-                      <SelectItem value="2">2 days</SelectItem>
-                      <SelectItem value="3">3 days</SelectItem>
-                      <SelectItem value="5">5 days</SelectItem>
-                      <SelectItem value="7">7 days</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <p className="text-xs text-surface-500">
-                  Up to 3 follow-up emails will be sent automatically. Subsequent emails are sent 3 days apart.
-                </p>
+              <div className="flex items-center gap-3 ml-6 pl-2 border-l-2 border-surface-100">
+                <Label className="text-sm text-surface-600 whitespace-nowrap">
+                  Send after
+                </Label>
+                <Select
+                  value={String(formData.auto_followup_days)}
+                  onValueChange={(value) => setFormData({ ...formData, auto_followup_days: Number(value) })}
+                >
+                  <SelectTrigger className="w-28 h-8">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">1 day</SelectItem>
+                    <SelectItem value="2">2 days</SelectItem>
+                    <SelectItem value="3">3 days</SelectItem>
+                    <SelectItem value="5">5 days</SelectItem>
+                    <SelectItem value="7">7 days</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-surface-400">Up to 3 emails, 3 days apart</p>
               </div>
             )}
           </div>
 
-          <div className="border-t border-surface-200 pt-6">
-            {/* Expiry Reminder */}
-            <div className="flex items-center justify-between">
+          <div className="border-t border-surface-100" />
+
+          {/* Expiry reminder */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="font-medium text-surface-900">Quote expiry reminders</p>
-                <p className="text-sm text-surface-500">
-                  Remind customers before their quote expires
+                <p className="text-sm font-medium text-surface-900">Expiry reminders</p>
+                <p className="text-xs text-surface-500">
+                  Notify customers before their quote expires
                 </p>
               </div>
               <Switch
@@ -538,62 +843,182 @@ export function SettingsForm({ profile }: SettingsFormProps) {
             </div>
             
             {formData.expiry_reminder_enabled && (
-              <div className="mt-3 space-y-3">
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-surface-50">
-                  <Label htmlFor="expiry_reminder_days" className="text-sm text-surface-600 whitespace-nowrap">
-                    Send reminder
-                  </Label>
-                  <Select
-                    value={String(formData.expiry_reminder_days)}
-                    onValueChange={(value) => setFormData({ ...formData, expiry_reminder_days: Number(value) })}
-                  >
-                    <SelectTrigger className="w-36 h-9">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1">1 day before</SelectItem>
-                      <SelectItem value="2">2 days before</SelectItem>
-                      <SelectItem value="3">3 days before</SelectItem>
-                      <SelectItem value="5">5 days before</SelectItem>
-                      <SelectItem value="7">7 days before</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <span className="text-sm text-surface-600">expiry</span>
-                </div>
+              <div className="flex items-center gap-3 ml-6 pl-2 border-l-2 border-surface-100">
+                <Label className="text-sm text-surface-600 whitespace-nowrap">
+                  Send
+                </Label>
+                <Select
+                  value={String(formData.expiry_reminder_days)}
+                  onValueChange={(value) => setFormData({ ...formData, expiry_reminder_days: Number(value) })}
+                >
+                  <SelectTrigger className="w-36 h-8">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">1 day before</SelectItem>
+                    <SelectItem value="2">2 days before</SelectItem>
+                    <SelectItem value="3">3 days before</SelectItem>
+                    <SelectItem value="5">5 days before</SelectItem>
+                    <SelectItem value="7">7 days before</SelectItem>
+                  </SelectContent>
+                </Select>
+                <span className="text-xs text-surface-400">expiry</span>
               </div>
             )}
           </div>
+
+          {error && <Alert variant="destructive">{error}</Alert>}
+          <CardActions isLoading={isLoading} success={success} isDirty={isDirty} onUndo={handleUndo} />
         </CardContent>
       </Card>
-
-      {/* Subscription */}
-      <SubscriptionCardWrapper profile={profile} />
-
-      {/* Error/Success Messages */}
-      {error && (
-        <Alert variant="destructive">{error}</Alert>
-      )}
-
-      {success && (
-        <Alert variant="success">Settings saved successfully!</Alert>
-      )}
-
-      {/* Save Button */}
-      <div className="flex justify-end">
-        <Button type="submit" disabled={isLoading} size="lg">
-          {isLoading ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Saving...
-            </>
-          ) : (
-            <>
-              <Check className="h-4 w-4" />
-              Save Changes
-            </>
-          )}
-        </Button>
-      </div>
     </form>
+  );
+}
+
+// ──────────────────────────────────────────────
+// Change Password Card
+// ──────────────────────────────────────────────
+
+function ChangePasswordCard() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const [formData, setFormData] = useState({
+    newPassword: "",
+    confirmPassword: "",
+  });
+
+  const isDirty = formData.newPassword.length > 0 || formData.confirmPassword.length > 0;
+
+  const handleUndo = useCallback(() => {
+    setFormData({ newPassword: "", confirmPassword: "" });
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (formData.newPassword.length < 8) {
+      setError("Password must be at least 8 characters");
+      return;
+    }
+
+    if (formData.newPassword !== formData.confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+    setSuccess(false);
+
+    try {
+      const supabase = createClient();
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: formData.newPassword,
+      });
+
+      if (updateError) throw updateError;
+
+      setSuccess(true);
+      setFormData({ newPassword: "", confirmPassword: "" });
+      setTimeout(() => setSuccess(false), 3000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update password");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <KeyRound className="h-4 w-4 text-surface-400" />
+            Password
+          </CardTitle>
+          <CardDescription>
+            Update your account password
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <input type="hidden" name="username" autoComplete="username" />
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="newPassword">New Password</Label>
+              <Input
+                id="newPassword"
+                type="password"
+                value={formData.newPassword}
+                onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
+                placeholder="At least 8 characters"
+                minLength={8}
+                autoComplete="new-password"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                value={formData.confirmPassword}
+                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                placeholder="Confirm new password"
+                minLength={8}
+                autoComplete="new-password"
+                required
+              />
+            </div>
+          </div>
+
+          {error && <Alert variant="destructive">{error}</Alert>}
+          {success && <Alert variant="success">Password updated successfully!</Alert>}
+          <CardActions isLoading={isLoading} success={success} isDirty={isDirty} onUndo={handleUndo} />
+        </CardContent>
+      </Card>
+    </form>
+  );
+}
+
+// ──────────────────────────────────────────────
+// Main Settings Form
+// ──────────────────────────────────────────────
+
+export function SettingsForm({ profile }: SettingsFormProps) {
+  return (
+    <div className="space-y-10">
+      {/* Business section */}
+      <section className="space-y-4">
+        <SectionHeading
+          title="Business"
+          description="Your company info, branding, and trade"
+        />
+        <CompanyDetailsCard profile={profile} />
+        <BrandingCard profile={profile} />
+      </section>
+
+      {/* Quoting section */}
+      <section className="space-y-4">
+        <SectionHeading
+          title="Quoting"
+          description="Default values and automation for your quotes"
+        />
+        <QuoteDefaultsCard profile={profile} />
+        <NotificationsCard profile={profile} />
+      </section>
+
+      {/* Account section */}
+      <section className="space-y-4">
+        <SectionHeading
+          title="Account"
+          description="Security and billing"
+        />
+        <ChangePasswordCard />
+        <SubscriptionCardWrapper profile={profile} />
+      </section>
+    </div>
   );
 }

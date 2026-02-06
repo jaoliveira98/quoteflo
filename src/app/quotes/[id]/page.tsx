@@ -57,38 +57,40 @@ export default async function QuoteDetailPage({
     <DashboardShell user={{ email: profile.email, company_name: profile.company_name }}>
       <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-          <div className="flex items-start gap-4">
-            <Button variant="ghost" size="icon" asChild aria-label="Back to quotes">
-              <Link href="/quotes">
-                <ArrowLeft className="h-5 w-5" />
-              </Link>
-            </Button>
-            <div>
-              <div className="flex items-center gap-3 mb-1">
-                <h1 className="text-2xl font-bold text-surface-900">{quote.quote_number}</h1>
-                <Badge variant={status.variant} className="gap-1">
-                  <StatusIcon className="h-3 w-3" />
-                  {status.label}
-                </Badge>
+        <div className="flex flex-col gap-4">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-start gap-4">
+              <Button variant="ghost" size="icon" asChild aria-label="Back to quotes">
+                <Link href="/quotes">
+                  <ArrowLeft className="h-5 w-5" />
+                </Link>
+              </Button>
+              <div>
+                <div className="flex items-center gap-3 mb-1">
+                  <h1 className="text-2xl font-bold text-surface-900">{quote.quote_number}</h1>
+                  <Badge variant={status.variant} className="gap-1">
+                    <StatusIcon className="h-3 w-3" />
+                    {status.label}
+                  </Badge>
+                </div>
+                <p className="text-surface-600">
+                  Created {formatDate(quote.created_at)}
+                  {quote.valid_until && (
+                    <> • Valid until {formatDate(quote.valid_until)}</>
+                  )}
+                </p>
               </div>
-              <p className="text-surface-600">
-                Created {formatDate(quote.created_at)}
-                {quote.valid_until && (
-                  <> • Valid until {formatDate(quote.valid_until)}</>
-                )}
-              </p>
             </div>
+            
+            <QuoteDetailActions 
+              quoteId={quote.id} 
+              status={quote.status}
+              accessToken={quote.access_token}
+              hasEmail={!!quote.customer_email}
+              followUpCount={quote.follow_up_count || 0}
+              lastFollowUpAt={quote.last_follow_up_at}
+            />
           </div>
-          
-          <QuoteDetailActions 
-            quoteId={quote.id} 
-            status={quote.status}
-            accessToken={quote.access_token}
-            hasEmail={!!quote.customer_email}
-            followUpCount={quote.follow_up_count || 0}
-            lastFollowUpAt={quote.last_follow_up_at}
-          />
         </div>
 
         {/* Customer Info */}
@@ -191,12 +193,14 @@ export default async function QuoteDetailPage({
                     {formatCurrency(Number(quote.subtotal))}
                   </span>
                 </div>
-                <div className="flex items-center gap-8">
-                  <span className="text-surface-600">VAT ({quote.vat_rate}%)</span>
-                  <span className="font-medium w-28 text-right">
-                    {formatCurrency(Number(quote.vat_amount))}
-                  </span>
-                </div>
+                {Number(quote.vat_amount) > 0 && (
+                  <div className="flex items-center gap-8">
+                    <span className="text-surface-600">VAT ({quote.vat_rate}%)</span>
+                    <span className="font-medium w-28 text-right">
+                      {formatCurrency(Number(quote.vat_amount))}
+                    </span>
+                  </div>
+                )}
                 <div className="flex items-center gap-8 pt-2 border-t border-surface-200">
                   <span className="text-lg font-semibold text-surface-900">Total</span>
                   <span className="text-xl font-bold w-28 text-right text-brand-600">

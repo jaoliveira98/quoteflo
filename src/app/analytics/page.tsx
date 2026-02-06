@@ -513,37 +513,6 @@ export default async function AnalyticsPage() {
           </CardContent>
         </Card>
 
-        {/* All-Time Summary */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="rounded-xl bg-gradient-to-br from-surface-800 to-surface-900 p-5 text-white shadow-medium">
-            <div className="flex items-center gap-2 mb-3">
-              <FileText className="h-4 w-4 text-surface-400" />
-              <p className="text-sm font-medium text-surface-300">All-Time Quotes</p>
-            </div>
-            <p className="text-2xl font-bold tracking-tight">{totalQuotes}</p>
-          </div>
-          <div className="rounded-xl bg-gradient-to-br from-surface-800 to-surface-900 p-5 text-white shadow-medium">
-            <div className="flex items-center gap-2 mb-3">
-              <PoundSterling className="h-4 w-4 text-surface-400" />
-              <p className="text-sm font-medium text-surface-300">Total Value</p>
-            </div>
-            <p className="text-2xl font-bold tracking-tight">{formatCurrency(totalValue)}</p>
-          </div>
-          <div className="rounded-xl bg-gradient-to-br from-green-600 to-green-700 p-5 text-white shadow-medium">
-            <div className="flex items-center gap-2 mb-3">
-              <CheckCircle2 className="h-4 w-4 text-green-200" />
-              <p className="text-sm font-medium text-green-100">Won Value</p>
-            </div>
-            <p className="text-2xl font-bold tracking-tight">{formatCurrency(acceptedValue)}</p>
-          </div>
-          <div className="rounded-xl bg-gradient-to-br from-brand-600 to-brand-700 p-5 text-white shadow-medium">
-            <div className="flex items-center gap-2 mb-3">
-              <Target className="h-4 w-4 text-brand-200" />
-              <p className="text-sm font-medium text-brand-100">Win Rate</p>
-            </div>
-            <p className="text-2xl font-bold tracking-tight">{conversionRate}%</p>
-          </div>
-        </div>
       </div>
     </DashboardShell>
   );

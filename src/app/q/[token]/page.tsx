@@ -104,7 +104,9 @@ export default async function PublicQuotePage({
           >
             <p className="text-sm opacity-80 mb-1">Total Quote Amount</p>
             <p className="text-3xl sm:text-4xl font-bold">{formatCurrency(Number(quote.total))}</p>
-            <p className="text-sm opacity-80 mt-1">Including VAT</p>
+            {Number(quote.vat_amount) > 0 && (
+              <p className="text-sm opacity-80 mt-1">Including VAT</p>
+            )}
           </div>
           <CardContent className="p-6">
             <div className="grid sm:grid-cols-2 gap-6">
@@ -168,10 +170,12 @@ export default async function PublicQuotePage({
                   <span>Subtotal</span>
                   <span>{formatCurrency(Number(quote.subtotal))}</span>
                 </div>
-                <div className="flex justify-between text-surface-600">
-                  <span>VAT ({quote.vat_rate}%)</span>
-                  <span>{formatCurrency(Number(quote.vat_amount))}</span>
-                </div>
+                {Number(quote.vat_amount) > 0 && (
+                  <div className="flex justify-between text-surface-600">
+                    <span>VAT ({quote.vat_rate}%)</span>
+                    <span>{formatCurrency(Number(quote.vat_amount))}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-lg font-semibold text-surface-900 pt-2 border-t border-surface-200">
                   <span>Total</span>
                   <span className="text-brand-600">{formatCurrency(Number(quote.total))}</span>

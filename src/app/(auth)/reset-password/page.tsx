@@ -102,6 +102,7 @@ export default function ResetPasswordPage() {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
+          <input type="hidden" name="username" autoComplete="username" />
           <div className="space-y-2">
             <Label htmlFor="password">New Password</Label>
             <Input

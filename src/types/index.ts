@@ -1,5 +1,22 @@
-// Trade types
-export type Trade = "electrician" | "plumber" | "builder";
+// Trade types - expanded list + custom
+export type Trade =
+  | "electrician"
+  | "plumber"
+  | "builder"
+  | "carpenter"
+  | "painter"
+  | "roofer"
+  | "landscaper"
+  | "tiler"
+  | "plasterer"
+  | "locksmith"
+  | "hvac"
+  | "gas_engineer"
+  | "glazier"
+  | "fencer"
+  | "cleaner"
+  | "handyman"
+  | "other";
 
 // Subscription types
 export type SubscriptionTier = "starter" | "professional" | "business";
@@ -13,11 +30,15 @@ export interface UserProfile {
   id: string;
   email: string;
   trade: Trade;
+  custom_trade_name: string | null;
   company_name: string;
   phone: string | null;
   postcode: string | null;
   logo_url: string | null;
   brand_color: string;
+  default_quote_expiry_days: number;
+  vat_enabled: boolean;
+  default_vat_rate: number;
   subscription_tier: SubscriptionTier;
   subscription_status: SubscriptionStatus;
   stripe_customer_id: string | null;
@@ -114,19 +135,13 @@ export interface QuoteLineItem {
 // Service library item
 export interface ServiceItem {
   id: string;
-  trade: Trade;
+  user_id: string;
   category: string;
   
   service_name: string;
   description: string | null;
-  typical_price_min: number;
-  typical_price_max: number;
+  price: number;
   unit: "each" | "per_hour" | "per_metre" | "per_room" | "per_day";
-  
-  // Compliance flags
-  part_p_required: boolean;
-  gas_safe_required: boolean;
-  building_reg_required: boolean;
   
   is_active: boolean;
   created_at: string;
