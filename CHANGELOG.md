@@ -4,6 +4,88 @@ All notable changes to this project are documented in this file.
 
 ---
 
+## [Step 13] - UX/UI Comprehensive Improvements
+
+### Landing Page Overhaul
+- **Social proof improved**: Replaced empty gray circles with initial-based avatars (JB, SM, DR, KW, PT) for more authentic feel
+- **New "How It Works" section**: 3-step visual flow (Pick Services → Send Instantly → Get Accepted) with numbered badges and connecting line
+- **New Testimonials section**: 3 trade-specific testimonials with quotes from electrician, plumber, builder
+- **New Final CTA section**: Dark section with strong call-to-action before footer
+- **Hero visual depth**: Added soft gradient background blobs for visual interest
+- **Underline accent**: SVG hand-drawn underline on "Under 5 Minutes" for emphasis
+- **Better feature cards**: Highlighted primary feature (5-Minute Quotes) with brand color treatment
+- **Improved pricing card**: Split layout with feature list and separated CTA section
+- **Responsive mobile nav**: Condensed "Start Free" button on mobile, full "Start Free Trial" on desktop
+- **Footer links**: Added login/signup links to footer for better navigation
+
+### Auth Pages
+- **Split-screen auth layout**: Left panel with dark branded sidebar showing product benefits (desktop), clean form on right
+- **Visual feature list**: CheckCircle2 list showing key features on auth sidebar
+- **Background decorations**: Subtle gradient orbs for depth
+- **Mobile-optimized**: Falls back to full-width form with header logo on mobile
+
+### Mobile UX (Mobile-First Improvements)
+- **Bottom sheet modals**: Service picker and add customer modals now slide up as bottom sheets on mobile (with drag handle indicator), centered dialog on desktop
+- **Mobile top bar**: Reduced height (h-14), added "New Quote" quick action button (green + icon) on right side
+- **Line item form**: Rewrote from flex layout to CSS grid (3-column) for much better mobile responsiveness
+- **Quote actions**: Responsive action buttons that hide labels on mobile, show icons only
+- **Touch-friendly buttons**: Better active states (scale-0.97), select-none to prevent text selection, active:bg colors for tactile feedback
+
+### Component Improvements
+- **Toast notification system**: New ToastProvider with success/error/warning/info variants, auto-dismiss, slide-up animation
+- **ConfirmDialog component**: Reusable confirmation dialog for destructive actions with danger/warning variants
+- **EmptyState component**: Consistent empty state pattern with icon, title, description, and action slot
+- **Textarea component**: Styled textarea matching Input component design system
+- **Select component**: Styled native select with chevron icon overlay
+- **Card transitions**: Added transition-all for smoother hover effects
+
+### UI Polish
+- **Custom scrollbars**: Subtle 6px webkit scrollbar with themed colors
+- **Smooth scrolling**: html { scroll-behavior: smooth }
+- **Input autofill**: Override webkit autofill background color to white
+- **Selection color**: Brand green selection highlight
+- **Tap highlight**: Removed webkit tap highlight for cleaner mobile taps
+- **Disabled inputs**: Added bg-surface-50 for clearer disabled state
+- **Focus rings**: Transparent border on focus to prevent double-border effect
+
+### Bug Fixes
+- **Pricing inconsistency**: Fixed £19/mo in settings page → £29/mo (matching landing page and business plan)
+- **Public quote brand color**: Quote total header now uses the tradesperson's actual brand_color instead of hardcoded green
+- **Dashboard empty state**: Improved with contextual welcome message and visual onboarding guidance
+- **Quote list hover**: Added group hover effect (icon turns brand color on hover)
+- **Dashboard quote list**: Improved hover with transition-all and group color change
+
+### SEO & Meta
+- **Enhanced metadata**: Added metadataBase, twitter card, viewport settings, theme-color
+- **Better descriptions**: More keyword-rich descriptions for search engine optimization
+
+### New Files
+- `src/components/ui/toast.tsx` - Toast notification system
+- `src/components/ui/confirm-dialog.tsx` - Confirmation dialog component
+- `src/components/ui/empty-state.tsx` - Reusable empty state component
+- `src/components/ui/textarea.tsx` - Styled textarea component
+- `src/components/ui/select.tsx` - Styled select component
+
+### Modified Files
+- `src/app/page.tsx` - Complete landing page rewrite
+- `src/app/layout.tsx` - ToastProvider wrapper, enhanced metadata
+- `src/app/globals.css` - Scrollbar, smooth scroll, autofill, selection styles
+- `src/app/(auth)/layout.tsx` - Split-screen auth layout
+- `src/app/dashboard/page.tsx` - Better empty state and welcome message
+- `src/app/quotes/page.tsx` - Improved list items with group hover
+- `src/app/quotes/new/quote-form.tsx` - Grid line items, bottom sheet modal
+- `src/app/quotes/[id]/edit/edit-quote-form.tsx` - Grid line items, bottom sheet modal
+- `src/app/quotes/[id]/quote-detail-actions.tsx` - Responsive action buttons
+- `src/app/q/[token]/page.tsx` - Dynamic brand color on quote total
+- `src/app/settings/settings-form.tsx` - Fixed pricing from £19 to £29
+- `src/app/customers/add-customer-button.tsx` - Bottom sheet modal on mobile
+- `src/components/dashboard-shell.tsx` - Improved sidebar and mobile top bar
+- `src/components/ui/button.tsx` - Better active states and touch feedback
+- `src/components/ui/card.tsx` - Added transition-all
+- `src/components/ui/input.tsx` - Disabled state styling
+
+---
+
 ## [Step 12] - Loading Skeletons & UI Polish
 
 ### Added

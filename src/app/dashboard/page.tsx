@@ -66,7 +66,12 @@ export default async function DashboardPage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-surface-900">Dashboard</h1>
-            <p className="text-surface-600">Welcome back, {profile.company_name}!</p>
+            <p className="text-surface-600">
+              {allQuotes.length === 0 
+                ? `Welcome to QuoteFlo, ${profile.company_name}! Let's create your first quote.`
+                : `Welcome back, ${profile.company_name}!`
+              }
+            </p>
           </div>
           <Button asChild>
             <Link href="/quotes/new">
@@ -151,16 +156,16 @@ export default async function DashboardPage() {
             </CardHeader>
             <CardContent>
               {recentQuotes.length > 0 ? (
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {recentQuotes.map((quote) => (
                     <Link
                       key={quote.id}
                       href={`/quotes/${quote.id}`}
-                      className="flex items-center justify-between p-4 rounded-lg border border-surface-200 hover:border-surface-300 hover:bg-surface-50 transition-colors"
+                      className="flex items-center justify-between p-4 rounded-lg border border-surface-200 hover:border-surface-300 hover:bg-surface-50 transition-all group"
                     >
                       <div className="flex items-center gap-4">
-                        <div className="h-10 w-10 rounded-lg bg-surface-100 flex items-center justify-center">
-                          <FileText className="h-5 w-5 text-surface-500" />
+                        <div className="h-10 w-10 rounded-lg bg-surface-100 flex items-center justify-center group-hover:bg-brand-50 transition-colors">
+                          <FileText className="h-5 w-5 text-surface-500 group-hover:text-brand-600 transition-colors" />
                         </div>
                         <div>
                           <p className="font-medium text-surface-900">{quote.customer_name}</p>
@@ -179,9 +184,14 @@ export default async function DashboardPage() {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8">
-                  <FileText className="h-12 w-12 text-surface-300 mx-auto mb-3" />
-                  <p className="text-surface-600 mb-4">No quotes yet</p>
+                <div className="text-center py-10">
+                  <div className="h-16 w-16 rounded-2xl bg-brand-50 flex items-center justify-center mx-auto mb-4">
+                    <FileText className="h-8 w-8 text-brand-400" />
+                  </div>
+                  <h3 className="font-semibold text-surface-900 mb-1">Create your first quote</h3>
+                  <p className="text-surface-600 text-sm mb-5 max-w-xs mx-auto">
+                    Pick from your trade&apos;s service library, add customer details, and send a professional quote in minutes.
+                  </p>
                   <Button asChild>
                     <Link href="/quotes/new">
                       <Plus className="h-4 w-4" />

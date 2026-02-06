@@ -82,19 +82,24 @@ export function AddCustomerButton() {
       </Button>
 
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white rounded-xl shadow-strong w-full max-w-md">
-            <div className="flex items-center justify-between p-4 border-b border-surface-200">
-              <div className="flex items-center gap-2">
-                <User className="h-5 w-5 text-surface-400" />
-                <h3 className="font-semibold text-surface-900">Add Customer</h3>
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/50">
+          <div className="bg-white rounded-t-2xl sm:rounded-xl shadow-strong w-full sm:max-w-md max-h-[90vh] overflow-y-auto animate-slide-up sm:animate-scale-in">
+            <div className="flex flex-col">
+              <div className="sm:hidden flex justify-center pt-3 pb-1">
+                <div className="w-10 h-1 rounded-full bg-surface-300" />
               </div>
-              <button 
-                onClick={() => setIsOpen(false)}
-                className="p-1 rounded hover:bg-surface-100"
-              >
-                <X className="h-5 w-5" />
-              </button>
+              <div className="flex items-center justify-between p-4 border-b border-surface-200">
+                <div className="flex items-center gap-2">
+                  <User className="h-5 w-5 text-surface-400" />
+                  <h3 className="font-semibold text-surface-900">Add Customer</h3>
+                </div>
+                <button 
+                  onClick={() => setIsOpen(false)}
+                  className="p-1.5 rounded-lg hover:bg-surface-100 transition-colors"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
             </div>
             
             <form onSubmit={handleSubmit} className="p-4 space-y-4">

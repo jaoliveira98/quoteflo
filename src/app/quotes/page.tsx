@@ -4,8 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
   FileText, 
-  Plus,
-  MoreHorizontal
+  Plus
 } from "lucide-react";
 import Link from "next/link";
 import { formatCurrency, formatDate } from "@/lib/utils";
@@ -106,22 +105,22 @@ export default async function QuotesPage({
 
         {/* Quotes List */}
         {filteredQuotes.length > 0 ? (
-          <div className="space-y-3">
+          <div className="space-y-2">
             {filteredQuotes.map((quote) => (
               <Link
                 key={quote.id}
                 href={`/quotes/${quote.id}`}
                 className="block"
               >
-                <Card className="hover:border-surface-300 hover:shadow-soft transition-all">
+                <Card className="hover:border-surface-300 hover:shadow-soft transition-all group">
                   <CardContent className="p-4">
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="flex items-center gap-4 min-w-0">
-                        <div className="h-10 w-10 rounded-lg bg-surface-100 flex items-center justify-center flex-shrink-0">
-                          <FileText className="h-5 w-5 text-surface-500" />
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                        <div className="h-10 w-10 rounded-lg bg-surface-100 flex items-center justify-center flex-shrink-0 group-hover:bg-brand-50 transition-colors">
+                          <FileText className="h-5 w-5 text-surface-500 group-hover:text-brand-600 transition-colors" />
                         </div>
                         <div className="min-w-0">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <p className="font-medium text-surface-900 truncate">
                               {quote.customer_name}
                             </p>
@@ -130,19 +129,16 @@ export default async function QuotesPage({
                             </Badge>
                           </div>
                           <div className="flex items-center gap-2 text-sm text-surface-500">
-                            <span>{quote.quote_number}</span>
-                            <span>•</span>
-                            <span>{formatDate(quote.created_at)}</span>
+                            <span className="truncate">{quote.quote_number}</span>
+                            <span className="hidden sm:inline">•</span>
+                            <span className="hidden sm:inline">{formatDate(quote.created_at)}</span>
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-4 flex-shrink-0">
-                        <span className="font-semibold text-surface-900">
+                      <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+                        <span className="font-semibold text-surface-900 text-sm sm:text-base">
                           {formatCurrency(Number(quote.total))}
                         </span>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
                       </div>
                     </div>
                   </CardContent>

@@ -103,10 +103,13 @@ export default async function PublicQuotePage({
       <main className="max-w-3xl mx-auto px-4 py-8 space-y-6">
         {/* Quote Summary Card */}
         <Card className="overflow-hidden">
-          <div className="bg-gradient-to-r from-brand-500 to-brand-600 p-6 text-white">
-            <p className="text-brand-100 text-sm mb-1">Total Quote Amount</p>
-            <p className="text-4xl font-bold">{formatCurrency(Number(quote.total))}</p>
-            <p className="text-brand-100 text-sm mt-1">Including VAT</p>
+          <div 
+            className="p-6 sm:p-8 text-white"
+            style={{ background: `linear-gradient(135deg, ${profile?.brand_color || '#22c55e'}, ${profile?.brand_color || '#22c55e'}dd)` }}
+          >
+            <p className="text-sm opacity-80 mb-1">Total Quote Amount</p>
+            <p className="text-3xl sm:text-4xl font-bold">{formatCurrency(Number(quote.total))}</p>
+            <p className="text-sm opacity-80 mt-1">Including VAT</p>
           </div>
           <CardContent className="p-6">
             <div className="grid sm:grid-cols-2 gap-6">

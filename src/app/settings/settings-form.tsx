@@ -197,7 +197,7 @@ function SubscriptionCard({ profile }: { profile: UserProfile }) {
               ) : (
                 <>
                   <Crown className="h-4 w-4" />
-                  Upgrade - £19/mo
+                  Upgrade - £29/mo
                 </>
               )}
             </Button>
@@ -241,7 +241,7 @@ function SubscriptionCard({ profile }: { profile: UserProfile }) {
                     ) : (
                       <>
                         <Crown className="h-4 w-4" />
-                        Upgrade Now - £19/month
+                        Upgrade Now - £29/month
                       </>
                     )}
                   </Button>

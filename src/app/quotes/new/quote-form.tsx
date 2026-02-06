@@ -358,7 +358,7 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
             value={jobDescription}
             onChange={(e) => setJobDescription(e.target.value)}
             placeholder="Describe the work to be carried out..."
-            className="w-full h-24 px-4 py-3 rounded-lg border border-input bg-background text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring"
+            className="w-full h-24 px-4 py-3 rounded-lg border border-input bg-background text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1 placeholder:text-muted-foreground transition-colors"
           />
         </CardContent>
       </Card>
@@ -380,50 +380,55 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
               {lineItems.map((item, index) => (
                 <div 
                   key={item.id}
-                  className="flex gap-3 p-4 rounded-lg border border-surface-200 bg-surface-50"
+                  className="p-4 rounded-lg border border-surface-200 bg-surface-50 space-y-3"
                 >
-                  <div className="flex-1 space-y-3">
-                    <Input
-                      value={item.description}
-                      onChange={(e) => updateLineItem(item.id, { description: e.target.value })}
-                      placeholder="Item description"
-                      className="font-medium"
-                    />
-                    <div className="flex gap-3">
-                      <div className="w-24">
-                        <Label className="text-xs text-surface-500">Qty</Label>
-                        <Input
-                          type="number"
-                          min="1"
-                          step="1"
-                          value={item.quantity}
-                          onChange={(e) => updateLineItem(item.id, { quantity: parseFloat(e.target.value) || 1 })}
-                        />
-                      </div>
-                      <div className="w-32">
-                        <Label className="text-xs text-surface-500">Unit Price (£)</Label>
-                        <Input
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          value={item.unit_price}
-                          onChange={(e) => updateLineItem(item.id, { unit_price: parseFloat(e.target.value) || 0 })}
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <Label className="text-xs text-surface-500">Line Total</Label>
-                        <div className="h-11 flex items-center font-medium text-surface-900">
-                          {formatCurrency(item.quantity * item.unit_price)}
-                        </div>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1">
+                      <Input
+                        value={item.description}
+                        onChange={(e) => updateLineItem(item.id, { description: e.target.value })}
+                        placeholder="Item description"
+                        className="font-medium bg-white"
+                      />
+                    </div>
+                    <button
+                      onClick={() => removeLineItem(item.id)}
+                      className="p-2 text-surface-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0"
+                      title="Remove item"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div>
+                      <Label className="text-xs text-surface-500">Qty</Label>
+                      <Input
+                        type="number"
+                        min="1"
+                        step="1"
+                        value={item.quantity}
+                        onChange={(e) => updateLineItem(item.id, { quantity: parseFloat(e.target.value) || 1 })}
+                        className="bg-white"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs text-surface-500">Unit Price (£)</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={item.unit_price}
+                        onChange={(e) => updateLineItem(item.id, { unit_price: parseFloat(e.target.value) || 0 })}
+                        className="bg-white"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs text-surface-500">Line Total</Label>
+                      <div className="h-11 flex items-center font-semibold text-surface-900">
+                        {formatCurrency(item.quantity * item.unit_price)}
                       </div>
                     </div>
                   </div>
-                  <button
-                    onClick={() => removeLineItem(item.id)}
-                    className="p-2 text-surface-400 hover:text-red-500 transition-colors"
-                  >
-                    <Trash2 className="h-5 w-5" />
-                  </button>
                 </div>
               ))}
             </div>
@@ -484,16 +489,22 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
 
       {/* Service Picker Modal */}
       {showServicePicker && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white rounded-xl shadow-strong w-full max-w-lg max-h-[80vh] flex flex-col">
-            <div className="flex items-center justify-between p-4 border-b border-surface-200">
-              <h3 className="font-semibold text-surface-900">Add Line Item</h3>
-              <button 
-                onClick={() => { setShowServicePicker(false); setServiceSearch(""); }}
-                className="p-1 rounded hover:bg-surface-100"
-              >
-                <X className="h-5 w-5" />
-              </button>
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/50">
+          <div className="bg-white rounded-t-2xl sm:rounded-xl shadow-strong w-full sm:max-w-lg max-h-[85vh] sm:max-h-[80vh] flex flex-col animate-slide-up sm:animate-scale-in">
+            <div className="flex flex-col">
+              {/* Mobile drag handle */}
+              <div className="sm:hidden flex justify-center pt-3 pb-1">
+                <div className="w-10 h-1 rounded-full bg-surface-300" />
+              </div>
+              <div className="flex items-center justify-between p-4 border-b border-surface-200">
+                <h3 className="font-semibold text-surface-900">Add Line Item</h3>
+                <button 
+                  onClick={() => { setShowServicePicker(false); setServiceSearch(""); }}
+                  className="p-1.5 rounded-lg hover:bg-surface-100 transition-colors"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
             </div>
             
             <div className="p-4 border-b border-surface-200">
