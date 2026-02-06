@@ -59,6 +59,9 @@ export async function POST(
     }).format(amount);
   };
 
+  // Use profile brand color or default green
+  const brandColor = profile?.brand_color || "#22c55e";
+
   // Generate email HTML
   const emailHtml = `
 <!DOCTYPE html>
@@ -68,7 +71,7 @@ export async function POST(
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #1e293b; max-width: 600px; margin: 0 auto; padding: 20px;">
-  <div style="text-align: center; padding: 20px 0; border-bottom: 2px solid #22c55e;">
+  <div style="text-align: center; padding: 20px 0; border-bottom: 2px solid ${brandColor};">
     <h1 style="margin: 0; font-size: 24px; color: #0f172a;">${profile?.company_name || "Quote"}</h1>
   </div>
   
@@ -80,12 +83,12 @@ export async function POST(
     <div style="background: #f8fafc; border-radius: 8px; padding: 20px; margin: 20px 0;">
       <p style="margin: 0 0 10px;"><strong>Quote Number:</strong> ${quote.quote_number}</p>
       ${quote.job_description ? `<p style="margin: 0 0 10px;"><strong>Job:</strong> ${quote.job_description}</p>` : ""}
-      <p style="margin: 0; font-size: 24px; font-weight: 700; color: #22c55e;">Total: ${formatCurrency(Number(quote.total))}</p>
+      <p style="margin: 0; font-size: 24px; font-weight: 700; color: ${brandColor};">Total: ${formatCurrency(Number(quote.total))}</p>
       <p style="margin: 5px 0 0; font-size: 14px; color: #64748b;">(inc. VAT)</p>
     </div>
     
     <div style="text-align: center; margin: 30px 0;">
-      <a href="${quoteUrl}" style="display: inline-block; background: #22c55e; color: white; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px;">View Full Quote</a>
+      <a href="${quoteUrl}" style="display: inline-block; background: ${brandColor}; color: white; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px;">View Full Quote</a>
     </div>
     
     <p style="margin: 0 0 10px;">Click the button above to:</p>

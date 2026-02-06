@@ -48,11 +48,19 @@ export function EditQuoteForm({ profile, quote, existingLineItems, services }: E
   const [serviceSearch, setServiceSearch] = useState("");
 
   // Customer details
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(
+    quote.customer_id || null
+  );
   const [customerName, setCustomerName] = useState(quote.customer_name);
   const [customerEmail, setCustomerEmail] = useState(quote.customer_email || "");
   const [customerPhone, setCustomerPhone] = useState(quote.customer_phone || "");
   const [customerAddress, setCustomerAddress] = useState(quote.customer_address || "");
   const [customerPostcode, setCustomerPostcode] = useState(quote.customer_postcode || "");
+
+  const handleCustomerFieldChange = (setter: (val: string) => void) => (value: string) => {
+    setter(value);
+    setSelectedCustomerId(null);
+  };
 
   // Quote details
   const [jobDescription, setJobDescription] = useState(quote.job_description || "");
@@ -143,6 +151,81 @@ export function EditQuoteForm({ profile, quote, existingLineItems, services }: E
     setLineItems(lineItems.filter(item => item.id !== id));
   };
 
+  const findOrCreateCustomer = async (supabase: ReturnType<typeof createClient>): Promise<string> => {
+    // If user didn't change any customer fields, keep the existing link
+    if (selectedCustomerId) {
+      return selectedCustomerId;
+    }
+
+    const trimmedName = customerName.trim();
+    const trimmedEmail = customerEmail.trim() || null;
+    const trimmedPhone = customerPhone.trim() || null;
+    const trimmedAddress = customerAddress.trim() || null;
+    const trimmedPostcode = customerPostcode.trim() || null;
+
+    // Try to find existing customer by email first
+    if (trimmedEmail) {
+      const { data: byEmail } = await supabase
+        .from("customers")
+        .select("id")
+        .eq("user_id", profile.id)
+        .eq("email", trimmedEmail)
+        .limit(1)
+        .maybeSingle();
+
+      if (byEmail) return byEmail.id;
+    }
+
+    // Try to find by exact name match (case-insensitive)
+    const { data: byName } = await supabase
+      .from("customers")
+      .select("id")
+      .eq("user_id", profile.id)
+      .ilike("name", trimmedName)
+      .limit(1)
+      .maybeSingle();
+
+    if (byName) {
+      const updates: Record<string, string | null> = {};
+      if (trimmedEmail) updates.email = trimmedEmail;
+      if (trimmedPhone) updates.phone = trimmedPhone;
+      if (trimmedAddress) updates.address = trimmedAddress;
+      if (trimmedPostcode) updates.postcode = trimmedPostcode;
+
+      if (Object.keys(updates).length > 0) {
+        await supabase
+          .from("customers")
+          .update({ ...updates, updated_at: new Date().toISOString() })
+          .eq("id", byName.id);
+      }
+
+      return byName.id;
+    }
+
+    // Create new customer
+    const { data: newCustomer, error: customerError } = await supabase
+      .from("customers")
+      .insert({
+        user_id: profile.id,
+        name: trimmedName,
+        email: trimmedEmail,
+        phone: trimmedPhone,
+        address: trimmedAddress,
+        postcode: trimmedPostcode,
+        emails: trimmedEmail ? [trimmedEmail] : [],
+        phones: trimmedPhone ? [trimmedPhone] : [],
+      })
+      .select("id")
+      .single();
+
+    if (customerError) {
+      console.error("Customer creation error:", customerError);
+      throw new Error("Failed to create customer");
+    }
+
+    return newCustomer.id;
+  };
+
   const handleSubmit = async () => {
     if (!customerName.trim()) {
       setError("Please enter a customer name");
@@ -160,15 +243,19 @@ export function EditQuoteForm({ profile, quote, existingLineItems, services }: E
     try {
       const supabase = createClient();
 
+      // Ensure customer exists and is linked
+      const customerId = await findOrCreateCustomer(supabase);
+
       // Update quote
       const { error: quoteError } = await supabase
         .from("quotes")
         .update({
-          customer_name: customerName,
-          customer_email: customerEmail || null,
-          customer_phone: customerPhone || null,
-          customer_address: customerAddress || null,
-          customer_postcode: customerPostcode || null,
+          customer_id: customerId,
+          customer_name: customerName.trim(),
+          customer_email: customerEmail.trim() || null,
+          customer_phone: customerPhone.trim() || null,
+          customer_address: customerAddress.trim() || null,
+          customer_postcode: customerPostcode.trim() || null,
           job_description: jobDescription || null,
           subtotal: subtotal,
           vat_rate: vatRate,
@@ -276,7 +363,7 @@ export function EditQuoteForm({ profile, quote, existingLineItems, services }: E
               <Input
                 id="customerName"
                 value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
+                onChange={(e) => handleCustomerFieldChange(setCustomerName)(e.target.value)}
                 placeholder="John Smith"
                 required
               />
@@ -287,7 +374,7 @@ export function EditQuoteForm({ profile, quote, existingLineItems, services }: E
                 id="customerEmail"
                 type="email"
                 value={customerEmail}
-                onChange={(e) => setCustomerEmail(e.target.value)}
+                onChange={(e) => handleCustomerFieldChange(setCustomerEmail)(e.target.value)}
                 placeholder="john@example.com"
               />
             </div>
@@ -297,7 +384,7 @@ export function EditQuoteForm({ profile, quote, existingLineItems, services }: E
                 id="customerPhone"
                 type="tel"
                 value={customerPhone}
-                onChange={(e) => setCustomerPhone(e.target.value)}
+                onChange={(e) => handleCustomerFieldChange(setCustomerPhone)(e.target.value)}
                 placeholder="07123 456789"
               />
             </div>
@@ -306,7 +393,7 @@ export function EditQuoteForm({ profile, quote, existingLineItems, services }: E
               <Input
                 id="customerPostcode"
                 value={customerPostcode}
-                onChange={(e) => setCustomerPostcode(e.target.value)}
+                onChange={(e) => handleCustomerFieldChange(setCustomerPostcode)(e.target.value)}
                 placeholder="SW1A 1AA"
               />
             </div>
@@ -316,7 +403,7 @@ export function EditQuoteForm({ profile, quote, existingLineItems, services }: E
             <Input
               id="customerAddress"
               value={customerAddress}
-              onChange={(e) => setCustomerAddress(e.target.value)}
+              onChange={(e) => handleCustomerFieldChange(setCustomerAddress)(e.target.value)}
               placeholder="123 Main Street, London"
             />
           </div>
