@@ -507,7 +507,7 @@ export function SkeletonAnalytics() {
 
 export function SkeletonSettings() {
   return (
-    <div className="max-w-3xl mx-auto space-y-8">
+    <div className="max-w-4xl mx-auto space-y-8">
       {/* Header */}
       <div className="space-y-2">
         <Skeleton className="h-7 w-24" />
