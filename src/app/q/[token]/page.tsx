@@ -16,6 +16,7 @@ import {
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { QuoteActions } from "./quote-actions";
 import { DownloadPDFButton } from "./download-pdf-button";
+import { MarkViewed } from "./mark-viewed";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -51,22 +52,13 @@ export default async function PublicQuotePage({
     .eq("id", quote.user_id)
     .single();
 
-  if (quote.status === "sent" && !quote.viewed_at) {
-    await supabase
-      .from("quotes")
-      .update({
-        status: "viewed",
-        viewed_at: new Date().toISOString(),
-      })
-      .eq("id", quote.id);
-  }
-
   const isExpired = quote.valid_until && new Date(quote.valid_until) < new Date();
   const isAccepted = quote.status === "accepted";
   const isDeclined = quote.status === "declined";
 
   return (
     <div className="min-h-screen bg-surface-50">
+      <MarkViewed accessToken={token} status={quote.status} viewedAt={quote.viewed_at} />
       {/* Header */}
       <header className="bg-white border-b border-surface-200 sticky top-0 z-10">
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
