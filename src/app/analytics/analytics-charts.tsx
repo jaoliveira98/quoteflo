@@ -148,90 +148,111 @@ export function AnalyticsCharts({ monthlyData, statusData }: AnalyticsChartsProp
 
       {/* Status Distribution - Pie Chart */}
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-lg">Status Distribution</CardTitle>
+          <span className="text-xs text-surface-400">All quotes</span>
         </CardHeader>
         <CardContent>
           {statusData.length > 0 ? (
-            <ChartContainer config={pieChartConfig} className="h-72 w-full">
-              <PieChart>
-                <ChartTooltip
-                  content={
-                    <ChartTooltipContent
-                      formatter={(value, name) => {
-                        const item = statusData.find(
-                          d => d.name.toLowerCase() === String(name).toLowerCase()
-                        );
-                        const numValue = Number(value);
-                        const percentage = totalStatusValue > 0
-                          ? Math.round((numValue / totalStatusValue) * 100)
-                          : 0;
-                        return (
-                          <div className="flex flex-1 justify-between leading-none items-center">
-                            <div className="flex items-center gap-1.5">
-                              <div
-                                className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
-                                style={{ backgroundColor: item?.color }}
-                              />
-                              <span className="text-muted-foreground">{item?.name || String(name)}</span>
+            <div className="space-y-4">
+              <ChartContainer config={pieChartConfig} className="h-56 w-full">
+                <PieChart>
+                  <ChartTooltip
+                    content={
+                      <ChartTooltipContent
+                        formatter={(value, name) => {
+                          const item = statusData.find(
+                            d => d.name.toLowerCase() === String(name).toLowerCase()
+                          );
+                          const numValue = Number(value);
+                          const percentage = totalStatusValue > 0
+                            ? Math.round((numValue / totalStatusValue) * 100)
+                            : 0;
+                          return (
+                            <div className="flex flex-1 justify-between leading-none items-center">
+                              <div className="flex items-center gap-1.5">
+                                <div
+                                  className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
+                                  style={{ backgroundColor: item?.color }}
+                                />
+                                <span className="text-muted-foreground">{item?.name || String(name)}</span>
+                              </div>
+                              <span className="font-mono font-medium tabular-nums text-foreground ml-4">
+                                {numValue} ({percentage}%)
+                              </span>
                             </div>
-                            <span className="font-mono font-medium tabular-nums text-foreground ml-4">
-                              {numValue} ({percentage}%)
-                            </span>
-                          </div>
-                        );
-                      }}
-                      hideIndicator
-                    />
-                  }
-                />
-                <Pie
-                  data={statusData}
-                  dataKey="value"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={90}
-                  strokeWidth={3}
-                  stroke="hsl(var(--background))"
-                  paddingAngle={2}
-                >
-                  {statusData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                  <Label
-                    content={({ viewBox }) => {
-                      if (viewBox && "cx" in viewBox && "cy" in viewBox) {
-                        return (
-                          <text
-                            x={viewBox.cx}
-                            y={viewBox.cy}
-                            textAnchor="middle"
-                            dominantBaseline="middle"
-                          >
-                            <tspan
+                          );
+                        }}
+                        hideIndicator
+                      />
+                    }
+                  />
+                  <Pie
+                    data={statusData}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={55}
+                    outerRadius={80}
+                    strokeWidth={3}
+                    stroke="hsl(var(--background))"
+                    paddingAngle={2}
+                  >
+                    {statusData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                    <Label
+                      content={({ viewBox }) => {
+                        if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                          return (
+                            <text
                               x={viewBox.cx}
                               y={viewBox.cy}
-                              className="fill-foreground text-3xl font-bold"
+                              textAnchor="middle"
+                              dominantBaseline="middle"
                             >
-                              {totalStatusValue}
-                            </tspan>
-                            <tspan
-                              x={viewBox.cx}
-                              y={(viewBox.cy || 0) + 22}
-                              className="fill-muted-foreground text-xs"
-                            >
-                              Total Quotes
-                            </tspan>
-                          </text>
-                        );
-                      }
-                    }}
-                  />
-                </Pie>
-              </PieChart>
-            </ChartContainer>
+                              <tspan
+                                x={viewBox.cx}
+                                y={viewBox.cy}
+                                className="fill-foreground text-3xl font-bold"
+                              >
+                                {totalStatusValue}
+                              </tspan>
+                              <tspan
+                                x={viewBox.cx}
+                                y={(viewBox.cy || 0) + 22}
+                                className="fill-muted-foreground text-xs"
+                              >
+                                Total Quotes
+                              </tspan>
+                            </text>
+                          );
+                        }
+                      }}
+                    />
+                  </Pie>
+                </PieChart>
+              </ChartContainer>
+              <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 pt-1">
+                {statusData.map((entry) => {
+                  const percentage = totalStatusValue > 0
+                    ? Math.round((entry.value / totalStatusValue) * 100)
+                    : 0;
+                  return (
+                    <div key={entry.name} className="flex items-center gap-1.5">
+                      <div
+                        className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
+                        style={{ backgroundColor: entry.color }}
+                      />
+                      <span className="text-xs text-surface-500">
+                        {entry.name} <span className="font-medium text-surface-700">{entry.value}</span> ({percentage}%)
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           ) : (
             <div className="h-72 flex items-center justify-center">
               <div className="text-center">
