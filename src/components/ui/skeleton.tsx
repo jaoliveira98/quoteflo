@@ -47,22 +47,23 @@ export function SkeletonCard({ className }: SkeletonProps) {
 
 export function SkeletonQuoteRow() {
   return (
-    <div className="rounded-xl border border-surface-200 bg-white p-4">
+    <div className="rounded-xl border border-surface-200 bg-white shadow-soft p-4">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 sm:gap-4 min-w-0">
           <Skeleton className="h-10 w-10 rounded-lg flex-shrink-0" />
           <div className="min-w-0">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <Skeleton className="h-4 w-32" />
               <Skeleton className="h-5 w-16 rounded-full" />
             </div>
-            <div className="flex items-center gap-2 mt-1">
+            <div className="flex items-center gap-2 text-sm mt-1">
               <Skeleton className="h-3 w-20" />
+              <Skeleton className="hidden sm:block h-3 w-1" />
               <Skeleton className="hidden sm:block h-3 w-24" />
             </div>
           </div>
         </div>
-        <Skeleton className="h-4 w-16 flex-shrink-0" />
+        <Skeleton className="h-4 w-16 sm:h-5 sm:w-20 flex-shrink-0" />
       </div>
     </div>
   );
