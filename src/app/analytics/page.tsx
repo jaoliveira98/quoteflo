@@ -7,15 +7,13 @@ import {
   CheckCircle2, 
   XCircle,
   PoundSterling,
-  TrendingUp,
   Clock,
   Users,
   Calendar,
   ArrowUp,
   ArrowDown,
   Minus,
-  Target,
-  Zap
+  Target
 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import { requireAuthWithProfile } from "@/lib/auth";
@@ -241,16 +239,14 @@ export default async function AnalyticsPage() {
       value: formatCurrency(avgQuoteValue),
       icon: PoundSterling,
       color: "text-brand-600",
-      bg: "bg-brand-50",
-      border: "border-l-brand-500",
+      bg: "bg-brand-100",
     },
     {
       label: "Average Accepted Value",
       value: formatCurrency(avgAcceptedValue),
       icon: CheckCircle2,
       color: "text-green-600",
-      bg: "bg-green-50",
-      border: "border-l-green-500",
+      bg: "bg-green-100",
     },
     {
       label: "Average Time to Accept",
@@ -261,22 +257,20 @@ export default async function AnalyticsPage() {
           : "N/A",
       icon: Clock,
       color: "text-blue-600",
-      bg: "bg-blue-50",
-      border: "border-l-blue-500",
+      bg: "bg-blue-100",
     },
     {
       label: "View Rate",
       value: `${viewRate}%`,
       icon: Eye,
       color: "text-amber-600",
-      bg: "bg-amber-50",
-      border: "border-l-amber-500",
+      bg: "bg-amber-100",
     },
   ];
 
   return (
     <DashboardShell user={{ email: profile.email, company_name: profile.company_name }}>
-      <div className="p-6 lg:p-8 space-y-6">
+      <div className="p-6 lg:p-8 space-y-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
           <div>
@@ -291,14 +285,14 @@ export default async function AnalyticsPage() {
 
         {/* KPI Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="relative overflow-hidden">
-            <CardContent className="p-5">
-              <div className="flex items-start justify-between">
-                <div className="space-y-1">
-                  <p className="text-sm font-medium text-surface-500">Quotes</p>
-                  <p className="text-2xl font-bold text-surface-900 tracking-tight">{currentQuoteCount}</p>
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-surface-500">Quotes</p>
+                  <p className="text-2xl font-bold text-surface-900">{currentQuoteCount}</p>
                 </div>
-                <div className="h-10 w-10 rounded-xl bg-surface-100 flex items-center justify-center">
+                <div className="h-10 w-10 rounded-lg bg-surface-100 flex items-center justify-center">
                   <FileText className="h-5 w-5 text-surface-600" />
                 </div>
               </div>
@@ -309,14 +303,14 @@ export default async function AnalyticsPage() {
             </CardContent>
           </Card>
 
-          <Card className="relative overflow-hidden">
-            <CardContent className="p-5">
-              <div className="flex items-start justify-between">
-                <div className="space-y-1">
-                  <p className="text-sm font-medium text-surface-500">Value</p>
-                  <p className="text-2xl font-bold text-surface-900 tracking-tight">{formatCurrency(currentValue)}</p>
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-surface-500">Value</p>
+                  <p className="text-2xl font-bold text-surface-900">{formatCurrency(currentValue)}</p>
                 </div>
-                <div className="h-10 w-10 rounded-xl bg-brand-50 flex items-center justify-center">
+                <div className="h-10 w-10 rounded-lg bg-brand-100 flex items-center justify-center">
                   <PoundSterling className="h-5 w-5 text-brand-600" />
                 </div>
               </div>
@@ -327,14 +321,14 @@ export default async function AnalyticsPage() {
             </CardContent>
           </Card>
 
-          <Card className="relative overflow-hidden">
-            <CardContent className="p-5">
-              <div className="flex items-start justify-between">
-                <div className="space-y-1">
-                  <p className="text-sm font-medium text-surface-500">Won</p>
-                  <p className="text-2xl font-bold text-surface-900 tracking-tight">{currentAccepted}</p>
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-surface-500">Won</p>
+                  <p className="text-2xl font-bold text-surface-900">{currentAccepted}</p>
                 </div>
-                <div className="h-10 w-10 rounded-xl bg-green-50 flex items-center justify-center">
+                <div className="h-10 w-10 rounded-lg bg-green-100 flex items-center justify-center">
                   <CheckCircle2 className="h-5 w-5 text-green-600" />
                 </div>
               </div>
@@ -345,14 +339,14 @@ export default async function AnalyticsPage() {
             </CardContent>
           </Card>
 
-          <Card className="relative overflow-hidden">
-            <CardContent className="p-5">
-              <div className="flex items-start justify-between">
-                <div className="space-y-1">
-                  <p className="text-sm font-medium text-surface-500">Win Rate</p>
-                  <p className="text-2xl font-bold text-surface-900 tracking-tight">{conversionRate}%</p>
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-surface-500">Win Rate</p>
+                  <p className="text-2xl font-bold text-surface-900">{conversionRate}%</p>
                 </div>
-                <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center">
+                <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center">
                   <Target className="h-5 w-5 text-blue-600" />
                 </div>
               </div>
@@ -372,39 +366,32 @@ export default async function AnalyticsPage() {
         <div className="grid lg:grid-cols-5 gap-6">
           {/* Quote Funnel */}
           <Card className="lg:col-span-3">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-base flex items-center gap-2">
-                <div className="h-8 w-8 rounded-lg bg-surface-100 flex items-center justify-center">
-                  <TrendingUp className="h-4 w-4 text-surface-600" />
-                </div>
-                Quote Funnel
-              </CardTitle>
+            <CardHeader>
+              <CardTitle className="text-lg">Quote Funnel</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {funnelSteps.map((step, index) => {
                   const Icon = step.icon;
                   return (
-                    <div key={index} className="group">
-                      <div className="flex items-center gap-3 mb-1.5">
-                        <div className={`h-7 w-7 rounded-lg ${step.bg} flex items-center justify-center flex-shrink-0`}>
-                          <Icon className={`h-3.5 w-3.5 ${step.color}`} />
-                        </div>
-                        <div className="flex-1 flex items-center justify-between min-w-0">
-                          <span className="text-sm font-medium text-surface-700">{step.label}</span>
-                          <div className="flex items-baseline gap-2">
-                            <span className="text-sm font-semibold text-surface-900">{step.count}</span>
-                            <span className="text-xs text-surface-400">{step.percentage}%</span>
+                    <div key={index}>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-3">
+                          <div className={`h-8 w-8 rounded-lg ${step.bg} flex items-center justify-center flex-shrink-0`}>
+                            <Icon className={`h-4 w-4 ${step.color}`} />
                           </div>
+                          <span className="text-sm font-medium text-surface-700">{step.label}</span>
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-sm font-semibold text-surface-900">{step.count}</span>
+                          <span className="text-xs text-surface-400">{step.percentage}%</span>
                         </div>
                       </div>
-                      <div className="ml-10">
-                        <div className="h-2 bg-surface-100 rounded-full overflow-hidden">
-                          <div 
-                            className={`h-full ${step.bar} rounded-full transition-all duration-700 ease-out`}
-                            style={{ width: `${step.percentage}%`, minWidth: step.count > 0 ? "4px" : "0" }} 
-                          />
-                        </div>
+                      <div className="h-2 bg-surface-100 rounded-full overflow-hidden">
+                        <div 
+                          className={`h-full ${step.bar} rounded-full transition-all duration-700 ease-out`}
+                          style={{ width: `${step.percentage}%`, minWidth: step.count > 0 ? "4px" : "0" }} 
+                        />
                       </div>
                     </div>
                   );
@@ -415,79 +402,64 @@ export default async function AnalyticsPage() {
 
           {/* Performance Metrics */}
           <Card className="lg:col-span-2">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-base flex items-center gap-2">
-                <div className="h-8 w-8 rounded-lg bg-surface-100 flex items-center justify-center">
-                  <Zap className="h-4 w-4 text-surface-600" />
-                </div>
-                Key Metrics
-              </CardTitle>
+            <CardHeader>
+              <CardTitle className="text-lg">Key Metrics</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {performanceMetrics.map((metric, index) => {
-                  const Icon = metric.icon;
-                  return (
-                    <div 
-                      key={index}
-                      className={`flex items-center gap-3 p-3 rounded-lg border-l-[3px] ${metric.border} bg-surface-50/80`}
-                    >
-                      <div className={`h-9 w-9 rounded-lg ${metric.bg} flex items-center justify-center flex-shrink-0`}>
-                        <Icon className={`h-4 w-4 ${metric.color}`} />
+            <CardContent className="space-y-6">
+              {performanceMetrics.map((metric, index) => {
+                const Icon = metric.icon;
+                return (
+                  <div key={index}>
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center gap-3">
+                        <div className={`h-8 w-8 rounded-lg ${metric.bg} flex items-center justify-center flex-shrink-0`}>
+                          <Icon className={`h-4 w-4 ${metric.color}`} />
+                        </div>
+                        <span className="text-sm text-surface-600">{metric.label}</span>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs text-surface-500 leading-none mb-1">{metric.label}</p>
-                        <p className="text-lg font-semibold text-surface-900 leading-tight truncate">{metric.value}</p>
-                      </div>
+                      <span className="text-lg font-semibold text-surface-900">{metric.value}</span>
                     </div>
-                  );
-                })}
-              </div>
+                    {index < performanceMetrics.length - 1 && (
+                      <div className="border-t border-surface-200 mt-4" />
+                    )}
+                  </div>
+                );
+              })}
             </CardContent>
           </Card>
         </div>
 
         {/* Top Customers */}
         <Card>
-          <CardHeader className="pb-4">
-            <CardTitle className="text-base flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-surface-100 flex items-center justify-center">
-                <Users className="h-4 w-4 text-surface-600" />
-              </div>
-              Top Customers by Value
-            </CardTitle>
+          <CardHeader>
+            <CardTitle className="text-lg">Top Customers by Value</CardTitle>
           </CardHeader>
           <CardContent>
             {topCustomers.length > 0 ? (
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {topCustomers.map((customer, index) => {
                   const maxCustomerValue = topCustomers[0]?.value || 1;
                   const barWidth = (customer.value / maxCustomerValue) * 100;
                   return (
                     <div 
                       key={index}
-                      className="group relative flex items-center gap-4 p-3 rounded-xl hover:bg-surface-50 transition-colors"
+                      className="flex items-center gap-4 p-4 rounded-lg border border-surface-200 hover:border-surface-300 hover:bg-surface-50 transition-all"
                     >
-                      <div className="flex items-center gap-3 flex-shrink-0">
-                        <span className="text-xs font-bold text-surface-300 w-5 text-right tabular-nums">
-                          {index + 1}
+                      <div className="h-10 w-10 rounded-lg bg-brand-100 flex items-center justify-center flex-shrink-0">
+                        <span className="text-brand-700 font-semibold text-sm">
+                          {customer.name.charAt(0).toUpperCase()}
                         </span>
-                        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-brand-100 to-brand-200 flex items-center justify-center ring-2 ring-white shadow-sm">
-                          <span className="text-brand-700 font-semibold text-sm">
-                            {customer.name.charAt(0).toUpperCase()}
-                          </span>
-                        </div>
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-1">
                           <p className="font-medium text-surface-900 truncate">{customer.name}</p>
-                          <p className="font-semibold text-surface-900 ml-4 flex-shrink-0">{formatCurrency(customer.value)}</p>
+                          <p className="font-medium text-surface-900 ml-4 flex-shrink-0">{formatCurrency(customer.value)}</p>
                         </div>
                         <div className="flex items-center justify-between">
                           <div className="flex-1 mr-4">
                             <div className="h-1.5 bg-surface-100 rounded-full overflow-hidden">
                               <div 
-                                className="h-full bg-brand-400 rounded-full transition-all duration-500"
+                                className="h-full bg-brand-500 rounded-full transition-all duration-500"
                                 style={{ width: `${barWidth}%` }}
                               />
                             </div>
@@ -503,10 +475,10 @@ export default async function AnalyticsPage() {
               </div>
             ) : (
               <div className="text-center py-10">
-                <div className="h-14 w-14 rounded-2xl bg-surface-100 flex items-center justify-center mx-auto mb-4">
-                  <Users className="h-7 w-7 text-surface-300" />
+                <div className="h-16 w-16 rounded-2xl bg-surface-100 flex items-center justify-center mx-auto mb-4">
+                  <Users className="h-8 w-8 text-surface-300" />
                 </div>
-                <p className="font-medium text-surface-700 mb-1">No customer data yet</p>
+                <p className="font-semibold text-surface-900 mb-1">No customer data yet</p>
                 <p className="text-sm text-surface-500">Create quotes to see your top customers</p>
               </div>
             )}

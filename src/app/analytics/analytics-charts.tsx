@@ -58,16 +58,9 @@ export function AnalyticsCharts({ monthlyData, statusData }: AnalyticsChartsProp
     <>
       {/* Monthly Quote Activity - Bar Chart */}
       <Card>
-        <CardHeader className="pb-2">
-          <div className="flex items-start justify-between">
-            <CardTitle className="text-base flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-surface-100 flex items-center justify-center">
-                <BarChart3 className="h-4 w-4 text-surface-600" />
-              </div>
-              Monthly Activity
-            </CardTitle>
-            <p className="text-xs text-surface-400 mt-1">Last 6 months</p>
-          </div>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle className="text-lg">Monthly Activity</CardTitle>
+          <span className="text-xs text-surface-400">Last 6 months</span>
         </CardHeader>
         <CardContent>
           {hasMonthlyData ? (
@@ -155,13 +148,8 @@ export function AnalyticsCharts({ monthlyData, statusData }: AnalyticsChartsProp
 
       {/* Status Distribution - Pie Chart */}
       <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-surface-100 flex items-center justify-center">
-              <PieChartIcon className="h-4 w-4 text-surface-600" />
-            </div>
-            Status Distribution
-          </CardTitle>
+        <CardHeader>
+          <CardTitle className="text-lg">Status Distribution</CardTitle>
         </CardHeader>
         <CardContent>
           {statusData.length > 0 ? (

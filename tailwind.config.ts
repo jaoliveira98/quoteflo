@@ -11,14 +11,44 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // QuoteFlo brand colors - professional, trustworthy, energetic
+        // CSS variable-based colors (shadcn/ui)
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+        },
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
+        },
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        primary: {
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
+        },
+        secondary: {
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
+        },
+        destructive: {
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
+        },
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
+        // QuoteFlo brand colors
         brand: {
           50: "#f0fdf4",
           100: "#dcfce7",
           200: "#bbf7d0",
           300: "#86efac",
           400: "#4ade80",
-          500: "#22c55e", // Primary green - action, success
+          500: "#22c55e",
           600: "#16a34a",
           700: "#15803d",
           800: "#166534",
@@ -38,11 +68,6 @@ const config: Config = {
           800: "#1e293b",
           900: "#0f172a",
           950: "#020617",
-        },
-        // Accent for UI hover states (uses CSS variables for consistency)
-        accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
         },
       },
       fontFamily: {
