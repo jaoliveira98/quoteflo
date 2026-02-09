@@ -90,17 +90,19 @@ export function SkeletonStatsWithChange() {
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
       {Array.from({ length: 4 }).map((_, i) => (
-        <div key={i} className="rounded-xl border border-surface-200 bg-white p-6">
-          <div className="flex items-center justify-between">
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-20" />
-              <Skeleton className="h-8 w-16" />
+        <div key={i} className="flex flex-col rounded-xl border border-surface-200 bg-white p-6">
+          <div className="flex-1 flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <div>
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-8 w-16 mt-1" />
+              </div>
+              <Skeleton className="h-10 w-10 rounded-lg flex-shrink-0" />
             </div>
-            <Skeleton className="h-10 w-10 rounded-lg" />
-          </div>
-          <div className="mt-3 flex items-center gap-2">
-            <Skeleton className="h-5 w-12 rounded-full" />
-            <Skeleton className="h-3 w-20" />
+            <div className="mt-3 flex items-center gap-2">
+              <Skeleton className="h-5 w-12 rounded-full" />
+              <Skeleton className="h-3 w-20" />
+            </div>
           </div>
         </div>
       ))}
@@ -404,33 +406,33 @@ export function SkeletonAnalytics() {
 
       {/* Charts */}
       <div className="grid lg:grid-cols-2 gap-6">
-        <div className="rounded-xl border border-surface-200 bg-white">
+        <div className="flex flex-col rounded-xl border border-surface-200 bg-white">
           <div className="p-6 pb-0 flex flex-row items-center justify-between">
             <Skeleton className="h-5 w-32" />
             <Skeleton className="h-3 w-20" />
           </div>
-          <div className="p-6">
+          <div className="p-6 flex-1">
             <Skeleton className="h-72 w-full rounded-lg" />
           </div>
         </div>
-        <div className="rounded-xl border border-surface-200 bg-white">
+        <div className="flex flex-col rounded-xl border border-surface-200 bg-white">
           <div className="p-6 pb-0">
             <Skeleton className="h-5 w-36" />
           </div>
-          <div className="p-6">
+          <div className="p-6 flex-1">
             <Skeleton className="h-72 w-full rounded-lg" />
           </div>
         </div>
       </div>
 
       {/* Funnel + Performance Metrics */}
-      <div className="grid lg:grid-cols-5 gap-6">
+      <div className="grid lg:grid-cols-2 gap-6">
         {/* Quote Funnel */}
-        <div className="lg:col-span-3 rounded-xl border border-surface-200 bg-white">
+        <div className="flex flex-col rounded-xl border border-surface-200 bg-white">
           <div className="p-6 pb-0">
             <Skeleton className="h-5 w-28" />
           </div>
-          <div className="p-6">
+          <div className="p-6 flex-1">
             <div className="space-y-4">
               {Array.from({ length: 4 }).map((_, i) => (
                 <div key={i}>
@@ -452,11 +454,11 @@ export function SkeletonAnalytics() {
         </div>
 
         {/* Key Metrics */}
-        <div className="lg:col-span-2 rounded-xl border border-surface-200 bg-white">
+        <div className="flex flex-col rounded-xl border border-surface-200 bg-white">
           <div className="p-6 pb-0">
             <Skeleton className="h-5 w-24" />
           </div>
-          <div className="p-6 space-y-6">
+          <div className="p-6 flex-1 space-y-6">
             {Array.from({ length: 4 }).map((_, i) => (
               <div key={i}>
                 <div className="flex items-center justify-between mb-1">
@@ -474,11 +476,11 @@ export function SkeletonAnalytics() {
       </div>
 
       {/* Top Customers */}
-      <div className="rounded-xl border border-surface-200 bg-white">
+      <div className="flex flex-col rounded-xl border border-surface-200 bg-white">
         <div className="p-6 pb-0">
           <Skeleton className="h-5 w-44" />
         </div>
-        <div className="p-6">
+        <div className="p-6 flex-1">
           <div className="space-y-3">
             {Array.from({ length: 5 }).map((_, i) => (
               <div

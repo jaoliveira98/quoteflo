@@ -285,14 +285,14 @@ export default async function AnalyticsPage() {
 
         {/* KPI Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="p-6">
+          <Card className="flex flex-col">
+            <CardContent className="p-6 flex-1 flex flex-col justify-between">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-surface-500">Quotes</p>
                   <p className="text-2xl font-bold text-surface-900">{currentQuoteCount}</p>
                 </div>
-                <div className="h-10 w-10 rounded-lg bg-surface-100 flex items-center justify-center">
+                <div className="h-10 w-10 rounded-lg bg-surface-100 flex items-center justify-center flex-shrink-0">
                   <FileText className="h-5 w-5 text-surface-600" />
                 </div>
               </div>
@@ -303,14 +303,14 @@ export default async function AnalyticsPage() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="p-6">
+          <Card className="flex flex-col">
+            <CardContent className="p-6 flex-1 flex flex-col justify-between">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-surface-500">Value</p>
                   <p className="text-2xl font-bold text-surface-900">{formatCurrency(currentValue)}</p>
                 </div>
-                <div className="h-10 w-10 rounded-lg bg-brand-100 flex items-center justify-center">
+                <div className="h-10 w-10 rounded-lg bg-brand-100 flex items-center justify-center flex-shrink-0">
                   <PoundSterling className="h-5 w-5 text-brand-600" />
                 </div>
               </div>
@@ -321,14 +321,14 @@ export default async function AnalyticsPage() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="p-6">
+          <Card className="flex flex-col">
+            <CardContent className="p-6 flex-1 flex flex-col justify-between">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-surface-500">Won</p>
                   <p className="text-2xl font-bold text-surface-900">{currentAccepted}</p>
                 </div>
-                <div className="h-10 w-10 rounded-lg bg-green-100 flex items-center justify-center">
+                <div className="h-10 w-10 rounded-lg bg-green-100 flex items-center justify-center flex-shrink-0">
                   <CheckCircle2 className="h-5 w-5 text-green-600" />
                 </div>
               </div>
@@ -339,18 +339,18 @@ export default async function AnalyticsPage() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="p-6">
+          <Card className="flex flex-col">
+            <CardContent className="p-6 flex-1 flex flex-col justify-between">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-surface-500">Win Rate</p>
                   <p className="text-2xl font-bold text-surface-900">{conversionRate}%</p>
                 </div>
-                <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
                   <Target className="h-5 w-5 text-blue-600" />
                 </div>
               </div>
-              <div className="mt-3">
+              <div className="mt-3 flex items-center gap-2">
                 <span className="text-xs text-surface-400">of {totalSent} sent quotes</span>
               </div>
             </CardContent>
@@ -358,18 +358,16 @@ export default async function AnalyticsPage() {
         </div>
 
         {/* Charts */}
-        <div className="grid lg:grid-cols-2 gap-6">
-          <AnalyticsCharts monthlyData={monthlyData} statusData={statusData} />
-        </div>
+        <AnalyticsCharts monthlyData={monthlyData} statusData={statusData} />
 
         {/* Funnel + Performance Metrics */}
-        <div className="grid lg:grid-cols-5 gap-6">
+        <div className="grid lg:grid-cols-2 gap-6">
           {/* Quote Funnel */}
-          <Card className="lg:col-span-3">
+          <Card className="flex flex-col">
             <CardHeader>
               <CardTitle className="text-lg">Quote Funnel</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex-1">
               <div className="space-y-4">
                 {funnelSteps.map((step, index) => {
                   const Icon = step.icon;
@@ -401,11 +399,11 @@ export default async function AnalyticsPage() {
           </Card>
 
           {/* Performance Metrics */}
-          <Card className="lg:col-span-2">
+          <Card className="flex flex-col">
             <CardHeader>
               <CardTitle className="text-lg">Key Metrics</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="flex-1 space-y-6">
               {performanceMetrics.map((metric, index) => {
                 const Icon = metric.icon;
                 return (
@@ -430,11 +428,11 @@ export default async function AnalyticsPage() {
         </div>
 
         {/* Top Customers */}
-        <Card>
+        <Card className="flex flex-col">
           <CardHeader>
             <CardTitle className="text-lg">Top Customers by Value</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex-1">
             {topCustomers.length > 0 ? (
               <div className="space-y-3">
                 {topCustomers.map((customer, index) => {

@@ -55,14 +55,14 @@ export function AnalyticsCharts({ monthlyData, statusData }: AnalyticsChartsProp
   }, {});
 
   return (
-    <>
+    <div className="grid lg:grid-cols-2 gap-6">
       {/* Monthly Quote Activity - Bar Chart */}
-      <Card>
+      <Card className="flex flex-col">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-lg">Monthly Activity</CardTitle>
           <span className="text-xs text-surface-400">Last 6 months</span>
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex-1">
           {hasMonthlyData ? (
             <ChartContainer config={barChartConfig} className="h-72 w-full">
               <BarChart
@@ -133,7 +133,7 @@ export function AnalyticsCharts({ monthlyData, statusData }: AnalyticsChartsProp
               </BarChart>
             </ChartContainer>
           ) : (
-            <div className="h-72 flex items-center justify-center">
+            <div className="h-72 flex items-center justify-center flex-1">
               <div className="text-center">
                 <div className="h-14 w-14 rounded-2xl bg-surface-100 flex items-center justify-center mx-auto mb-4">
                   <BarChart3 className="h-7 w-7 text-surface-300" />
@@ -147,12 +147,12 @@ export function AnalyticsCharts({ monthlyData, statusData }: AnalyticsChartsProp
       </Card>
 
       {/* Status Distribution - Pie Chart */}
-      <Card>
+      <Card className="flex flex-col">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-lg">Status Distribution</CardTitle>
           <span className="text-xs text-surface-400">All quotes</span>
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex-1">
           {statusData.length > 0 ? (
             <div className="space-y-4">
               <ChartContainer config={pieChartConfig} className="h-56 w-full">
@@ -254,7 +254,7 @@ export function AnalyticsCharts({ monthlyData, statusData }: AnalyticsChartsProp
               </div>
             </div>
           ) : (
-            <div className="h-72 flex items-center justify-center">
+            <div className="h-72 flex items-center justify-center flex-1">
               <div className="text-center">
                 <div className="h-14 w-14 rounded-2xl bg-surface-100 flex items-center justify-center mx-auto mb-4">
                   <PieChartIcon className="h-7 w-7 text-surface-300" />
@@ -266,6 +266,6 @@ export function AnalyticsCharts({ monthlyData, statusData }: AnalyticsChartsProp
           )}
         </CardContent>
       </Card>
-    </>
+    </div>
   );
 }
