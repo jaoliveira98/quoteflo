@@ -39,10 +39,10 @@ const config: Config = {
           900: "#0f172a",
           950: "#020617",
         },
-        // Accent for highlights
+        // Accent for UI hover states (uses CSS variables for consistency)
         accent: {
-          DEFAULT: "#f59e0b", // Amber for warnings/highlights
-          foreground: "#ffffff",
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
         },
       },
       fontFamily: {

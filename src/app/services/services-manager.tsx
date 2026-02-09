@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -30,8 +30,9 @@ import {
   Search,
   Package,
   Pencil,
+  ChevronDown,
 } from "lucide-react";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, cn } from "@/lib/utils";
 import type { UserProfile, ServiceItem } from "@/types";
 
 interface ServicesManagerProps {
@@ -73,8 +74,24 @@ export function ServicesManager({ profile, initialServices }: ServicesManagerPro
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const categoryRef = useRef<HTMLDivElement>(null);
 
   const categories = [...new Set(services.map(s => s.category))].sort();
+
+  const filteredCategories = categories.filter(cat =>
+    cat.toLowerCase().includes(formData.category.toLowerCase())
+  );
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (categoryRef.current && !categoryRef.current.contains(event.target as Node)) {
+        setShowCategoryDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const filteredServices = services.filter(
     (s) =>
@@ -365,23 +382,59 @@ export function ServicesManager({ profile, initialServices }: ServicesManagerPro
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2" ref={categoryRef}>
               <Label htmlFor="category">Category *</Label>
-              <Input
-                id="category"
-                value={formData.category}
-                onChange={(e) =>
-                  setFormData({ ...formData, category: e.target.value })
-                }
-                placeholder="e.g. Services, Products, Labour"
-                list="category-suggestions"
-              />
-              {categories.length > 0 && (
-                <datalist id="category-suggestions">
-                  {categories.map((cat) => (
-                    <option key={cat} value={cat} />
-                  ))}
-                </datalist>
+              <div className="relative">
+                <Input
+                  id="category"
+                  value={formData.category}
+                  onChange={(e) => {
+                    setFormData({ ...formData, category: e.target.value });
+                    setShowCategoryDropdown(true);
+                  }}
+                  onFocus={() => setShowCategoryDropdown(true)}
+                  placeholder="e.g. Services, Products, Labour"
+                  className="pr-9"
+                  autoComplete="off"
+                />
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-surface-400 hover:text-surface-600 transition-colors"
+                  aria-label="Toggle category suggestions"
+                >
+                  <ChevronDown className={cn(
+                    "h-4 w-4 transition-transform duration-200",
+                    showCategoryDropdown && "rotate-180"
+                  )} />
+                </button>
+
+                {showCategoryDropdown && filteredCategories.length > 0 && (
+                  <div className="absolute z-50 w-full mt-1 bg-white border border-surface-200 rounded-lg shadow-medium max-h-48 overflow-y-auto">
+                    {filteredCategories.map((cat) => (
+                      <button
+                        key={cat}
+                        type="button"
+                        onClick={() => {
+                          setFormData({ ...formData, category: cat });
+                          setShowCategoryDropdown(false);
+                        }}
+                        className={cn(
+                          "w-full text-left px-4 py-2.5 text-sm transition-colors hover:bg-surface-50 border-b border-surface-100 last:border-0",
+                          formData.category === cat && "bg-brand-50 text-brand-700 font-medium"
+                        )}
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              {formData.category && !categories.includes(formData.category) && formData.category.trim() && (
+                <p className="text-xs text-surface-500">
+                  New category &ldquo;{formData.category.trim()}&rdquo; will be created
+                </p>
               )}
             </div>
 
