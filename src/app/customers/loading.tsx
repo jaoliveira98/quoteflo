@@ -15,7 +15,7 @@ export default function CustomersLoading() {
         </div>
 
         {/* Search */}
-        <Skeleton className="h-10 w-full max-w-md rounded-lg" />
+        <Skeleton className="h-10 w-full max-w-sm rounded-lg" />
 
         {/* Grid */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
