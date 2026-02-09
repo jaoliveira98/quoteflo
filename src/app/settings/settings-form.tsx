@@ -524,9 +524,11 @@ function BrandingCard({ profile }: { profile: UserProfile }) {
         <CardContent className="space-y-4">
           <div className="flex flex-wrap gap-2">
             {BRAND_COLORS.map((color) => (
-              <button
+              <Button
                 key={color.value}
                 type="button"
+                variant="ghost"
+                size="icon"
                 onClick={() => setBrandColor(color.value)}
                 className={cn(
                   "h-9 w-9 rounded-lg border-2 transition-all hover:scale-105",

@@ -76,7 +76,7 @@ export default function HomePage() {
 
           {/* CTA */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
-            <Button asChild size="lg" className="text-base px-8 w-full sm:w-auto shadow-md hover:shadow-lg transition-shadow">
+            <Button asChild size="lg" className="text-base px-8 w-full sm:w-auto shadow-medium hover:shadow-strong transition-shadow">
               <Link href="/signup">
                 Start 14-Day Free Trial
                 <ArrowRight className="h-4 w-4" />
@@ -334,7 +334,7 @@ export default function HomePage() {
             </div>
 
             <div className="p-6 sm:p-8 bg-surface-50 border-t border-surface-200">
-              <Button asChild size="lg" className="w-full shadow-md">
+              <Button asChild size="lg" className="w-full shadow-medium">
                 <Link href="/signup">
                   Start 14-Day Free Trial
                   <ArrowRight className="h-4 w-4" />
@@ -358,7 +358,7 @@ export default function HomePage() {
             Join 500+ UK tradespeople who&apos;ve ditched the spreadsheets. 
             Your first quote is 5 minutes away.
           </p>
-          <Button asChild size="lg" className="text-base px-8 shadow-lg">
+          <Button asChild size="lg" className="text-base px-8 shadow-strong">
             <Link href="/signup">
               Start Free — No Card Needed
               <ArrowRight className="h-4 w-4" />

@@ -85,7 +85,7 @@ function SidebarContent({
 
       <div className="p-4 pb-2">
         <Button 
-          className="w-full shadow-sm" 
+          className="w-full shadow-soft" 
           size="lg"
           onClick={() => handleNavigation("/quotes/new")}
           disabled={isNavigating}
@@ -119,7 +119,7 @@ function SidebarContent({
                     className={cn(
                       "w-full justify-start gap-3 px-3 py-2.5 h-auto rounded-lg text-sm font-medium transition-all",
                       isActive
-                        ? "bg-brand-50 text-brand-700 shadow-sm hover:bg-brand-50"
+                        ? "bg-brand-50 text-brand-700 shadow-soft hover:bg-brand-50"
                         : "text-surface-600 hover:bg-surface-50 hover:text-surface-900 active:bg-surface-100",
                       isLoading && "bg-surface-50"
                     )}

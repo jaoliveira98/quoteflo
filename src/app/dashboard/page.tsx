@@ -15,7 +15,7 @@ import Link from "next/link";
 import { formatCurrency } from "@/lib/utils";
 import { requireAuthWithProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { STATUS_COLORS } from "@/lib/constants";
+import { STATUS_COLORS, STATUS_LABELS } from "@/lib/constants";
 import type { QuoteStatus } from "@/types";
 
 export default async function DashboardPage() {
@@ -170,7 +170,7 @@ export default async function DashboardPage() {
                       </div>
                       <div className="flex items-center gap-4">
                         <Badge variant={STATUS_COLORS[quote.status as QuoteStatus]}>
-                          {quote.status.charAt(0).toUpperCase() + quote.status.slice(1)}
+                          {STATUS_LABELS[quote.status as QuoteStatus]}
                         </Badge>
                         <span className="font-medium text-surface-900">
                           {formatCurrency(Number(quote.total))}
@@ -181,8 +181,8 @@ export default async function DashboardPage() {
                 </div>
               ) : (
                 <div className="text-center py-10">
-                  <div className="h-16 w-16 rounded-2xl bg-brand-50 flex items-center justify-center mx-auto mb-4">
-                    <FileText className="h-8 w-8 text-brand-400" />
+                  <div className="h-16 w-16 rounded-2xl bg-surface-100 flex items-center justify-center mx-auto mb-4">
+                    <FileText className="h-8 w-8 text-surface-400" />
                   </div>
                   <h3 className="font-semibold text-surface-900 mb-1">Create your first quote</h3>
                   <p className="text-surface-600 text-sm mb-5 max-w-xs mx-auto">

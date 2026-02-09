@@ -17,8 +17,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireAuthWithProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { formatCurrency } from "@/lib/utils";
-import { STATUS_COLORS, STATUS_ICONS } from "@/lib/constants";
+import { formatCurrency, getInitials } from "@/lib/utils";
+import { STATUS_COLORS, STATUS_ICONS, STATUS_LABELS } from "@/lib/constants";
 import type { QuoteStatus } from "@/types";
 import { CustomerActions } from "./customer-actions";
 
@@ -89,7 +89,7 @@ export default async function CustomerDetailPage({
             <div className="flex items-center gap-4">
               <div className="h-14 w-14 rounded-full bg-brand-100 flex items-center justify-center">
                 <span className="text-xl font-semibold text-brand-700">
-                  {customer.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}
+                  {getInitials(customer.name)}
                 </span>
               </div>
               <div>
@@ -126,7 +126,9 @@ export default async function CustomerDetailPage({
                   <p className="text-sm text-surface-500">Total Quotes</p>
                   <p className="text-2xl font-bold text-surface-900">{totalQuotes}</p>
                 </div>
-                <FileText className="h-8 w-8 text-surface-300" />
+                <div className="h-10 w-10 rounded-lg bg-surface-100 flex items-center justify-center">
+                  <FileText className="h-5 w-5 text-surface-600" />
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -136,9 +138,11 @@ export default async function CustomerDetailPage({
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-surface-500">Won</p>
-                  <p className="text-2xl font-bold text-green-600">{acceptedQuotes}</p>
+                  <p className="text-2xl font-bold text-surface-900">{acceptedQuotes}</p>
                 </div>
-                <CheckCircle2 className="h-8 w-8 text-surface-300" />
+                <div className="h-10 w-10 rounded-lg bg-green-100 flex items-center justify-center">
+                  <CheckCircle2 className="h-5 w-5 text-green-600" />
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -150,7 +154,9 @@ export default async function CustomerDetailPage({
                   <p className="text-sm text-surface-500">Total Quoted</p>
                   <p className="text-2xl font-bold text-surface-900">{formatCurrency(totalValue)}</p>
                 </div>
-                <PoundSterling className="h-8 w-8 text-surface-300" />
+                <div className="h-10 w-10 rounded-lg bg-surface-100 flex items-center justify-center">
+                  <PoundSterling className="h-5 w-5 text-surface-600" />
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -160,9 +166,11 @@ export default async function CustomerDetailPage({
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-surface-500">Won Value</p>
-                  <p className="text-2xl font-bold text-green-600">{formatCurrency(acceptedValue)}</p>
+                  <p className="text-2xl font-bold text-surface-900">{formatCurrency(acceptedValue)}</p>
                 </div>
-                <CheckCircle2 className="h-8 w-8 text-surface-300" />
+                <div className="h-10 w-10 rounded-lg bg-green-100 flex items-center justify-center">
+                  <CheckCircle2 className="h-5 w-5 text-green-600" />
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -287,7 +295,7 @@ export default async function CustomerDetailPage({
                         </div>
                         <div className="flex items-center gap-4">
                           <Badge variant={STATUS_COLORS[quote.status as QuoteStatus]}>
-                            {quote.status.charAt(0).toUpperCase() + quote.status.slice(1)}
+                            {STATUS_LABELS[quote.status as QuoteStatus]}
                           </Badge>
                           <span className="font-semibold text-surface-900">
                             {formatCurrency(Number(quote.total))}

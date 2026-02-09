@@ -20,7 +20,7 @@ export default function AuthLayout({
         <div className="relative z-10">
           <Link href="/">
             <div className="flex items-center gap-2">
-              <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center font-bold text-white text-lg shadow-sm">
+              <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center font-bold text-white text-lg shadow-soft">
                 Q
               </div>
               <span className="text-xl font-semibold tracking-tight">

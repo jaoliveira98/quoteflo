@@ -16,6 +16,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
   Select,
   SelectContent,
@@ -320,8 +321,8 @@ export function ServicesManager({ profile, initialServices }: ServicesManagerPro
         <Card>
           <CardContent className="py-16">
             <div className="text-center">
-              <div className="h-16 w-16 rounded-2xl bg-brand-50 flex items-center justify-center mx-auto mb-4">
-                <Package className="h-8 w-8 text-brand-400" />
+              <div className="h-16 w-16 rounded-2xl bg-surface-100 flex items-center justify-center mx-auto mb-4">
+                <Package className="h-8 w-8 text-surface-400" />
               </div>
               <h3 className="font-semibold text-surface-900 mb-1">
                 {search ? "No items found" : "No items yet"}
@@ -397,36 +398,39 @@ export function ServicesManager({ profile, initialServices }: ServicesManagerPro
                   className="pr-9"
                   autoComplete="off"
                 />
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="icon"
                   tabIndex={-1}
                   onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-surface-400 hover:text-surface-600 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 h-auto w-auto p-0 text-surface-400 hover:text-surface-600 transition-colors"
                   aria-label="Toggle category suggestions"
                 >
                   <ChevronDown className={cn(
                     "h-4 w-4 transition-transform duration-200",
                     showCategoryDropdown && "rotate-180"
                   )} />
-                </button>
+                </Button>
 
                 {showCategoryDropdown && filteredCategories.length > 0 && (
                   <div className="absolute z-50 w-full mt-1 bg-white border border-surface-200 rounded-lg shadow-medium max-h-48 overflow-y-auto">
                     {filteredCategories.map((cat) => (
-                      <button
+                      <Button
                         key={cat}
                         type="button"
+                        variant="ghost"
                         onClick={() => {
                           setFormData({ ...formData, category: cat });
                           setShowCategoryDropdown(false);
                         }}
                         className={cn(
-                          "w-full text-left px-4 py-2.5 text-sm transition-colors hover:bg-surface-50 border-b border-surface-100 last:border-0",
+                          "w-full justify-start px-4 py-2.5 h-auto text-sm transition-colors hover:bg-surface-50 border-b border-surface-100 last:border-0 rounded-none",
                           formData.category === cat && "bg-brand-50 text-brand-700 font-medium"
                         )}
                       >
                         {cat}
-                      </button>
+                      </Button>
                     ))}
                   </div>
                 )}
@@ -508,40 +512,16 @@ export function ServicesManager({ profile, initialServices }: ServicesManagerPro
       </Dialog>
 
       {/* Delete Confirmation */}
-      <Dialog
+      <ConfirmDialog
         open={!!deleteConfirm}
-        onOpenChange={(open) => !open && setDeleteConfirm(null)}
-      >
-        <DialogContent className="sm:max-w-sm">
-          <DialogHeader>
-            <DialogTitle>Delete Item</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete this item? This action cannot be
-              undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setDeleteConfirm(null)}
-              disabled={isLoading}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => deleteConfirm && handleDelete(deleteConfirm)}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                "Delete"
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        onClose={() => setDeleteConfirm(null)}
+        onConfirm={() => deleteConfirm && handleDelete(deleteConfirm)}
+        title="Delete Item"
+        description="Are you sure you want to delete this item? This action cannot be undone."
+        confirmLabel="Delete"
+        variant="danger"
+        isLoading={isLoading}
+      />
     </div>
   );
 }

@@ -347,26 +347,29 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
                   className="pl-9 pr-9"
                 />
                 {customerSearch && (
-                  <button
+                  <Button
                     type="button"
+                    variant="ghost"
+                    size="icon"
                     onClick={() => { setCustomerSearch(""); setShowCustomerDropdown(false); }}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-surface-400 hover:text-surface-600"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 h-auto w-auto p-0 text-surface-400 hover:text-surface-600"
                   >
                     <X className="h-4 w-4" />
-                  </button>
+                  </Button>
                 )}
               </div>
 
               {showCustomerDropdown && (customerSearch || filteredCustomers.length > 0) && (
-                <div className="absolute z-50 w-full mt-1 bg-white border border-surface-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                <div className="absolute z-50 w-full mt-1 bg-white border border-surface-200 rounded-lg shadow-medium max-h-60 overflow-y-auto">
                   {filteredCustomers.length > 0 ? (
                     filteredCustomers.slice(0, 10).map(customer => (
-                      <button
+                      <Button
                         key={customer.id}
                         type="button"
+                        variant="ghost"
                         onClick={() => selectCustomer(customer)}
                         className={cn(
-                          "w-full text-left px-4 py-3 hover:bg-surface-50 transition-colors border-b border-surface-100 last:border-0",
+                          "w-full justify-start px-4 py-3 h-auto hover:bg-surface-50 transition-colors border-b border-surface-100 last:border-0 rounded-none",
                           selectedCustomerId === customer.id && "bg-brand-50"
                         )}
                       >
@@ -375,7 +378,7 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
                           {customer.email && <span>{customer.email}</span>}
                           {customer.phone && <span>{customer.phone}</span>}
                         </div>
-                      </button>
+                      </Button>
                     ))
                   ) : customerSearch ? (
                     <div className="px-4 py-3 text-sm text-surface-500">

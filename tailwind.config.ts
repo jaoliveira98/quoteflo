@@ -89,6 +89,7 @@ const config: Config = {
         "slide-up": "slideUp 0.4s ease-out",
         "slide-down": "slideDown 0.3s ease-out",
         "scale-in": "scaleIn 0.2s ease-out",
+        "loading-bar": "loadingBar 1s ease-in-out infinite",
       },
       keyframes: {
         fadeIn: {
@@ -106,6 +107,11 @@ const config: Config = {
         scaleIn: {
           "0%": { opacity: "0", transform: "scale(0.95)" },
           "100%": { opacity: "1", transform: "scale(1)" },
+        },
+        loadingBar: {
+          "0%": { width: "0%", marginLeft: "0%" },
+          "50%": { width: "60%", marginLeft: "20%" },
+          "100%": { width: "0%", marginLeft: "100%" },
         },
       },
     },

@@ -16,7 +16,7 @@ import { requireAuthWithProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { AddCustomerButton } from "./add-customer-button";
 import { CustomersSearch } from "./customers-search";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, getInitials } from "@/lib/utils";
 
 export default async function CustomersPage({
   searchParams,
@@ -119,7 +119,7 @@ export default async function CustomersPage({
                       <div className="flex items-start justify-between mb-3">
                         <div className="h-10 w-10 rounded-full bg-brand-100 flex items-center justify-center">
                           <span className="text-sm font-semibold text-brand-700">
-                            {customer.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}
+                            {getInitials(customer.name)}
                           </span>
                         </div>
                         <ChevronRight className="h-5 w-5 text-surface-300" />

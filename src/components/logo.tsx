@@ -18,7 +18,7 @@ export function Logo({ className, size = "md" }: LogoProps) {
       <div className="relative">
         <div
           className={cn(
-            "rounded-lg bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center font-bold text-white shadow-sm",
+            "rounded-lg bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center font-bold text-white shadow-soft",
             size === "sm" && "h-7 w-7 text-sm",
             size === "md" && "h-8 w-8 text-base",
             size === "lg" && "h-10 w-10 text-lg"
