@@ -55,6 +55,7 @@ export default async function PublicQuotePage({
   const isExpired = quote.valid_until && new Date(quote.valid_until) < new Date();
   const isAccepted = quote.status === "accepted";
   const isDeclined = quote.status === "declined";
+  const brandColor = profile?.brand_color || "#22c55e";
 
   return (
     <div className="min-h-screen bg-surface-50">
@@ -62,9 +63,18 @@ export default async function PublicQuotePage({
       {/* Header */}
       <header className="bg-white border-b border-surface-200 sticky top-0 z-10">
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div>
-            <p className="text-sm text-surface-500">Quote from</p>
-            <p className="font-semibold text-surface-900">{profile?.company_name || "Company"}</p>
+          <div className="flex items-center gap-3">
+            {profile?.logo_url ? (
+              <img 
+                src={profile.logo_url} 
+                alt={profile?.company_name || "Company logo"} 
+                className="h-10 w-10 object-contain"
+              />
+            ) : null}
+            <div>
+              <p className="text-sm text-surface-500">Quote from</p>
+              <p className="font-semibold text-surface-900">{profile?.company_name || "Company"}</p>
+            </div>
           </div>
           <div className="flex items-center gap-3">
             <DownloadPDFButton quoteId={quote.id} />
@@ -92,7 +102,7 @@ export default async function PublicQuotePage({
         <Card className="overflow-hidden">
           <div 
             className="p-6 sm:p-8 text-white"
-            style={{ background: `linear-gradient(135deg, ${profile?.brand_color || '#22c55e'}, ${profile?.brand_color || '#22c55e'}dd)` }}
+            style={{ background: `linear-gradient(135deg, ${brandColor}, ${brandColor}dd)` }}
           >
             <p className="text-sm opacity-80 mb-1">Total Quote Amount</p>
             <p className="text-3xl sm:text-4xl font-bold">{formatCurrency(Number(quote.total))}</p>
@@ -170,7 +180,7 @@ export default async function PublicQuotePage({
                 )}
                 <div className="flex justify-between text-lg font-semibold text-surface-900 pt-2 border-t border-surface-200">
                   <span>Total</span>
-                  <span className="text-brand-600">{formatCurrency(Number(quote.total))}</span>
+                  <span style={{ color: brandColor }}>{formatCurrency(Number(quote.total))}</span>
                 </div>
               </div>
             </div>
@@ -179,7 +189,7 @@ export default async function PublicQuotePage({
 
         {/* Actions */}
         {!isAccepted && !isDeclined && !isExpired && (
-          <QuoteActions quoteId={quote.id} token={token} />
+          <QuoteActions quoteId={quote.id} token={token} brandColor={brandColor} />
         )}
 
         {isAccepted && (
@@ -221,7 +231,7 @@ export default async function PublicQuotePage({
                   href={`tel:${profile.phone}`}
                   className="flex items-center gap-3 p-3 rounded-lg bg-surface-50 hover:bg-surface-100 transition-colors"
                 >
-                  <Phone className="h-5 w-5 text-brand-500" />
+                  <Phone className="h-5 w-5" style={{ color: brandColor }} />
                   <span className="font-medium text-surface-900">{profile.phone}</span>
                 </a>
               )}
@@ -230,7 +240,7 @@ export default async function PublicQuotePage({
                   href={`mailto:${profile.email}`}
                   className="flex items-center gap-3 p-3 rounded-lg bg-surface-50 hover:bg-surface-100 transition-colors"
                 >
-                  <Mail className="h-5 w-5 text-brand-500" />
+                  <Mail className="h-5 w-5" style={{ color: brandColor }} />
                   <span className="font-medium text-surface-900">{profile.email}</span>
                 </a>
               )}

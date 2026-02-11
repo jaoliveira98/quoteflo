@@ -52,6 +52,8 @@ function generateQuoteHTML(
   lineItems: QuoteLineItem[],
   profile: UserProfile | null
 ) {
+  const brandColor = profile?.brand_color || "#22c55e";
+  
   return `
 <!DOCTYPE html>
 <html lang="en">
@@ -80,7 +82,7 @@ function generateQuoteHTML(
       align-items: flex-start;
       margin-bottom: 40px;
       padding-bottom: 20px;
-      border-bottom: 2px solid #22c55e;
+      border-bottom: 2px solid ${brandColor};
     }
     .company-name {
       font-size: 24px;
@@ -93,7 +95,7 @@ function generateQuoteHTML(
     .quote-title h1 {
       font-size: 28px;
       font-weight: 700;
-      color: #22c55e;
+      color: ${brandColor};
     }
     .quote-number {
       font-size: 16px;
@@ -178,7 +180,7 @@ function generateQuoteHTML(
       font-weight: 700;
     }
     .totals-row.total .amount {
-      color: #22c55e;
+      color: ${brandColor};
     }
     .footer {
       margin-top: 60px;

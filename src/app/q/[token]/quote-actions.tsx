@@ -11,9 +11,10 @@ import { CheckCircle2, X, Loader2 } from "lucide-react";
 interface QuoteActionsProps {
   quoteId: string;
   token: string;
+  brandColor?: string;
 }
 
-export function QuoteActions({ quoteId, token }: QuoteActionsProps) {
+export function QuoteActions({ quoteId, token, brandColor = "#22c55e" }: QuoteActionsProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState<"accept" | "decline" | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -73,8 +74,11 @@ export function QuoteActions({ quoteId, token }: QuoteActionsProps) {
     }
   };
 
+  const borderColor = `${brandColor}33`;
+  const bgColor = `${brandColor}0d`;
+
   return (
-    <Card className="border-brand-200 bg-brand-50">
+    <Card style={{ borderColor, backgroundColor: bgColor }}>
       <CardContent className="p-6">
         <h3 className="font-semibold text-surface-900 mb-2 text-center">
           Ready to proceed?
@@ -93,6 +97,7 @@ export function QuoteActions({ quoteId, token }: QuoteActionsProps) {
             disabled={isLoading !== null}
             className="flex-1"
             size="lg"
+            style={{ backgroundColor: brandColor, borderColor: brandColor }}
           >
             {isLoading === "accept" ? (
               <Loader2 className="h-4 w-4 animate-spin" />
