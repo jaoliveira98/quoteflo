@@ -13,7 +13,8 @@ import {
   FileText,
   Download
 } from "lucide-react";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { formatCurrency, formatDate, isValidImageUrl } from "@/lib/utils";
+import type { Quote, QuoteLineItem } from "@/types";
 import { QuoteActions } from "./quote-actions";
 import { DownloadPDFButton } from "./download-pdf-button";
 import { MarkViewed } from "./mark-viewed";
@@ -30,27 +31,19 @@ export default async function PublicQuotePage({
 }) {
   const { token } = await params;
 
-  const { data: quote, error } = await supabase
-    .from("quotes")
-    .select("*")
-    .eq("access_token", token)
-    .single();
+  const { data, error } = await supabase.rpc("get_public_quote_data", {
+    p_token: token,
+  });
 
-  if (error || !quote) {
+  if (error || !data) {
     notFound();
   }
 
-  const { data: lineItems } = await supabase
-    .from("quote_line_items")
-    .select("*")
-    .eq("quote_id", quote.id)
-    .order("item_order", { ascending: true });
-
-  const { data: profile } = await supabase
-    .from("user_profiles")
-    .select("company_name, phone, email, trade, logo_url, brand_color")
-    .eq("id", quote.user_id)
-    .single();
+  const { quote, line_items: lineItems, profile } = data as {
+    quote: Quote;
+    line_items: QuoteLineItem[];
+    profile: { company_name: string; phone: string | null; email: string; logo_url: string | null; brand_color: string } | null;
+  };
 
   const isExpired = quote.valid_until && new Date(quote.valid_until) < new Date();
   const isAccepted = quote.status === "accepted";
@@ -64,7 +57,7 @@ export default async function PublicQuotePage({
       <header className="bg-white border-b border-surface-200 sticky top-0 z-10">
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            {profile?.logo_url ? (
+            {profile?.logo_url && isValidImageUrl(profile.logo_url) ? (
               <img 
                 src={profile.logo_url} 
                 alt={profile?.company_name || "Company logo"} 
@@ -77,7 +70,7 @@ export default async function PublicQuotePage({
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <DownloadPDFButton quoteId={quote.id} />
+            <DownloadPDFButton token={token} />
             <div className="text-right">
               <p className="text-sm text-surface-500">{quote.quote_number}</p>
               {isAccepted && (
@@ -211,7 +204,7 @@ export default async function PublicQuotePage({
               <Clock className="h-12 w-12 text-amber-500 mx-auto mb-3" />
               <h3 className="font-semibold text-amber-900 mb-1">Quote Expired</h3>
               <p className="text-amber-700">
-                This quote expired on {formatDate(quote.valid_until)}. 
+                This quote expired on {quote.valid_until ? formatDate(quote.valid_until) : ""}. 
                 Please contact {profile?.company_name} for an updated quote.
               </p>
             </CardContent>

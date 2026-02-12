@@ -4,12 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 
 interface DownloadPDFButtonProps {
-  quoteId: string;
+  token: string;
 }
 
-export function DownloadPDFButton({ quoteId }: DownloadPDFButtonProps) {
+export function DownloadPDFButton({ token }: DownloadPDFButtonProps) {
   const handleDownload = () => {
-    window.open(`/api/quotes/${quoteId}/pdf/public`, "_blank");
+    window.open(`/api/quotes/pdf/public?token=${encodeURIComponent(token)}`, "_blank");
   };
 
   return (

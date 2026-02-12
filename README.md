@@ -111,8 +111,8 @@ To enable subscription billing:
      - `customer.subscription.created`
      - `customer.subscription.updated`
      - `customer.subscription.deleted`
-     - `invoice.payment_succeeded`
-     - `invoice.payment_failed`
+   - `invoice.payment_succeeded`
+   - `invoice.payment_failed`
 
 ## 📁 Project Structure
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { formatCurrency, formatDateLong } from "@/lib/utils";
+import { formatCurrency, formatDateLong, escapeHtml } from "@/lib/utils";
 import type { Quote, QuoteLineItem, UserProfile } from "@/types";
 
 export async function GET(
@@ -52,7 +52,7 @@ function generateQuoteHTML(
   lineItems: QuoteLineItem[],
   profile: UserProfile | null
 ) {
-  const brandColor = profile?.brand_color || "#22c55e";
+  const brandColor = escapeHtml(profile?.brand_color || "#22c55e");
   
   return `
 <!DOCTYPE html>
@@ -60,7 +60,7 @@ function generateQuoteHTML(
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quote ${quote.quote_number}</title>
+  <title>Quote ${escapeHtml(quote.quote_number)}</title>
   <style>
     * {
       margin: 0;
@@ -225,24 +225,24 @@ function generateQuoteHTML(
 <body>
   <div class="header">
     <div>
-      <div class="company-name">${profile?.company_name || "Company Name"}</div>
-      ${profile?.phone ? `<p>${profile.phone}</p>` : ""}
-      ${profile?.email ? `<p>${profile.email}</p>` : ""}
+      <div class="company-name">${escapeHtml(profile?.company_name || "Company Name")}</div>
+      ${profile?.phone ? `<p>${escapeHtml(profile.phone)}</p>` : ""}
+      ${profile?.email ? `<p>${escapeHtml(profile.email)}</p>` : ""}
     </div>
     <div class="quote-title">
       <h1>QUOTE</h1>
-      <div class="quote-number">${quote.quote_number}</div>
+      <div class="quote-number">${escapeHtml(quote.quote_number)}</div>
     </div>
   </div>
 
   <div class="details-grid">
     <div class="detail-section">
       <h3>Quote For</h3>
-      <p class="name">${quote.customer_name}</p>
-      ${quote.customer_email ? `<p>${quote.customer_email}</p>` : ""}
-      ${quote.customer_phone ? `<p>${quote.customer_phone}</p>` : ""}
-      ${quote.customer_address ? `<p>${quote.customer_address}</p>` : ""}
-      ${quote.customer_postcode ? `<p>${quote.customer_postcode}</p>` : ""}
+      <p class="name">${escapeHtml(quote.customer_name)}</p>
+      ${quote.customer_email ? `<p>${escapeHtml(quote.customer_email)}</p>` : ""}
+      ${quote.customer_phone ? `<p>${escapeHtml(quote.customer_phone)}</p>` : ""}
+      ${quote.customer_address ? `<p>${escapeHtml(quote.customer_address)}</p>` : ""}
+      ${quote.customer_postcode ? `<p>${escapeHtml(quote.customer_postcode)}</p>` : ""}
     </div>
     <div class="detail-section" style="text-align: right;">
       <h3>Quote Date</h3>
@@ -257,7 +257,7 @@ function generateQuoteHTML(
   ${quote.job_description ? `
     <div class="job-description">
       <h3>Job Description</h3>
-      <p>${quote.job_description}</p>
+      <p>${escapeHtml(quote.job_description)}</p>
     </div>
   ` : ""}
 
@@ -273,7 +273,7 @@ function generateQuoteHTML(
     <tbody>
       ${lineItems.map(item => `
         <tr>
-          <td>${item.description}</td>
+          <td>${escapeHtml(item.description)}</td>
           <td style="text-align: center;">${item.quantity}</td>
           <td style="text-align: right;">${formatCurrency(Number(item.unit_price))}</td>
           <td>${formatCurrency(Number(item.line_total))}</td>
@@ -313,7 +313,7 @@ function generateQuoteHTML(
       </div>
       <div>
         <h4>Questions?</h4>
-        <p>Contact us at ${profile?.phone || "the number above"} or reply to this quote.</p>
+        <p>Contact us at ${escapeHtml(profile?.phone || "the number above")} or reply to this quote.</p>
       </div>
     </div>
   </div>

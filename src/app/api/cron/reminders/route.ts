@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { Resend } from "resend";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, escapeHtml } from "@/lib/utils";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -13,12 +13,11 @@ const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KE
 function verifyCronSecret(request: NextRequest): boolean {
   const authHeader = request.headers.get("authorization");
   const cronSecret = process.env.CRON_SECRET;
-  
+
   if (!cronSecret) {
-    console.warn("CRON_SECRET not set - allowing all requests");
-    return true;
+    return false;
   }
-  
+
   return authHeader === `Bearer ${cronSecret}`;
 }
 
@@ -64,6 +63,7 @@ async function sendFollowUpEmail(quote: {
     `;
   }
 
+  const brandColor = escapeHtml(quote.brand_color || "#22c55e");
   const emailHtml = `
 <!DOCTYPE html>
 <html>
@@ -72,30 +72,30 @@ async function sendFollowUpEmail(quote: {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #1e293b; max-width: 600px; margin: 0 auto; padding: 20px;">
-  <div style="text-align: center; padding: 20px 0; border-bottom: 2px solid ${quote.brand_color || "#22c55e"};">
-    <h1 style="margin: 0; font-size: 24px; color: #0f172a;">${quote.company_name}</h1>
+  <div style="text-align: center; padding: 20px 0; border-bottom: 2px solid ${brandColor};">
+    <h1 style="margin: 0; font-size: 24px; color: #0f172a;">${escapeHtml(quote.company_name)}</h1>
   </div>
   
   <div style="padding: 30px 0;">
-    <p style="margin: 0 0 20px;">Hi ${quote.customer_name.split(" ")[0]},</p>
+    <p style="margin: 0 0 20px;">Hi ${escapeHtml(quote.customer_name.split(" ")[0])},</p>
     
     ${followUpMessage}
     
     <div style="background: #f8fafc; border-radius: 8px; padding: 20px; margin: 20px 0;">
-      <p style="margin: 0 0 10px;"><strong>Quote Number:</strong> ${quote.quote_number}</p>
-      <p style="margin: 0; font-size: 24px; font-weight: 700; color: ${quote.brand_color || "#22c55e"};">Total: ${formatCurrency(Number(quote.total))}</p>
+      <p style="margin: 0 0 10px;"><strong>Quote Number:</strong> ${escapeHtml(quote.quote_number)}</p>
+      <p style="margin: 0; font-size: 24px; font-weight: 700; color: ${brandColor};">Total: ${formatCurrency(Number(quote.total))}</p>
       <p style="margin: 5px 0 0; font-size: 14px; color: #64748b;">(inc. VAT)</p>
     </div>
     
     <div style="text-align: center; margin: 30px 0;">
-      <a href="${quoteUrl}" style="display: inline-block; background: ${quote.brand_color || "#22c55e"}; color: white; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px;">View Quote</a>
+      <a href="${quoteUrl}" style="display: inline-block; background: ${brandColor}; color: white; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px;">View Quote</a>
     </div>
   </div>
   
   <div style="border-top: 1px solid #e2e8f0; padding-top: 20px; font-size: 14px; color: #64748b;">
     <p style="margin: 0;">Best regards,</p>
-    <p style="margin: 5px 0 0; font-weight: 600; color: #1e293b;">${quote.company_name}</p>
-    ${quote.phone ? `<p style="margin: 5px 0 0;">${quote.phone}</p>` : ""}
+    <p style="margin: 5px 0 0; font-weight: 600; color: #1e293b;">${escapeHtml(quote.company_name)}</p>
+    ${quote.phone ? `<p style="margin: 5px 0 0;">${escapeHtml(quote.phone)}</p>` : ""}
   </div>
 </body>
 </html>
@@ -143,6 +143,7 @@ async function sendExpiryReminderEmail(quote: {
     month: "long" 
   });
 
+  const brandColor = escapeHtml(quote.brand_color || "#22c55e");
   const emailHtml = `
 <!DOCTYPE html>
 <html>
@@ -151,28 +152,28 @@ async function sendExpiryReminderEmail(quote: {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #1e293b; max-width: 600px; margin: 0 auto; padding: 20px;">
-  <div style="text-align: center; padding: 20px 0; border-bottom: 2px solid ${quote.brand_color || "#22c55e"};">
-    <h1 style="margin: 0; font-size: 24px; color: #0f172a;">${quote.company_name}</h1>
+  <div style="text-align: center; padding: 20px 0; border-bottom: 2px solid ${brandColor};">
+    <h1 style="margin: 0; font-size: 24px; color: #0f172a;">${escapeHtml(quote.company_name)}</h1>
   </div>
   
   <div style="padding: 30px 0;">
-    <p style="margin: 0 0 20px;">Hi ${quote.customer_name.split(" ")[0]},</p>
+    <p style="margin: 0 0 20px;">Hi ${escapeHtml(quote.customer_name.split(" ")[0])},</p>
     
     <p style="margin: 0 0 20px;">Just a quick heads up – the quote I sent you is expiring soon.</p>
     
     <div style="background: #fef3c7; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center;">
       <p style="margin: 0; font-size: 14px; color: #92400e;">⏰ Quote expires on</p>
-      <p style="margin: 5px 0 0; font-size: 20px; font-weight: 700; color: #92400e;">${formattedExpiry}</p>
+      <p style="margin: 5px 0 0; font-size: 20px; font-weight: 700; color: #92400e;">${escapeHtml(formattedExpiry)}</p>
     </div>
     
     <div style="background: #f8fafc; border-radius: 8px; padding: 20px; margin: 20px 0;">
-      <p style="margin: 0 0 10px;"><strong>Quote Number:</strong> ${quote.quote_number}</p>
-      <p style="margin: 0; font-size: 24px; font-weight: 700; color: ${quote.brand_color || "#22c55e"};">Total: ${formatCurrency(Number(quote.total))}</p>
+      <p style="margin: 0 0 10px;"><strong>Quote Number:</strong> ${escapeHtml(quote.quote_number)}</p>
+      <p style="margin: 0; font-size: 24px; font-weight: 700; color: ${brandColor};">Total: ${formatCurrency(Number(quote.total))}</p>
       <p style="margin: 5px 0 0; font-size: 14px; color: #64748b;">(inc. VAT)</p>
     </div>
     
     <div style="text-align: center; margin: 30px 0;">
-      <a href="${quoteUrl}" style="display: inline-block; background: ${quote.brand_color || "#22c55e"}; color: white; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px;">View & Accept Quote</a>
+      <a href="${quoteUrl}" style="display: inline-block; background: ${brandColor}; color: white; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px;">View & Accept Quote</a>
     </div>
     
     <p style="margin: 0 0 20px;">If you'd like to proceed after this date, just get in touch and I'll be happy to send an updated quote.</p>
@@ -180,8 +181,8 @@ async function sendExpiryReminderEmail(quote: {
   
   <div style="border-top: 1px solid #e2e8f0; padding-top: 20px; font-size: 14px; color: #64748b;">
     <p style="margin: 0;">Best regards,</p>
-    <p style="margin: 5px 0 0; font-weight: 600; color: #1e293b;">${quote.company_name}</p>
-    ${quote.phone ? `<p style="margin: 5px 0 0;">${quote.phone}</p>` : ""}
+    <p style="margin: 5px 0 0; font-weight: 600; color: #1e293b;">${escapeHtml(quote.company_name)}</p>
+    ${quote.phone ? `<p style="margin: 5px 0 0;">${escapeHtml(quote.phone)}</p>` : ""}
   </div>
 </body>
 </html>

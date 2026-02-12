@@ -120,7 +120,7 @@ export default async function QuotesPage({
     const [yearB, monthB] = keyB.split("-").map(Number);
     if (yearA !== yearB) return yearB - yearA;
     return monthB - monthA;
-  });
+  }) as [string, { label: string; quotes: typeof filteredQuotes }][];
 
   return (
     <DashboardShell user={{ email: profile.email, company_name: profile.company_name }}>

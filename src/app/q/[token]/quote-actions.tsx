@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
@@ -24,23 +23,18 @@ export function QuoteActions({ quoteId, token, brandColor = "#22c55e" }: QuoteAc
     setError(null);
 
     try {
-      const supabase = createClient();
-      
-      const { error: updateError } = await supabase
-        .from("quotes")
-        .update({
-          status: "accepted",
-          accepted_at: new Date().toISOString(),
-        })
-        .eq("id", quoteId)
-        .eq("access_token", token);
+      const res = await fetch("/api/quotes/accept", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token, quote_id: quoteId }),
+      });
 
-      if (updateError) {
-        throw updateError;
+      if (!res.ok) {
+        throw new Error("Failed to accept");
       }
 
       router.refresh();
-    } catch (err) {
+    } catch {
       setError("Something went wrong. Please try again.");
     } finally {
       setIsLoading(null);
@@ -52,22 +46,18 @@ export function QuoteActions({ quoteId, token, brandColor = "#22c55e" }: QuoteAc
     setError(null);
 
     try {
-      const supabase = createClient();
-      
-      const { error: updateError } = await supabase
-        .from("quotes")
-        .update({
-          status: "declined",
-        })
-        .eq("id", quoteId)
-        .eq("access_token", token);
+      const res = await fetch("/api/quotes/decline", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token, quote_id: quoteId }),
+      });
 
-      if (updateError) {
-        throw updateError;
+      if (!res.ok) {
+        throw new Error("Failed to decline");
       }
 
       router.refresh();
-    } catch (err) {
+    } catch {
       setError("Something went wrong. Please try again.");
     } finally {
       setIsLoading(null);

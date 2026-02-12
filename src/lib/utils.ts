@@ -76,3 +76,53 @@ export function getUniqueContacts(primary: string | null, list: string[] | null)
 export function pluralize(count: number, singular: string, plural?: string): string {
   return count === 1 ? singular : (plural ?? `${singular}s`);
 }
+
+export function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+const SAFE_REDIRECT_PREFIXES = [
+  "/dashboard",
+  "/quotes",
+  "/customers",
+  "/settings",
+  "/analytics",
+  "/services",
+];
+
+export function getSafeRedirectPath(path: string | null | undefined): string {
+  if (!path || typeof path !== "string") return "/dashboard";
+  const trimmed = path.trim();
+  if (trimmed === "" || trimmed.startsWith("//") || trimmed.includes(":")) {
+    return "/dashboard";
+  }
+  const normalized = trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
+  const isSafe = SAFE_REDIRECT_PREFIXES.some((prefix) =>
+    normalized === prefix || normalized.startsWith(`${prefix}/`)
+  );
+  return isSafe ? normalized : "/dashboard";
+}
+
+export function isValidImageUrl(url: string | null | undefined): boolean {
+  if (!url || typeof url !== "string") return false;
+  const trimmed = url.trim();
+  if (trimmed.length === 0) return false;
+  try {
+    const parsed = new URL(trimmed);
+    if (!["https:", "http:"].includes(parsed.protocol)) return false;
+    if (parsed.protocol === "http:" && !["localhost", "127.0.0.1"].includes(parsed.hostname)) {
+      return false;
+    }
+    if (["javascript:", "data:", "vbscript:"].some((p) => trimmed.toLowerCase().startsWith(p))) {
+      return false;
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}

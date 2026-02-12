@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { Resend } from "resend";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, escapeHtml } from "@/lib/utils";
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
@@ -74,6 +74,8 @@ export async function POST(
     `;
   }
 
+  const brandColor = escapeHtml(profile?.brand_color || "#22c55e");
+  const companyName = escapeHtml(profile?.company_name || "The Team");
   const emailHtml = `
 <!DOCTYPE html>
 <html>
@@ -82,37 +84,37 @@ export async function POST(
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #1e293b; max-width: 600px; margin: 0 auto; padding: 20px;">
-  <div style="text-align: center; padding: 20px 0; border-bottom: 2px solid ${profile?.brand_color || "#22c55e"};">
-    <h1 style="margin: 0; font-size: 24px; color: #0f172a;">${profile?.company_name || "Quote"}</h1>
+  <div style="text-align: center; padding: 20px 0; border-bottom: 2px solid ${brandColor};">
+    <h1 style="margin: 0; font-size: 24px; color: #0f172a;">${escapeHtml(profile?.company_name || "Quote")}</h1>
   </div>
   
   <div style="padding: 30px 0;">
-    <p style="margin: 0 0 20px;">Hi ${quote.customer_name.split(" ")[0]},</p>
+    <p style="margin: 0 0 20px;">Hi ${escapeHtml(quote.customer_name.split(" ")[0])},</p>
     
     ${followUpMessage}
     
     <div style="background: #f8fafc; border-radius: 8px; padding: 20px; margin: 20px 0;">
-      <p style="margin: 0 0 10px;"><strong>Quote Number:</strong> ${quote.quote_number}</p>
-      ${quote.job_description ? `<p style="margin: 0 0 10px;"><strong>Job:</strong> ${quote.job_description}</p>` : ""}
-      <p style="margin: 0; font-size: 24px; font-weight: 700; color: ${profile?.brand_color || "#22c55e"};">Total: ${formatCurrency(Number(quote.total))}</p>
+      <p style="margin: 0 0 10px;"><strong>Quote Number:</strong> ${escapeHtml(quote.quote_number)}</p>
+      ${quote.job_description ? `<p style="margin: 0 0 10px;"><strong>Job:</strong> ${escapeHtml(quote.job_description)}</p>` : ""}
+      <p style="margin: 0; font-size: 24px; font-weight: 700; color: ${brandColor};">Total: ${formatCurrency(Number(quote.total))}</p>
       <p style="margin: 5px 0 0; font-size: 14px; color: #64748b;">(inc. VAT)</p>
     </div>
     
     <div style="text-align: center; margin: 30px 0;">
-      <a href="${quoteUrl}" style="display: inline-block; background: ${profile?.brand_color || "#22c55e"}; color: white; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px;">View Quote</a>
+      <a href="${quoteUrl}" style="display: inline-block; background: ${brandColor}; color: white; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px;">View Quote</a>
     </div>
     
     ${quote.valid_until ? `
       <p style="margin: 0; padding: 15px; background: #fef3c7; border-radius: 8px; color: #92400e; text-align: center;">
-        This quote is valid until <strong>${new Date(quote.valid_until).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</strong>
+        This quote is valid until <strong>${escapeHtml(new Date(quote.valid_until).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }))}</strong>
       </p>
     ` : ""}
   </div>
   
   <div style="border-top: 1px solid #e2e8f0; padding-top: 20px; font-size: 14px; color: #64748b;">
     <p style="margin: 0;">Best regards,</p>
-    <p style="margin: 5px 0 0; font-weight: 600; color: #1e293b;">${profile?.company_name || "The Team"}</p>
-    ${profile?.phone ? `<p style="margin: 5px 0 0;">${profile.phone}</p>` : ""}
+    <p style="margin: 5px 0 0; font-weight: 600; color: #1e293b;">${companyName}</p>
+    ${profile?.phone ? `<p style="margin: 5px 0 0;">${escapeHtml(profile.phone)}</p>` : ""}
   </div>
   
   <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0; font-size: 12px; color: #94a3b8; text-align: center;">
