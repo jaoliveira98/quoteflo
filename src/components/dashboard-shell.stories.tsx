@@ -7,6 +7,12 @@ const meta: Meta<typeof DashboardShell> = {
   tags: ["autodocs"],
   parameters: {
     layout: "fullscreen",
+    nextjs: {
+      appDirectory: true,
+      navigation: {
+        pathname: "/dashboard",
+      },
+    },
   },
 };
 

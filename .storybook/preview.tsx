@@ -1,14 +1,19 @@
 import type { Preview } from '@storybook/nextjs-vite'
 import React from 'react'
+import { Inter } from 'next/font/google'
 import { ToastProvider } from '@/components/ui/toast'
 import '../src/app/globals.css'
+
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
 
 const preview: Preview = {
   decorators: [
     (Story) => (
-      <ToastProvider>
-        <Story />
-      </ToastProvider>
+      <div className={`${inter.variable} font-sans antialiased`}>
+        <ToastProvider>
+          <Story />
+        </ToastProvider>
+      </div>
     ),
   ],
   parameters: {
@@ -17,6 +22,9 @@ const preview: Preview = {
        color: /(background|color)$/i,
        date: /Date$/i,
       },
+    },
+    nextjs: {
+      appDirectory: true,
     },
   },
 };
