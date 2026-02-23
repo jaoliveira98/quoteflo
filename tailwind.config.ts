@@ -12,7 +12,6 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // CSS variable-based colors (shadcn/ui)
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: {
@@ -42,7 +41,6 @@ const config: Config = {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
         },
-        // QuoteFlo brand colors
         brand: {
           50: "#f0fdf4",
           100: "#dcfce7",
@@ -56,7 +54,6 @@ const config: Config = {
           900: "#14532d",
           950: "#052e16",
         },
-        // Slate for professional UI
         surface: {
           50: "#f8fafc",
           100: "#f1f5f9",
@@ -81,9 +78,9 @@ const config: Config = {
         sm: "0.375rem",
       },
       boxShadow: {
-        "soft": "0 2px 8px -2px rgba(0, 0, 0, 0.08), 0 4px 16px -4px rgba(0, 0, 0, 0.06)",
-        "medium": "0 4px 12px -2px rgba(0, 0, 0, 0.1), 0 8px 24px -4px rgba(0, 0, 0, 0.08)",
-        "strong": "0 8px 24px -4px rgba(0, 0, 0, 0.12), 0 16px 48px -8px rgba(0, 0, 0, 0.1)",
+        soft: "0 2px 8px -2px rgba(0, 0, 0, 0.08), 0 4px 16px -4px rgba(0, 0, 0, 0.06)",
+        medium: "0 4px 12px -2px rgba(0, 0, 0, 0.1), 0 8px 24px -4px rgba(0, 0, 0, 0.08)",
+        strong: "0 8px 24px -4px rgba(0, 0, 0, 0.12), 0 16px 48px -8px rgba(0, 0, 0, 0.1)",
       },
       animation: {
         "fade-in": "fadeIn 0.3s ease-out",

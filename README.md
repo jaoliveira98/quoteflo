@@ -226,6 +226,10 @@ quoteflo/
 --surface-100: #f1f5f9;
 ```
 
+## Project root
+
+Config files live in the root (that’s where Next, Vercel, TypeScript, etc. look for them): `components.json` (shadcn), `middleware.ts`, `next.config.ts`, `postcss.config.mjs`, `tailwind.config.ts`, `tsconfig.json`, `vercel.json`, `vitest.config.ts`, `playwright.config.ts`. Plus `.storybook/`, `e2e/`, `src/`, `supabase/`.
+
 ## 📝 License
 
 MIT

@@ -62,5 +62,8 @@
     "playwright": "^1.58.2",
     "@vitest/browser-playwright": "^4.0.18",
     "@vitest/coverage-v8": "^4.0.18"
+  },
+  "overrides": {
+    "minimatch": ">=10.2.1"
   }
 }
