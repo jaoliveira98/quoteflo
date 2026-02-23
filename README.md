@@ -74,7 +74,7 @@ To enable automated follow-up emails and expiry reminders:
    CRON_SECRET=your_random_secret_string
    ```
 
-3. **For Vercel deployment:** Cron jobs are pre-configured in `vercel.json` to run daily at 9 AM UTC.
+3. **For Vercel deployment:** Cron jobs are pre-configured in `vercel.json` to run daily at 9 AM UTC. The endpoint accepts both GET and POST (Vercel uses GET); ensure `CRON_SECRET` is set so only your scheduler can call it.
 
 4. **For other hosts:** Set up a cron job to call:
    ```
@@ -225,6 +225,12 @@ quoteflo/
 --surface-600: #475569;
 --surface-100: #f1f5f9;
 ```
+
+## Testing
+
+- **Unit:** `npm run test:unit` — runs Vitest tests (e.g. `escapeHtml` in `src/lib/utils.test.ts`).
+- **E2E:** `npm run test:e2e` — runs Playwright tests against the app.
+- **XSS E2E:** To run the public-quote XSS test, run `supabase/seed_xss_test_quote.sql` in your Supabase SQL Editor (once), then set `TEST_XSS_QUOTE_TOKEN=aaaaaaaa-bbbb-4ccc-dddd-eeeeeeeeeeee` (or the token from the seeded quote) when running `npm run test:e2e`.
 
 ## Project root
 

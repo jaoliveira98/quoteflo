@@ -13,15 +13,20 @@ export async function DELETE(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { error } = await supabase
+  const { data: deleted, error } = await supabase
     .from("quotes")
     .delete()
     .eq("id", id)
-    .eq("user_id", user.id);
+    .eq("user_id", user.id)
+    .select("id");
 
   if (error) {
     console.error("Delete error:", error);
     return NextResponse.json({ error: "Failed to delete quote" }, { status: 500 });
+  }
+
+  if (!deleted?.length) {
+    return NextResponse.json({ error: "Quote not found" }, { status: 404 });
   }
 
   return NextResponse.json({ success: true });

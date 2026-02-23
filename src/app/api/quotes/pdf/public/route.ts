@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
   const token = request.nextUrl.searchParams.get("token");
 
   if (!token) {
-    return NextResponse.json({ error: "Token is required" }, { status: 400 });
+    return NextResponse.json({ error: "Quote not found" }, { status: 404 });
   }
 
   const { data, error } = await supabase.rpc("get_public_quote_data", {
