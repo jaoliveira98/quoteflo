@@ -1,17 +1,14 @@
+import Image from "next/image";
 import { createClient } from "@supabase/supabase-js";
 import { notFound } from "next/navigation";
-import { Logo } from "@/components/logo";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
   CheckCircle2, 
   Clock, 
   Mail, 
   Phone, 
-  MapPin,
   FileText,
-  Download
 } from "lucide-react";
 import { formatCurrency, formatDate, isValidImageUrl } from "@/lib/utils";
 import type { Quote, QuoteLineItem } from "@/types";
@@ -58,9 +55,11 @@ export default async function PublicQuotePage({
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             {profile?.logo_url && isValidImageUrl(profile.logo_url) ? (
-              <img 
+              <Image 
                 src={profile.logo_url} 
                 alt={profile?.company_name || "Company logo"} 
+                width={40}
+                height={40}
                 className="h-10 w-10 object-contain"
               />
             ) : null}

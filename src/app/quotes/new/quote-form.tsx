@@ -78,7 +78,7 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
   const [jobDescription, setJobDescription] = useState("");
   const [vatEnabled, setVatEnabled] = useState(profile.vat_enabled ?? true);
   const [vatRate, setVatRate] = useState(profile.default_vat_rate ?? 20);
-  const [validDays, setValidDays] = useState(profile.default_quote_expiry_days ?? 30);
+  const [validDays] = useState(profile.default_quote_expiry_days ?? 30);
   const [lineItems, setLineItems] = useState<LineItem[]>([]);
 
   const subtotal = lineItems.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0);

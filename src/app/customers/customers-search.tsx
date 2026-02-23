@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, X } from "lucide-react";
+import { Search, X, Loader2 } from "lucide-react";
 
 interface CustomersSearchProps {
   currentSearch: string;
@@ -37,6 +37,8 @@ export function CustomersSearch({ currentSearch }: CustomersSearchProps) {
         onChange={(e) => setSearch(e.target.value)}
         placeholder="Search by name, email, phone..."
         className="pl-9 pr-9"
+        disabled={isPending}
+        aria-busy={isPending}
       />
       {search && (
         <Button
@@ -44,10 +46,15 @@ export function CustomersSearch({ currentSearch }: CustomersSearchProps) {
           variant="ghost"
           size="icon"
           onClick={handleSearchClear}
+          disabled={isPending}
           className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-surface-400 hover:text-surface-600"
           aria-label="Clear search"
         >
-          <X className="h-4 w-4" />
+          {isPending ? (
+            <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+          ) : (
+            <X className="h-4 w-4" />
+          )}
         </Button>
       )}
     </form>

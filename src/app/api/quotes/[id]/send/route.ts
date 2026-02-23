@@ -38,7 +38,7 @@ export async function POST(
     .eq("id", user.id)
     .single();
 
-  const { data: lineItems } = await supabase
+  await supabase
     .from("quote_line_items")
     .select("*")
     .eq("quote_id", quote.id)

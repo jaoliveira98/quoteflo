@@ -39,7 +39,6 @@ export function QuoteDetailActions({
   accessToken,
   hasEmail,
   followUpCount = 0,
-  lastFollowUpAt
 }: QuoteDetailActionsProps) {
   const router = useRouter();
   const [isSending, setIsSending] = useState(false);
