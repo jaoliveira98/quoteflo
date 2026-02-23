@@ -17,6 +17,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Alert } from "@/components/ui/alert";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { 
   Building2, 
   Palette, 
@@ -31,6 +42,7 @@ import {
   CalendarDays,
   Receipt,
   RotateCcw,
+  Trash2,
 } from "lucide-react";
 import type { UserProfile } from "@/types";
 import { cn } from "@/lib/utils";
@@ -986,6 +998,264 @@ function ChangePasswordCard() {
 }
 
 // ──────────────────────────────────────────────
+// Delete Account Card
+// ──────────────────────────────────────────────
+
+function DeleteAccountCard({ profile }: { profile: UserProfile }) {
+  const router = useRouter();
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
+  const [cancelOpen, setCancelOpen] = useState(false);
+
+  const deletionScheduledAt = profile.deletion_scheduled_at
+    ? new Date(profile.deletion_scheduled_at)
+    : null;
+  const deletionDateFormatted = deletionScheduledAt
+    ? deletionScheduledAt.toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      })
+    : null;
+
+  const handleScheduleDeletion = async () => {
+    if (!password.trim()) {
+      setError("Please enter your password");
+      return;
+    }
+    setIsDeleting(true);
+    setError(null);
+    try {
+      const response = await fetch("/api/account/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to schedule account deletion");
+      }
+      setOpen(false);
+      setPassword("");
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleCancelDeletion = async () => {
+    if (!password.trim()) {
+      setError("Please enter your password");
+      return;
+    }
+    setIsCancelling(true);
+    setError(null);
+    try {
+      const response = await fetch("/api/account/cancel-deletion", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to cancel deletion");
+      }
+      setCancelOpen(false);
+      setPassword("");
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setIsCancelling(false);
+    }
+  };
+
+  const handleOpenChange = (next: boolean) => {
+    if (!isDeleting) {
+      setOpen(next);
+      if (!next) {
+        setPassword("");
+        setError(null);
+      }
+    }
+  };
+
+  const handleCancelOpenChange = (next: boolean) => {
+    if (!isCancelling) {
+      setCancelOpen(next);
+      if (!next) {
+        setPassword("");
+        setError(null);
+      }
+    }
+  };
+
+  if (deletionScheduledAt) {
+    return (
+      <Card className="border-amber-200 bg-amber-50/50">
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <Trash2 className="h-4 w-4 text-amber-600" />
+            Account scheduled for deletion
+          </CardTitle>
+          <CardDescription>
+            Your account and all data will be permanently deleted on{" "}
+            <strong>{deletionDateFormatted}</strong>. If you did not request this (for example if
+            someone else had access to your account), cancel the deletion below to keep your
+            account.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <AlertDialog open={cancelOpen} onOpenChange={handleCancelOpenChange}>
+            <AlertDialogTrigger asChild>
+              <Button type="button" variant="outline" className="border-amber-300 text-amber-800 hover:bg-amber-100">
+                Cancel deletion
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Cancel account deletion?</AlertDialogTitle>
+                <AlertDialogDescription asChild>
+                  <span>Enter your password to cancel the scheduled deletion and keep your account.</span>
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <div className="py-4 space-y-2">
+                <Label htmlFor="cancel-deletion-password">Your password</Label>
+                <Input
+                  id="cancel-deletion-password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  autoComplete="current-password"
+                  disabled={isCancelling}
+                  className="mt-1"
+                />
+                {error && (
+                  <Alert variant="destructive" className="mt-2">
+                    {error}
+                  </Alert>
+                )}
+              </div>
+              <AlertDialogFooter>
+                <AlertDialogCancel type="button" disabled={isCancelling}>
+                  Close
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  type="button"
+                  disabled={isCancelling || !password.trim()}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    void handleCancelDeletion();
+                  }}
+                >
+                  {isCancelling ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Cancelling…
+                    </>
+                  ) : (
+                    "Cancel deletion"
+                  )}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="border-red-200">
+      <CardHeader>
+        <CardTitle className="text-base flex items-center gap-2">
+          <Trash2 className="h-4 w-4 text-red-500" />
+          Delete account
+        </CardTitle>
+        <CardDescription>
+          Permanently delete your account and all associated data after a 30-day grace period.
+          You can cancel the deletion anytime before the date. If someone else deleted your account
+          without your consent, log in and cancel the deletion here.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <AlertDialog open={open} onOpenChange={handleOpenChange}>
+          <AlertDialogTrigger asChild>
+            <Button
+              type="button"
+              variant="outline"
+              className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+            >
+              <Trash2 className="h-4 w-4" />
+              Delete my account
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete your account?</AlertDialogTitle>
+              <AlertDialogDescription asChild>
+                <span>
+                  Your account will be scheduled for deletion in 30 days. Until then you can log in
+                  and cancel. After 30 days, your account and all data will be permanently removed.
+                  Enter your password to confirm.
+                </span>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <div className="py-4 space-y-2">
+              <Label htmlFor="delete-account-password">Your password</Label>
+              <Input
+                id="delete-account-password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                autoComplete="current-password"
+                disabled={isDeleting}
+                className="mt-1"
+              />
+              {error && (
+                <Alert variant="destructive" className="mt-2">
+                  {error}
+                </Alert>
+              )}
+            </div>
+            <AlertDialogFooter>
+              <AlertDialogCancel type="button" disabled={isDeleting}>
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                type="button"
+                disabled={isDeleting || !password.trim()}
+                className="bg-red-600 hover:bg-red-700 text-white"
+                onClick={(e) => {
+                  e.preventDefault();
+                  void handleScheduleDeletion();
+                }}
+              >
+                {isDeleting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Scheduling…
+                  </>
+                ) : (
+                  "Delete my account"
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </CardContent>
+    </Card>
+  );
+}
+
+// ──────────────────────────────────────────────
 // Main Settings Form
 // ──────────────────────────────────────────────
 
@@ -1020,6 +1290,7 @@ export function SettingsForm({ profile }: SettingsFormProps) {
         />
         <ChangePasswordCard />
         <SubscriptionCardWrapper profile={profile} />
+        <DeleteAccountCard profile={profile} />
       </section>
     </div>
   );
