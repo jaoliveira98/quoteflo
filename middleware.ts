@@ -1,7 +1,24 @@
-import { type NextRequest } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
+import { checkAuthRateLimit, getClientIdentifier } from "@/lib/rate-limit";
+
+const AUTH_PATHS = ["/login", "/signup", "/forgot-password", "/reset-password"];
+
+function isAuthPath(pathname: string): boolean {
+  return AUTH_PATHS.some((path) => pathname === path || pathname.startsWith(path + "/"));
+}
 
 export async function middleware(request: NextRequest) {
+  if (isAuthPath(request.nextUrl.pathname)) {
+    const id = getClientIdentifier(request);
+    const { allowed } = await checkAuthRateLimit(id);
+    if (!allowed) {
+      return new NextResponse(
+        "Too many attempts. Please try again in a minute.",
+        { status: 429, headers: { "Retry-After": "60" } }
+      );
+    }
+  }
   return await updateSession(request);
 }
 

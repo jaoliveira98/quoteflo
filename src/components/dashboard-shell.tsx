@@ -15,6 +15,7 @@ import {
   Loader2,
   Building2,
   ExternalLink,
+  HelpCircle,
 } from "lucide-react";
 import { useState, useTransition, useEffect } from "react";
 import { Logo } from "@/components/logo";
@@ -189,7 +190,18 @@ function SidebarContent({
         ))}
       </nav>
 
-      <div className="p-4 border-t border-surface-200">
+      <div className="p-4 border-t border-surface-200 space-y-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-full justify-start gap-3 px-3 py-2.5 h-auto text-sm font-medium text-surface-600 hover:text-surface-900 hover:bg-surface-50"
+          onClick={() => handleNavigation("/contact")}
+          disabled={isNavigating}
+          title="Contact support"
+        >
+          <HelpCircle className="h-5 w-5 text-surface-400" />
+          Contact support
+        </Button>
         <div className="flex items-center gap-3 px-3 py-2">
           <div
             className={cn(
