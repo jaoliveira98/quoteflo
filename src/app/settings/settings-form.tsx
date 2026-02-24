@@ -43,6 +43,7 @@ import {
   Receipt,
   RotateCcw,
   Trash2,
+  Download,
 } from "lucide-react";
 import type { UserProfile, Trade } from "@/types";
 import { cn } from "@/lib/utils";
@@ -1057,6 +1058,71 @@ function ChangePasswordCard() {
 }
 
 // ──────────────────────────────────────────────
+// Download my data (GDPR right of access)
+// ──────────────────────────────────────────────
+
+function DownloadDataCard() {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleDownload = async () => {
+    setIsLoading(true);
+    try {
+      const res = await fetch("/api/account/export");
+      if (!res.ok) throw new Error("Export failed");
+      const blob = await res.blob();
+      const disposition = res.headers.get("Content-Disposition");
+      const match = disposition?.match(/filename="?([^";]+)"?/);
+      const filename = match?.[1] ?? `quoteflo-data-${new Date().toISOString().slice(0, 10)}.json`;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      // Error already logged; user sees button reset
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base flex items-center gap-2">
+          <Download className="h-4 w-4 text-surface-600" />
+          Download my data
+        </CardTitle>
+        <CardDescription>
+          Get a copy of your account data (profile, customers, quotes) in JSON format. This supports your right of access under UK GDPR.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={handleDownload}
+          disabled={isLoading}
+          className="gap-2"
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Preparing…
+            </>
+          ) : (
+            <>
+              <Download className="h-4 w-4" />
+              Download my data
+            </>
+          )}
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
+// ──────────────────────────────────────────────
 // Delete Account Card
 // ──────────────────────────────────────────────
 
@@ -1341,6 +1407,7 @@ export function AccountSettingsSection({ profile }: SettingsFormProps) {
     <section className="space-y-4">
       <ChangePasswordCard />
       <SubscriptionCardWrapper profile={profile} />
+      <DownloadDataCard />
       <DeleteAccountCard profile={profile} />
     </section>
   );

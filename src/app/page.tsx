@@ -372,9 +372,13 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <Logo size="sm" />
-            <div className="flex items-center gap-6 text-sm text-surface-500">
+            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-sm text-surface-500">
               <Link href="/login" className="hover:text-surface-700 transition-colors">Log in</Link>
               <Link href="/signup" className="hover:text-surface-700 transition-colors">Sign up</Link>
+              <Link href="/contact" className="hover:text-surface-700 transition-colors">Contact</Link>
+              <Link href="/terms" className="hover:text-surface-700 transition-colors">Terms</Link>
+              <Link href="/privacy" className="hover:text-surface-700 transition-colors">Privacy</Link>
+              <Link href="/cookies" className="hover:text-surface-700 transition-colors">Cookies</Link>
             </div>
             <p className="text-sm text-surface-500">
               © {new Date().getFullYear()} QuoteFlo. Built for UK tradespeople.
