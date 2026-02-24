@@ -35,8 +35,8 @@ export default defineConfig({
         },
       },
       {
-        name: "unit",
         test: {
+          name: "unit",
           include: ["src/**/*.test.ts"],
           environment: "node",
         },

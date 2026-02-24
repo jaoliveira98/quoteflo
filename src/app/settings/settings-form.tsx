@@ -101,21 +101,6 @@ function CardActions({
   );
 }
 
-function SectionHeading({
-  title,
-  description,
-}: {
-  title: string;
-  description: string;
-}) {
-  return (
-    <div className="pb-1">
-      <h2 className="text-lg font-semibold text-surface-900">{title}</h2>
-      <p className="text-sm text-surface-500">{description}</p>
-    </div>
-  );
-}
-
 // ──────────────────────────────────────────────
 // Subscription Card
 // ──────────────────────────────────────────────
