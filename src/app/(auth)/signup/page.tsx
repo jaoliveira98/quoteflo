@@ -240,6 +240,7 @@ export default function SignupPage() {
                   value={formData.companyName}
                   onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
                   required
+                  autoComplete="organization"
                 />
               </div>
 

@@ -315,6 +315,7 @@ export function EditQuoteForm({ profile, quote, existingLineItems, services, has
                 onChange={(e) => handleCustomerFieldChange(setCustomerName)(e.target.value)}
                 placeholder="John Smith"
                 required
+                autoComplete="name"
               />
             </div>
             <div className="space-y-2">
@@ -325,6 +326,7 @@ export function EditQuoteForm({ profile, quote, existingLineItems, services, has
                 value={customerEmail}
                 onChange={(e) => handleCustomerFieldChange(setCustomerEmail)(e.target.value)}
                 placeholder="john@example.com"
+                autoComplete="email"
               />
             </div>
             <div className="space-y-2">
@@ -335,6 +337,7 @@ export function EditQuoteForm({ profile, quote, existingLineItems, services, has
                 value={customerPhone}
                 onChange={(e) => handleCustomerFieldChange(setCustomerPhone)(e.target.value)}
                 placeholder="07123 456789"
+                autoComplete="tel"
               />
             </div>
             <div className="space-y-2">
@@ -344,6 +347,7 @@ export function EditQuoteForm({ profile, quote, existingLineItems, services, has
                 value={customerPostcode}
                 onChange={(e) => handleCustomerFieldChange(setCustomerPostcode)(e.target.value)}
                 placeholder="SW1A 1AA"
+                autoComplete="postal-code"
               />
             </div>
           </div>
@@ -354,6 +358,7 @@ export function EditQuoteForm({ profile, quote, existingLineItems, services, has
               value={customerAddress}
               onChange={(e) => handleCustomerFieldChange(setCustomerAddress)(e.target.value)}
               placeholder="123 Main Street, London"
+              autoComplete="street-address"
             />
           </div>
         </CardContent>
@@ -369,6 +374,8 @@ export function EditQuoteForm({ profile, quote, existingLineItems, services, has
         </CardHeader>
         <CardContent>
           <Textarea
+            id="jobDescription"
+            name="jobDescription"
             value={jobDescription}
             onChange={(e) => setJobDescription(e.target.value)}
             placeholder="Describe the work to be carried out..."
@@ -399,6 +406,8 @@ export function EditQuoteForm({ profile, quote, existingLineItems, services, has
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1">
                       <Input
+                        id={`line-item-description-${item.id}`}
+                        name={`line-description-${item.id}`}
                         value={item.description}
                         onChange={(e) => updateLineItem(item.id, { description: e.target.value })}
                         placeholder="Item description"
@@ -417,8 +426,10 @@ export function EditQuoteForm({ profile, quote, existingLineItems, services, has
                   </div>
                   <div className="grid grid-cols-3 gap-3">
                     <div>
-                      <Label className="text-xs text-surface-500">Qty</Label>
+                      <Label htmlFor={`line-item-qty-${item.id}`} className="text-xs text-surface-500">Qty</Label>
                       <Input
+                        id={`line-item-qty-${item.id}`}
+                        name={`line-qty-${item.id}`}
                         type="number"
                         min="1"
                         step="1"
@@ -428,8 +439,10 @@ export function EditQuoteForm({ profile, quote, existingLineItems, services, has
                       />
                     </div>
                     <div>
-                      <Label className="text-xs text-surface-500">Unit Price (£)</Label>
+                      <Label htmlFor={`line-item-unit-price-${item.id}`} className="text-xs text-surface-500">Unit Price (£)</Label>
                       <Input
+                        id={`line-item-unit-price-${item.id}`}
+                        name={`line-unit-price-${item.id}`}
                         type="number"
                         min="0"
                         step="0.01"
@@ -439,7 +452,7 @@ export function EditQuoteForm({ profile, quote, existingLineItems, services, has
                       />
                     </div>
                     <div>
-                      <Label className="text-xs text-surface-500">Line Total</Label>
+                      <span className="text-xs text-surface-500">Line Total</span>
                       <div className="h-11 flex items-center font-semibold text-surface-900">
                         {formatCurrency(item.quantity * item.unit_price)}
                       </div>
@@ -493,6 +506,8 @@ export function EditQuoteForm({ profile, quote, existingLineItems, services, has
                 {vatEnabled && (
                   <div className="flex items-center gap-1 ml-2">
                     <Input
+                      id="vat-rate-edit"
+                      name="vatRate"
                       type="number"
                       min="0"
                       max="100"
@@ -547,11 +562,14 @@ export function EditQuoteForm({ profile, quote, existingLineItems, services, has
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-surface-400" />
               <Input
+                id="service-search"
+                name="serviceSearch"
                 value={serviceSearch}
                 onChange={(e) => setServiceSearch(e.target.value)}
                 placeholder="Search items..."
                 className="pl-9"
                 autoFocus
+                autoComplete="off"
               />
             </div>
           </div>

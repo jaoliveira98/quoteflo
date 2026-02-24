@@ -377,6 +377,7 @@ export function ServicesManager({ profile, initialServices, hasAccess = true }: 
                   setFormData({ ...formData, service_name: e.target.value })
                 }
                 placeholder="e.g. Consultation, Widget, Hourly Rate"
+                autoComplete="off"
                 autoFocus
               />
             </div>
@@ -470,7 +471,7 @@ export function ServicesManager({ profile, initialServices, hasAccess = true }: 
                 />
               </div>
               <div className="space-y-2">
-                <Label>Unit</Label>
+                <Label htmlFor="service-unit">Unit</Label>
                 <Select
                   value={formData.unit}
                   onValueChange={(value) =>
@@ -480,7 +481,7 @@ export function ServicesManager({ profile, initialServices, hasAccess = true }: 
                     })
                   }
                 >
-                  <SelectTrigger>
+                  <SelectTrigger id="service-unit">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>

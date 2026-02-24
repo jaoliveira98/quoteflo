@@ -443,6 +443,7 @@ function CompanyDetailsCard({ profile }: { profile: UserProfile }) {
               onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
               placeholder="e.g. Smith Electrical Services"
               required
+              autoComplete="organization"
             />
           </div>
 
@@ -455,6 +456,7 @@ function CompanyDetailsCard({ profile }: { profile: UserProfile }) {
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                 placeholder="07123 456789"
+                autoComplete="tel"
               />
             </div>
             <div className="space-y-2">
@@ -464,6 +466,7 @@ function CompanyDetailsCard({ profile }: { profile: UserProfile }) {
                 value={formData.postcode}
                 onChange={(e) => setFormData({ ...formData, postcode: e.target.value })}
                 placeholder="SW1A 1AA"
+                autoComplete="postal-code"
               />
             </div>
           </div>
@@ -754,11 +757,13 @@ function QuoteDefaultsCard({ profile }: { profile: UserProfile }) {
 
             {vatEnabled && (
               <div className="flex items-center gap-3 ml-6 pl-2 border-l-2 border-surface-100">
-                <Label className="text-sm text-surface-600 whitespace-nowrap">
+                <Label htmlFor="vat-rate" className="text-sm text-surface-600 whitespace-nowrap">
                   Default rate
                 </Label>
                 <div className="flex items-center gap-1.5">
                   <Input
+                    id="vat-rate"
+                    name="vatRate"
                     type="number"
                     min="0"
                     max="100"
@@ -870,14 +875,14 @@ function NotificationsCard({ profile }: { profile: UserProfile }) {
             
             {formData.auto_followup_enabled && (
               <div className="flex items-center gap-3 ml-6 pl-2 border-l-2 border-surface-100">
-                <Label className="text-sm text-surface-600 whitespace-nowrap">
+                <Label htmlFor="auto-followup-days" className="text-sm text-surface-600 whitespace-nowrap">
                   Send after
                 </Label>
                 <Select
                   value={String(formData.auto_followup_days)}
                   onValueChange={(value) => setFormData({ ...formData, auto_followup_days: Number(value) })}
                 >
-                  <SelectTrigger className="w-28 h-8">
+                  <SelectTrigger id="auto-followup-days" className="w-28 h-8">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -912,14 +917,14 @@ function NotificationsCard({ profile }: { profile: UserProfile }) {
             
             {formData.expiry_reminder_enabled && (
               <div className="flex items-center gap-3 ml-6 pl-2 border-l-2 border-surface-100">
-                <Label className="text-sm text-surface-600 whitespace-nowrap">
+                <Label htmlFor="expiry-reminder-days" className="text-sm text-surface-600 whitespace-nowrap">
                   Send
                 </Label>
                 <Select
                   value={String(formData.expiry_reminder_days)}
                   onValueChange={(value) => setFormData({ ...formData, expiry_reminder_days: Number(value) })}
                 >
-                  <SelectTrigger className="w-36 h-8">
+                  <SelectTrigger id="expiry-reminder-days" className="w-36 h-8">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>

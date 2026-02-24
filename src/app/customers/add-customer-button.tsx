@@ -126,6 +126,7 @@ export function AddCustomerButton({ hasAccess = true }: AddCustomerButtonProps) 
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="John Smith"
                 required
+                autoComplete="name"
               />
             </div>
 
@@ -138,6 +139,7 @@ export function AddCustomerButton({ hasAccess = true }: AddCustomerButtonProps) 
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   placeholder="john@example.com"
+                  autoComplete="email"
                 />
               </div>
               <div className="space-y-2">
@@ -148,6 +150,7 @@ export function AddCustomerButton({ hasAccess = true }: AddCustomerButtonProps) 
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   placeholder="07123 456789"
+                  autoComplete="tel"
                 />
               </div>
             </div>
@@ -159,6 +162,7 @@ export function AddCustomerButton({ hasAccess = true }: AddCustomerButtonProps) 
                 value={formData.address}
                 onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                 placeholder="123 Main Street, London"
+                autoComplete="street-address"
               />
             </div>
 
@@ -169,6 +173,7 @@ export function AddCustomerButton({ hasAccess = true }: AddCustomerButtonProps) 
                 value={formData.postcode}
                 onChange={(e) => setFormData({ ...formData, postcode: e.target.value })}
                 placeholder="SW1A 1AA"
+                autoComplete="postal-code"
               />
             </div>
 
@@ -180,6 +185,7 @@ export function AddCustomerButton({ hasAccess = true }: AddCustomerButtonProps) 
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                 placeholder="Any notes about this customer..."
                 className="h-20 resize-none"
+                autoComplete="off"
               />
             </div>
 

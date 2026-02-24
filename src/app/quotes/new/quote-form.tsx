@@ -337,10 +337,12 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer, h
           {/* Customer search */}
           {customers.length > 0 && (
             <div ref={customerSearchRef} className="relative pb-4 border-b border-surface-200">
-              <Label className="text-sm text-surface-500 mb-2 block">Search existing customers</Label>
+              <Label htmlFor="customer-search" className="text-sm text-surface-500 mb-2 block">Search existing customers</Label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-surface-400" />
                 <Input
+                  id="customer-search"
+                  name="customerSearch"
                   value={customerSearch}
                   onChange={(e) => {
                     setCustomerSearch(e.target.value);
@@ -349,6 +351,7 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer, h
                   onFocus={() => setShowCustomerDropdown(true)}
                   placeholder="Search by name, email, or phone..."
                   className="pl-9 pr-9"
+                  autoComplete="off"
                 />
                 {customerSearch && (
                   <Button
@@ -403,6 +406,7 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer, h
                 onChange={(e) => handleCustomerFieldChange(setCustomerName)(e.target.value)}
                 placeholder="John Smith"
                 required
+                autoComplete="name"
               />
             </div>
             <div className="space-y-2">
@@ -413,6 +417,7 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer, h
                 value={customerEmail}
                 onChange={(e) => handleCustomerFieldChange(setCustomerEmail)(e.target.value)}
                 placeholder="john@example.com"
+                autoComplete="email"
               />
             </div>
             <div className="space-y-2">
@@ -423,6 +428,7 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer, h
                 value={customerPhone}
                 onChange={(e) => handleCustomerFieldChange(setCustomerPhone)(e.target.value)}
                 placeholder="07123 456789"
+                autoComplete="tel"
               />
             </div>
             <div className="space-y-2">
@@ -432,6 +438,7 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer, h
                 value={customerPostcode}
                 onChange={(e) => handleCustomerFieldChange(setCustomerPostcode)(e.target.value)}
                 placeholder="SW1A 1AA"
+                autoComplete="postal-code"
               />
             </div>
           </div>
@@ -442,6 +449,7 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer, h
               value={customerAddress}
               onChange={(e) => handleCustomerFieldChange(setCustomerAddress)(e.target.value)}
               placeholder="123 Main Street, London"
+              autoComplete="street-address"
             />
           </div>
         </CardContent>
@@ -457,6 +465,8 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer, h
         </CardHeader>
         <CardContent>
           <Textarea
+            id="jobDescription"
+            name="jobDescription"
             value={jobDescription}
             onChange={(e) => setJobDescription(e.target.value)}
             placeholder="Describe the work to be carried out..."
@@ -487,6 +497,8 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer, h
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1">
                       <Input
+                        id={`line-item-description-${item.id}`}
+                        name={`line-description-${item.id}`}
                         value={item.description}
                         onChange={(e) => updateLineItem(item.id, { description: e.target.value })}
                         placeholder="Item description"
@@ -505,8 +517,10 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer, h
                   </div>
                   <div className="grid grid-cols-3 gap-3">
                     <div>
-                      <Label className="text-xs text-surface-500">Qty</Label>
+                      <Label htmlFor={`line-item-qty-${item.id}`} className="text-xs text-surface-500">Qty</Label>
                       <Input
+                        id={`line-item-qty-${item.id}`}
+                        name={`line-qty-${item.id}`}
                         type="number"
                         min="1"
                         step="1"
@@ -516,8 +530,10 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer, h
                       />
                     </div>
                     <div>
-                      <Label className="text-xs text-surface-500">Unit Price (£)</Label>
+                      <Label htmlFor={`line-item-unit-price-${item.id}`} className="text-xs text-surface-500">Unit Price (£)</Label>
                       <Input
+                        id={`line-item-unit-price-${item.id}`}
+                        name={`line-unit-price-${item.id}`}
                         type="number"
                         min="0"
                         step="0.01"
@@ -527,7 +543,7 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer, h
                       />
                     </div>
                     <div>
-                      <Label className="text-xs text-surface-500">Line Total</Label>
+                      <span className="text-xs text-surface-500">Line Total</span>
                       <div className="h-11 flex items-center font-semibold text-surface-900">
                         {formatCurrency(item.quantity * item.unit_price)}
                       </div>
@@ -583,6 +599,8 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer, h
                 {vatEnabled && (
                   <div className="flex items-center gap-1 ml-2">
                     <Input
+                      id="vat-rate"
+                      name="vatRate"
                       type="number"
                       min="0"
                       max="100"
@@ -641,11 +659,14 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer, h
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-surface-400" />
               <Input
+                id="service-search"
+                name="serviceSearch"
                 value={serviceSearch}
                 onChange={(e) => setServiceSearch(e.target.value)}
                 placeholder="Search items..."
                 className="pl-9"
                 autoFocus
+                autoComplete="off"
               />
             </div>
           </div>

@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetTitle,
 } from "@/components/ui/sheet";
 import {
@@ -318,6 +319,9 @@ export function DashboardShell({ children, user, hasAccess = true }: DashboardSh
       <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
         <SheetContent side="left" className="w-64 p-0">
           <SheetTitle className="sr-only">Navigation</SheetTitle>
+          <SheetDescription className="sr-only">
+            Main navigation links
+          </SheetDescription>
           <SidebarContent {...sidebarProps} />
         </SheetContent>
       </Sheet>
