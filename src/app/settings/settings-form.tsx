@@ -44,7 +44,7 @@ import {
   RotateCcw,
   Trash2,
 } from "lucide-react";
-import type { UserProfile } from "@/types";
+import type { UserProfile, Trade } from "@/types";
 import { cn } from "@/lib/utils";
 import { TRADES_CONFIG, BRAND_COLORS } from "@/lib/constants";
 import { Suspense } from "react";
@@ -346,23 +346,50 @@ function CompanyDetailsCard({ profile }: { profile: UserProfile }) {
     postcode: profile.postcode || "",
   }), [profile]);
 
-  const [formData, setFormData] = useState(initialValues);
+  const initialTradeValues = useMemo(
+    () => ({
+      trade: profile.trade as Trade,
+      customTradeName: profile.custom_trade_name || "",
+    }),
+    [profile],
+  );
 
-  const isDirty = formData.company_name !== initialValues.company_name ||
+  const [formData, setFormData] = useState(initialValues);
+  const [selectedTrade, setSelectedTrade] = useState<Trade>(initialTradeValues.trade);
+  const [customTradeName, setCustomTradeName] = useState(initialTradeValues.customTradeName);
+
+  const isFormDirty =
+    formData.company_name !== initialValues.company_name ||
     formData.phone !== initialValues.phone ||
     formData.postcode !== initialValues.postcode;
 
+  const isTradeDirty =
+    selectedTrade !== initialTradeValues.trade ||
+    customTradeName.trim() !== initialTradeValues.customTradeName.trim();
+
+  const isTradeValid =
+    selectedTrade !== "other" || customTradeName.trim().length > 0;
+
+  const isDirty = isFormDirty || (isTradeDirty && isTradeValid);
+
   const handleUndo = useCallback(() => {
     setFormData(initialValues);
-  }, [initialValues]);
+    setSelectedTrade(initialTradeValues.trade);
+    setCustomTradeName(initialTradeValues.customTradeName);
+  }, [initialValues, initialTradeValues]);
 
-  const tradeConfig = TRADES_CONFIG.find(t => t.value === profile.trade);
-  const tradeName = profile.trade === "other"
-    ? profile.custom_trade_name || "Other"
-    : tradeConfig?.label || profile.trade;
+  const tradeConfig = TRADES_CONFIG.find((t) => t.value === selectedTrade);
+  const tradeName =
+    selectedTrade === "other"
+      ? customTradeName || "Other"
+      : tradeConfig?.label || selectedTrade;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (selectedTrade === "other" && !customTradeName.trim()) {
+      setError("Please enter your trade name.");
+      return;
+    }
     setIsLoading(true);
     setError(null);
     setSuccess(false);
@@ -375,6 +402,9 @@ function CompanyDetailsCard({ profile }: { profile: UserProfile }) {
           company_name: formData.company_name,
           phone: formData.phone || null,
           postcode: formData.postcode || null,
+          trade: selectedTrade,
+          custom_trade_name:
+            selectedTrade === "other" ? customTradeName.trim() : null,
           updated_at: new Date().toISOString(),
         })
         .eq("id", profile.id);
@@ -438,17 +468,52 @@ function CompanyDetailsCard({ profile }: { profile: UserProfile }) {
           </div>
 
           <div className="space-y-2">
-            <Label>Trade</Label>
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-surface-50 border border-surface-200">
-              {tradeConfig && (
-                <tradeConfig.icon className="h-5 w-5 text-brand-600" />
+            <Label htmlFor="trade">Trade</Label>
+            <div className="space-y-2">
+              <Select
+                value={selectedTrade}
+                onValueChange={(value) => setSelectedTrade(value as Trade)}
+              >
+                <SelectTrigger id="trade">
+                  <SelectValue placeholder="Select your trade" />
+                </SelectTrigger>
+                <SelectContent>
+                  {TRADES_CONFIG.map((trade) => (
+                    <SelectItem key={trade.value} value={trade.value}>
+                      <span className="flex items-center gap-2">
+                        <trade.icon className="h-4 w-4 text-brand-600" />
+                        <span>{trade.label}</span>
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {selectedTrade === "other" && (
+                <div className="space-y-1">
+                  <Label
+                    htmlFor="custom-trade"
+                    className="text-xs text-surface-500"
+                  >
+                    Your trade name
+                  </Label>
+                  <Input
+                    id="custom-trade"
+                    value={customTradeName}
+                    onChange={(e) => setCustomTradeName(e.target.value)}
+                    placeholder="e.g. Solar Panel Installer"
+                  />
+                </div>
               )}
-              <span className="font-medium text-surface-700 capitalize">
-                {tradeName}
-              </span>
-              <Badge variant="secondary" className="ml-auto text-xs">
-                Set during signup
-              </Badge>
+
+              <div className="flex items-center gap-2 text-xs text-surface-500">
+                {tradeConfig && (
+                  <tradeConfig.icon className="h-3.5 w-3.5 text-brand-600" />
+                )}
+                <span>
+                  {tradeName} — used on your quotes and customer-facing pages.
+                </span>
+              </div>
             </div>
           </div>
 

@@ -24,15 +24,28 @@ export function NewQuoteButton({
 }: NewQuoteButtonProps) {
   const nav = useDashboardNav();
 
-  if (nav && !nav.hasAccess) {
+  if (nav) {
+    if (!nav.hasAccess) {
+      return (
+        <Button
+          variant={variant}
+          size={size}
+          className={cn(className)}
+          disabled
+          onClick={(e) => e.preventDefault()}
+          aria-disabled="true"
+        >
+          {children}
+        </Button>
+      );
+    }
+
     return (
       <Button
         variant={variant}
         size={size}
         className={cn(className)}
-        disabled
-        onClick={(e) => e.preventDefault()}
-        aria-disabled="true"
+        onClick={() => nav.startNavigation(href)}
       >
         {children}
       </Button>
@@ -65,11 +78,23 @@ export function NewQuoteLink({
 }) {
   const nav = useDashboardNav();
 
-  if (nav && !nav.hasAccess) {
+  if (nav) {
+    if (!nav.hasAccess) {
+      return (
+        <span className={cn("cursor-not-allowed opacity-60", className)} aria-disabled="true">
+          {children}
+        </span>
+      );
+    }
+
     return (
-      <span className={cn("cursor-not-allowed opacity-60", className)} aria-disabled="true">
+      <button
+        type="button"
+        onClick={() => nav.startNavigation(href)}
+        className={cn("inline-flex items-center gap-1 text-brand-600 hover:text-brand-700", className)}
+      >
         {children}
-      </span>
+      </button>
     );
   }
 

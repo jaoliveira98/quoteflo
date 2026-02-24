@@ -47,6 +47,14 @@ export async function requireAuthWithProfile() {
   return profile;
 }
 
+export async function redirectIfAuthenticated(redirectTo: string = "/dashboard") {
+  const user = await getUser();
+
+  if (user) {
+    redirect(redirectTo);
+  }
+}
+
 export function hasActiveSubscription(profile: UserProfile): boolean {
   if (profile.subscription_status === "active") return true;
   if (

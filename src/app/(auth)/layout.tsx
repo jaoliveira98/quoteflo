@@ -1,12 +1,15 @@
 import { Logo } from "@/components/logo";
 import Link from "next/link";
 import { CheckCircle2 } from "lucide-react";
+import { redirectIfAuthenticated } from "@/lib/auth";
 
-export default function AuthLayout({
+export default async function AuthLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  await redirectIfAuthenticated();
+
   return (
     <div className="min-h-screen bg-surface-50 flex flex-col lg:flex-row">
       {/* Left side - Branding (hidden on mobile) */}
