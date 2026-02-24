@@ -55,16 +55,16 @@ export function AnalyticsCharts({ monthlyData, statusData }: AnalyticsChartsProp
   }, {});
 
   return (
-    <div className="grid lg:grid-cols-2 gap-6">
+    <div className="grid lg:grid-cols-2 gap-4 sm:gap-6 min-w-0">
       {/* Monthly Quote Activity - Bar Chart */}
-      <Card className="flex flex-col">
-        <CardHeader className="flex flex-row items-center justify-between">
+      <Card className="flex flex-col min-w-0 overflow-hidden">
+        <CardHeader className="flex flex-row items-center justify-between gap-2">
           <CardTitle className="text-lg">Monthly Activity</CardTitle>
-          <span className="text-xs text-surface-400">Last 6 months</span>
+          <span className="text-xs text-surface-400 flex-shrink-0">Last 6 months</span>
         </CardHeader>
-        <CardContent className="flex-1">
+        <CardContent className="flex-1 min-w-0">
           {hasMonthlyData ? (
-            <ChartContainer config={barChartConfig} className="h-72 w-full">
+            <ChartContainer config={barChartConfig} className="h-72 w-full min-w-0 max-w-full">
               <BarChart
                 data={monthlyData}
                 margin={{ top: 8, right: 4, bottom: 0, left: -20 }}
@@ -147,15 +147,15 @@ export function AnalyticsCharts({ monthlyData, statusData }: AnalyticsChartsProp
       </Card>
 
       {/* Status Distribution - Pie Chart */}
-      <Card className="flex flex-col">
-        <CardHeader className="flex flex-row items-center justify-between">
+      <Card className="flex flex-col min-w-0 overflow-hidden">
+        <CardHeader className="flex flex-row items-center justify-between gap-2">
           <CardTitle className="text-lg">Status Distribution</CardTitle>
-          <span className="text-xs text-surface-400">All quotes</span>
+          <span className="text-xs text-surface-400 flex-shrink-0">All quotes</span>
         </CardHeader>
-        <CardContent className="flex-1">
+        <CardContent className="flex-1 min-w-0">
           {statusData.length > 0 ? (
-            <div className="space-y-4">
-              <ChartContainer config={pieChartConfig} className="h-56 w-full">
+            <div className="space-y-4 min-w-0">
+              <ChartContainer config={pieChartConfig} className="h-56 w-full min-w-0 max-w-full">
                 <PieChart>
                   <ChartTooltip
                     content={

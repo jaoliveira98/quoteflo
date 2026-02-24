@@ -82,97 +82,99 @@ export default async function CustomerDetailPage({
       user={{ email: profile.email, company_name: profile.company_name, brand_color: profile.brand_color }}
       hasAccess={hasActiveSubscription(profile)}
     >
-      <div className="p-6 lg:p-8 space-y-6">
+      <div className="p-4 sm:p-6 lg:p-8 space-y-6 min-w-0 overflow-x-hidden">
         {/* Header */}
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-start gap-4">
-            <Button variant="ghost" size="icon" asChild aria-label="Back to customers">
-              <Link href="/customers">
-                <ArrowLeft className="h-5 w-5" />
-              </Link>
-            </Button>
-            <div className="flex items-center gap-4">
-              <div className="h-14 w-14 rounded-full bg-brand-100 flex items-center justify-center">
-                <span className="text-xl font-semibold text-brand-700">
-                  {getInitials(customer.name)}
-                </span>
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-surface-900">{customer.name}</h1>
-                <p className="text-surface-600">
-                  Customer since {new Date(customer.created_at).toLocaleDateString("en-GB", {
-                    month: "long",
-                    year: "numeric",
-                  })}
-                </p>
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <div className="flex items-start gap-3 sm:gap-4 min-w-0">
+              <Button variant="ghost" size="icon" asChild aria-label="Back to customers" className="flex-shrink-0">
+                <Link href="/customers">
+                  <ArrowLeft className="h-5 w-5" />
+                </Link>
+              </Button>
+              <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+                <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-brand-100 flex items-center justify-center flex-shrink-0">
+                  <span className="text-lg sm:text-xl font-semibold text-brand-700">
+                    {getInitials(customer.name)}
+                  </span>
+                </div>
+                <div className="min-w-0">
+                  <h1 className="text-xl sm:text-2xl font-bold text-surface-900 truncate">{customer.name}</h1>
+                  <p className="text-sm sm:text-base text-surface-600">
+                    Customer since {new Date(customer.created_at).toLocaleDateString("en-GB", {
+                      month: "long",
+                      year: "numeric",
+                    })}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <NewQuoteButton href={`/quotes/new?customer=${customer.id}`}>
-              <Plus className="h-4 w-4" />
-              New Quote
-            </NewQuoteButton>
-            <CustomerActions
-              customer={customer}
-              otherCustomers={otherCustomers}
-            />
+            <div className="flex items-center gap-2 flex-shrink-0 flex-wrap">
+              <NewQuoteButton href={`/quotes/new?customer=${customer.id}`}>
+                <Plus className="h-4 w-4" />
+                New Quote
+              </NewQuoteButton>
+              <CustomerActions
+                customer={customer}
+                otherCustomers={otherCustomers}
+              />
+            </div>
           </div>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="p-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-surface-500">Total Quotes</p>
-                  <p className="text-2xl font-bold text-surface-900">{totalQuotes}</p>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <Card className="min-w-0">
+            <CardContent className="p-4 sm:p-5">
+              <div className="flex items-center justify-between gap-2 min-h-[3.5rem]">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm text-surface-500">Total Quotes</p>
+                  <p className="text-xl sm:text-2xl font-bold text-surface-900 break-all">{totalQuotes}</p>
                 </div>
-                <div className="h-10 w-10 rounded-lg bg-surface-100 flex items-center justify-center">
-                  <FileText className="h-5 w-5 text-surface-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-surface-500">Won</p>
-                  <p className="text-2xl font-bold text-surface-900">{acceptedQuotes}</p>
-                </div>
-                <div className="h-10 w-10 rounded-lg bg-green-100 flex items-center justify-center">
-                  <CheckCircle2 className="h-5 w-5 text-green-600" />
+                <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg bg-surface-100 flex items-center justify-center flex-shrink-0">
+                  <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-surface-600" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="p-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-surface-500">Total Quoted</p>
-                  <p className="text-2xl font-bold text-surface-900">{formatCurrency(totalValue)}</p>
+          <Card className="min-w-0">
+            <CardContent className="p-4 sm:p-5">
+              <div className="flex items-center justify-between gap-2 min-h-[3.5rem]">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm text-surface-500">Won</p>
+                  <p className="text-xl sm:text-2xl font-bold text-surface-900 break-all">{acceptedQuotes}</p>
                 </div>
-                <div className="h-10 w-10 rounded-lg bg-surface-100 flex items-center justify-center">
-                  <PoundSterling className="h-5 w-5 text-surface-600" />
+                <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg bg-green-100 flex items-center justify-center flex-shrink-0">
+                  <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="p-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-surface-500">Won Value</p>
-                  <p className="text-2xl font-bold text-surface-900">{formatCurrency(acceptedValue)}</p>
+          <Card className="min-w-0">
+            <CardContent className="p-4 sm:p-5">
+              <div className="flex items-center justify-between gap-2 min-h-[3.5rem]">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm text-surface-500">Total Quoted</p>
+                  <p className="text-xl sm:text-2xl font-bold text-surface-900 break-all">{formatCurrency(totalValue)}</p>
                 </div>
-                <div className="h-10 w-10 rounded-lg bg-green-100 flex items-center justify-center">
-                  <CheckCircle2 className="h-5 w-5 text-green-600" />
+                <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg bg-surface-100 flex items-center justify-center flex-shrink-0">
+                  <PoundSterling className="h-4 w-4 sm:h-5 sm:w-5 text-surface-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="min-w-0">
+            <CardContent className="p-4 sm:p-5">
+              <div className="flex items-center justify-between gap-2 min-h-[3.5rem]">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm text-surface-500">Won Value</p>
+                  <p className="text-xl sm:text-2xl font-bold text-surface-900 break-all">{formatCurrency(acceptedValue)}</p>
+                </div>
+                <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg bg-green-100 flex items-center justify-center flex-shrink-0">
+                  <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
                 </div>
               </div>
             </CardContent>
@@ -259,44 +261,46 @@ export default async function CustomerDetailPage({
           </Card>
 
           {/* Quote History */}
-          <Card className="lg:col-span-2">
+          <Card className="lg:col-span-2 min-w-0 overflow-hidden">
             <CardHeader>
               <CardTitle className="text-lg">Quote History</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="min-w-0">
               {customerQuotes.length > 0 ? (
-                <div className="space-y-3">
+                <div className="space-y-2 sm:space-y-3">
                   {customerQuotes.map((quote) => {
                     const StatusIcon = STATUS_ICONS[quote.status as QuoteStatus] || FileText;
                     return (
                       <DashboardNavLink
                         key={quote.id}
                         href={`/quotes/${quote.id}`}
-                        className="flex items-center justify-between p-4 rounded-lg border border-surface-200 hover:border-surface-300 hover:bg-surface-50 transition-colors"
+                        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 sm:p-4 rounded-lg border border-surface-200 hover:border-surface-300 hover:bg-surface-50 transition-colors min-w-0"
                       >
-                        <div className="flex items-center gap-4">
-                          <div className="h-10 w-10 rounded-lg bg-surface-100 flex items-center justify-center">
-                            <StatusIcon className="h-5 w-5 text-surface-500" />
+                        <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                          <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg bg-surface-100 flex items-center justify-center flex-shrink-0">
+                            <StatusIcon className="h-4 w-4 sm:h-5 sm:w-5 text-surface-500" />
                           </div>
-                          <div>
-                            <p className="font-medium text-surface-900">{quote.quote_number}</p>
-                            <div className="flex items-center gap-2 text-sm text-surface-500">
-                              <Calendar className="h-3.5 w-3.5" />
-                              {new Date(quote.created_at).toLocaleDateString("en-GB", {
-                                day: "numeric",
-                                month: "short",
-                                year: "numeric",
-                              })}
+                          <div className="min-w-0 flex-1">
+                            <p className="font-medium text-surface-900 truncate">{quote.quote_number}</p>
+                            <div className="flex items-center gap-2 text-sm text-surface-500 flex-wrap">
+                              <span className="flex items-center gap-1.5 shrink-0">
+                                <Calendar className="h-3.5 w-3.5" />
+                                {new Date(quote.created_at).toLocaleDateString("en-GB", {
+                                  day: "numeric",
+                                  month: "short",
+                                  year: "numeric",
+                                })}
+                              </span>
                               {quote.job_description && (
                                 <>
-                                  <span>•</span>
-                                  <span className="truncate max-w-[200px]">{quote.job_description}</span>
+                                  <span className="hidden sm:inline">•</span>
+                                  <span className="truncate max-w-[140px] sm:max-w-[200px]">{quote.job_description}</span>
                                 </>
                               )}
                             </div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0">
                           <Badge variant={STATUS_COLORS[quote.status as QuoteStatus]}>
                             {STATUS_LABELS[quote.status as QuoteStatus]}
                           </Badge>

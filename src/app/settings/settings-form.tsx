@@ -186,9 +186,9 @@ function SubscriptionCard({ profile }: { profile: UserProfile }) {
           </Alert>
         )}
         
-        <div className="flex items-center justify-between p-4 rounded-lg bg-surface-50">
-          <div>
-            <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 rounded-lg bg-surface-50">
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2">
               <p className="font-medium text-surface-900">
                 {isActive ? "Professional" : isTrialing ? "Free Trial" : "Starter"} Plan
               </p>
@@ -222,37 +222,38 @@ function SubscriptionCard({ profile }: { profile: UserProfile }) {
               }
             </p>
           </div>
-          
-          {isActive || hasStripeCustomer ? (
-            <Button 
-              variant="outline" 
-              onClick={handleManageBilling}
-              disabled={isLoading}
-              size="sm"
-              className="gap-1.5"
-            >
-              {isLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <>
-                  Manage
-                  <ExternalLink className="h-3.5 w-3.5" aria-hidden />
-                </>
-              )}
-            </Button>
-          ) : (
-            <Button onClick={handleUpgrade} disabled={isLoading} size="sm" className="gap-1.5">
-              {isLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <>
-                  <Crown className="h-4 w-4" />
-                  Upgrade - £29/mo
-                  <ExternalLink className="h-3.5 w-3.5" aria-hidden />
-                </>
-              )}
-            </Button>
-          )}
+          <div className="flex-shrink-0">
+            {isActive || hasStripeCustomer ? (
+              <Button 
+                variant="outline" 
+                onClick={handleManageBilling}
+                disabled={isLoading}
+                size="sm"
+                className="gap-1.5 w-full sm:w-auto"
+              >
+                {isLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <>
+                    Manage
+                    <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+                  </>
+                )}
+              </Button>
+            ) : (
+              <Button onClick={handleUpgrade} disabled={isLoading} size="sm" className="gap-1.5 w-full sm:w-auto">
+                {isLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <>
+                    <Crown className="h-4 w-4" />
+                    Upgrade - £29/mo
+                    <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+                  </>
+                )}
+              </Button>
+            )}
+          </div>
         </div>
         
         {isTrialing && (

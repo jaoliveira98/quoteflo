@@ -51,25 +51,25 @@ export default async function QuoteDetailPage({
       user={{ email: profile.email, company_name: profile.company_name, brand_color: profile.brand_color }}
       hasAccess={hasActiveSubscription(profile)}
     >
-      <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
+      <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto space-y-6 min-w-0">
         {/* Header */}
         <div className="flex flex-col gap-4">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex items-start gap-4">
-              <Button variant="ghost" size="icon" asChild aria-label="Back to quotes">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <div className="flex items-start gap-3 sm:gap-4 min-w-0">
+              <Button variant="ghost" size="icon" asChild aria-label="Back to quotes" className="flex-shrink-0">
                 <Link href="/quotes">
                   <ArrowLeft className="h-5 w-5" />
                 </Link>
               </Button>
-              <div>
-                <div className="flex items-center gap-3 mb-1">
-                  <h1 className="text-2xl font-bold text-surface-900">{quote.quote_number}</h1>
-                  <Badge variant={status.variant} className="gap-1">
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-1">
+                  <h1 className="text-xl sm:text-2xl font-bold text-surface-900 break-words">{quote.quote_number}</h1>
+                  <Badge variant={status.variant} className="gap-1 flex-shrink-0">
                     <StatusIcon className="h-3 w-3" />
                     {status.label}
                   </Badge>
                 </div>
-                <p className="text-surface-600">
+                <p className="text-sm sm:text-base text-surface-600 break-words">
                   Created {formatDate(quote.created_at)}
                   {quote.valid_until && (
                     <> • Valid until {formatDate(quote.valid_until)}</>
@@ -77,16 +77,17 @@ export default async function QuoteDetailPage({
                 </p>
               </div>
             </div>
-            
-            <QuoteDetailActions
-              quoteId={quote.id}
-              status={quote.status}
-              accessToken={quote.access_token}
-              hasEmail={!!quote.customer_email}
-              followUpCount={quote.follow_up_count || 0}
-              lastFollowUpAt={quote.last_follow_up_at}
-              hasAccess={hasActiveSubscription(profile)}
-            />
+            <div className="flex-shrink-0 sm:pl-2">
+              <QuoteDetailActions
+                quoteId={quote.id}
+                status={quote.status}
+                accessToken={quote.access_token}
+                hasEmail={!!quote.customer_email}
+                followUpCount={quote.follow_up_count || 0}
+                lastFollowUpAt={quote.last_follow_up_at}
+                hasAccess={hasActiveSubscription(profile)}
+              />
+            </div>
           </div>
         </div>
 
