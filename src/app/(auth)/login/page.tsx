@@ -59,73 +59,83 @@ function LoginForm() {
   };
 
   return (
-    <Card className="border-0 shadow-medium">
-      <CardHeader className="text-center pb-2">
-        <CardTitle className="text-2xl">Welcome back</CardTitle>
-        <CardDescription>
-          Log in to your QuoteFlo account
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              required
-              autoComplete="email"
-            />
+    <div className="relative" aria-busy={isLoading}>
+      {isLoading && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-white/80 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-3 text-surface-600 text-sm">
+            <Loader2 className="h-5 w-5 animate-spin text-brand-600" />
+            <span>Logging you in…</span>
           </div>
+        </div>
+      )}
+      <Card className="border-0 shadow-medium">
+        <CardHeader className="text-center pb-2">
+          <CardTitle className="text-2xl">Welcome back</CardTitle>
+          <CardDescription>
+            Log in to your QuoteFlo account
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                required
+                autoComplete="email"
+              />
+            </div>
 
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="password">Password</Label>
-              <Link 
-                href="/forgot-password" 
-                className="text-sm text-brand-600 hover:underline"
-              >
-                Forgot password?
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">Password</Label>
+                <Link 
+                  href="/forgot-password" 
+                  className="text-sm text-brand-600 hover:underline"
+                >
+                  Forgot password?
+                </Link>
+              </div>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Your password"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                required
+                autoComplete="current-password"
+              />
+            </div>
+
+            {error && (
+              <Alert variant="destructive">{error}</Alert>
+            )}
+
+            <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Logging in...
+                </>
+              ) : (
+                "Log in"
+              )}
+            </Button>
+
+            <div className="pt-2 text-center text-sm text-surface-500">
+              Don&apos;t have an account?{" "}
+              <Link href="/signup" className="text-brand-600 hover:underline font-medium">
+                Start free trial
               </Link>
             </div>
-            <Input
-              id="password"
-              type="password"
-              placeholder="Your password"
-              value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              required
-              autoComplete="current-password"
-            />
-          </div>
-
-          {error && (
-            <Alert variant="destructive">{error}</Alert>
-          )}
-
-          <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
-            {isLoading ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Logging in...
-              </>
-            ) : (
-              "Log in"
-            )}
-          </Button>
-
-          <div className="pt-2 text-center text-sm text-surface-500">
-            Don&apos;t have an account?{" "}
-            <Link href="/signup" className="text-brand-600 hover:underline font-medium">
-              Start free trial
-            </Link>
-          </div>
-        </form>
-      </CardContent>
-    </Card>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
 

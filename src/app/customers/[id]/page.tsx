@@ -1,4 +1,5 @@
 import { DashboardShell } from "@/components/dashboard-shell";
+import { DashboardNavLink } from "@/components/dashboard-nav-link";
 import { NewQuoteButton } from "@/components/new-quote-button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -268,7 +269,7 @@ export default async function CustomerDetailPage({
                   {customerQuotes.map((quote) => {
                     const StatusIcon = STATUS_ICONS[quote.status as QuoteStatus] || FileText;
                     return (
-                      <Link
+                      <DashboardNavLink
                         key={quote.id}
                         href={`/quotes/${quote.id}`}
                         className="flex items-center justify-between p-4 rounded-lg border border-surface-200 hover:border-surface-300 hover:bg-surface-50 transition-colors"
@@ -303,7 +304,7 @@ export default async function CustomerDetailPage({
                             {formatCurrency(Number(quote.total))}
                           </span>
                         </div>
-                      </Link>
+                      </DashboardNavLink>
                     );
                   })}
                 </div>
