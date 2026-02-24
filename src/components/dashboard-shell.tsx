@@ -1,17 +1,20 @@
 "use client";
 
+import { createContext, useContext, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { 
-  LayoutDashboard, 
-  FileText, 
-  Users, 
-  Settings, 
+import {
+  LayoutDashboard,
+  FileText,
+  Users,
+  Settings,
   Plus,
   Menu,
   LogOut,
   BarChart3,
   Package,
-  Loader2
+  Loader2,
+  Building2,
+  ExternalLink,
 } from "lucide-react";
 import { useState, useTransition, useEffect } from "react";
 import { Logo } from "@/components/logo";
@@ -21,8 +24,30 @@ import {
   SheetContent,
   SheetTitle,
 } from "@/components/ui/sheet";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
+
+type DashboardNavContextValue = {
+  startNavigation: (href: string) => void;
+  openUpgradeDialog: () => void;
+  hasAccess: boolean;
+  goToStripeSubscription: () => Promise<void>;
+};
+
+const DashboardNavContext = createContext<DashboardNavContextValue | null>(null);
+
+export function useDashboardNav() {
+  const ctx = useContext(DashboardNavContext);
+  return ctx;
+}
 
 const navigationGroups = [
   {
@@ -41,9 +66,11 @@ const navigationGroups = [
     ],
   },
   {
-    label: "Account",
+    label: "Settings",
     items: [
-      { name: "Settings", href: "/settings", icon: Settings },
+      { name: "Business", href: "/settings/business", icon: Building2 },
+      { name: "Quoting", href: "/settings/quoting", icon: FileText },
+      { name: "Account", href: "/settings/account", icon: Settings },
     ],
   },
 ];
@@ -53,7 +80,9 @@ interface DashboardShellProps {
   user?: {
     email: string;
     company_name: string;
+    brand_color?: string;
   };
+  hasAccess?: boolean;
 }
 
 interface SidebarContentProps {
@@ -65,7 +94,18 @@ interface SidebarContentProps {
   user?: {
     email: string;
     company_name: string;
+    brand_color?: string;
   };
+  hasAccess?: boolean;
+  onOpenUpgradeDialog?: () => void;
+}
+
+function brandAvatarStyle(brandColor: string | undefined) {
+  if (!brandColor) return undefined;
+  return {
+    backgroundColor: `${brandColor}1a`,
+    color: brandColor,
+  } as React.CSSProperties;
 }
 
 function SidebarContent({
@@ -75,7 +115,17 @@ function SidebarContent({
   handleNavigation,
   handleLogout,
   user,
+  hasAccess = true,
+  onOpenUpgradeDialog,
 }: SidebarContentProps) {
+  const handleNewQuoteClick = () => {
+    if (hasAccess) {
+      handleNavigation("/quotes/new");
+    } else {
+      onOpenUpgradeDialog?.();
+    }
+  };
+
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center h-14 px-4 border-b border-surface-200">
@@ -83,11 +133,12 @@ function SidebarContent({
       </div>
 
       <div className="p-4 pb-2">
-        <Button 
-          className="w-full shadow-soft" 
+        <Button
+          className="w-full shadow-soft"
           size="lg"
-          onClick={() => handleNavigation("/quotes/new")}
+          onClick={handleNewQuoteClick}
           disabled={isNavigating}
+          title={hasAccess ? undefined : "Upgrade to create quotes"}
         >
           {loadingPath === "/quotes/new" ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -139,8 +190,17 @@ function SidebarContent({
 
       <div className="p-4 border-t border-surface-200">
         <div className="flex items-center gap-3 px-3 py-2">
-          <div className="h-9 w-9 rounded-full bg-brand-100 flex items-center justify-center">
-            <span className="text-sm font-medium text-brand-700">
+          <div
+            className={cn(
+              "h-9 w-9 rounded-full flex items-center justify-center",
+              !user?.brand_color && "bg-brand-100"
+            )}
+            style={user?.brand_color ? brandAvatarStyle(user.brand_color) : undefined}
+          >
+            <span
+              className={cn("text-sm font-medium", !user?.brand_color && "text-brand-700")}
+              style={user?.brand_color ? { color: user.brand_color } : undefined}
+            >
               {user?.company_name?.charAt(0) || "Q"}
             </span>
           </div>
@@ -167,16 +227,46 @@ function SidebarContent({
   );
 }
 
-export function DashboardShell({ children, user }: DashboardShellProps) {
+export function DashboardShell({ children, user, hasAccess = true }: DashboardShellProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [loadingPath, setLoadingPath] = useState<string | null>(null);
 
   useEffect(() => {
     setLoadingPath(null);
   }, [pathname]);
+
+  const handleOpenUpgradeDialog = useCallback(() => {
+    setSidebarOpen(false);
+    setUpgradeDialogOpen(true);
+  }, []);
+
+  const goToStripeSubscription = useCallback(async () => {
+    setCheckoutLoading(true);
+    try {
+      let res = await fetch("/api/billing/portal", { method: "POST" });
+      let data = await res.json();
+      if (res.ok && data.url) {
+        window.location.href = data.url;
+        return;
+      }
+      res = await fetch("/api/billing/checkout", { method: "POST" });
+      data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to start checkout");
+      if (data.url) {
+        window.location.href = data.url;
+        return;
+      }
+      throw new Error("No checkout URL returned");
+    } catch (err) {
+      console.error(err);
+      setCheckoutLoading(false);
+    }
+  }, []);
 
   const handleNavigation = (href: string) => {
     if (pathname === href) return;
@@ -198,6 +288,13 @@ export function DashboardShell({ children, user }: DashboardShellProps) {
 
   const isNavigating = isPending || loadingPath !== null;
 
+  const navContextValue: DashboardNavContextValue = {
+    startNavigation: handleNavigation,
+    openUpgradeDialog: handleOpenUpgradeDialog,
+    hasAccess: hasAccess ?? true,
+    goToStripeSubscription,
+  };
+
   const sidebarProps: SidebarContentProps = {
     pathname,
     loadingPath,
@@ -205,6 +302,8 @@ export function DashboardShell({ children, user }: DashboardShellProps) {
     handleNavigation,
     handleLogout,
     user,
+    hasAccess,
+    onOpenUpgradeDialog: hasAccess ? undefined : handleOpenUpgradeDialog,
   };
 
   return (
@@ -245,9 +344,9 @@ export function DashboardShell({ children, user }: DashboardShellProps) {
           </div>
           <Button
             size="icon"
-            onClick={() => handleNavigation("/quotes/new")}
+            onClick={hasAccess ? () => handleNavigation("/quotes/new") : handleOpenUpgradeDialog}
             className="-mr-2"
-            aria-label="New quote"
+            aria-label={hasAccess ? "New quote" : "Upgrade to create quotes"}
           >
             <Plus className="h-5 w-5" />
           </Button>
@@ -257,9 +356,69 @@ export function DashboardShell({ children, user }: DashboardShellProps) {
           "min-h-[calc(100vh-3.5rem)] lg:min-h-screen transition-opacity duration-150",
           isNavigating && "opacity-60 pointer-events-none"
         )}>
-          {children}
+          {hasAccess === false && (
+            <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 text-center text-sm text-amber-800">
+              Trial or subscription ended.{" "}
+              <button
+                type="button"
+                onClick={goToStripeSubscription}
+                disabled={checkoutLoading}
+                className="font-medium underline underline-offset-2 hover:no-underline disabled:opacity-70 inline-flex items-center gap-1.5"
+              >
+                {checkoutLoading ? (
+                  "Redirecting…"
+                ) : (
+                  <>
+                    Subscribe to QuoteFlo Pro
+                    <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+                  </>
+                )}
+              </button>{" "}
+              to continue.
+            </div>
+          )}
+          <DashboardNavContext.Provider value={navContextValue}>
+            {children}
+          </DashboardNavContext.Provider>
         </main>
       </div>
+
+      <Dialog open={upgradeDialogOpen} onOpenChange={setUpgradeDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Subscription required</DialogTitle>
+            <DialogDescription>
+              Your trial or subscription has ended. Subscribe to QuoteFlo Pro to continue creating quotes and using all features.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              onClick={() => setUpgradeDialogOpen(false)}
+              disabled={checkoutLoading}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={goToStripeSubscription}
+              disabled={checkoutLoading}
+              className="gap-2"
+            >
+              {checkoutLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Redirecting…
+                </>
+              ) : (
+                <>
+                  Subscribe to QuoteFlo Pro
+                  <ExternalLink className="h-4 w-4" aria-hidden />
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

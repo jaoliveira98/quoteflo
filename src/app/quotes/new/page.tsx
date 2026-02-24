@@ -1,6 +1,7 @@
 import { DashboardShell } from "@/components/dashboard-shell";
-import { requireAuthWithProfile } from "@/lib/auth";
-import { createClient } from "@/lib/supabase/server";
+import { requireAuthWithProfile, hasActiveSubscription } from "@/lib/auth";
+import { getCachedCustomers } from "@/lib/data/customers";
+import { getCachedServiceLibrary } from "@/lib/data/services";
 import { QuoteForm } from "./quote-form";
 
 export default async function NewQuotePage({
@@ -9,35 +10,29 @@ export default async function NewQuotePage({
   searchParams: Promise<{ customer?: string }>;
 }) {
   const profile = await requireAuthWithProfile();
-  const supabase = await createClient();
   const { customer: customerId } = await searchParams;
-  
-  const { data: services } = await supabase
-    .from("service_library")
-    .select("*")
-    .eq("user_id", profile.id)
-    .eq("is_active", true)
-    .order("category", { ascending: true })
-    .order("service_name", { ascending: true });
-  
-  const { data: customers } = await supabase
-    .from("customers")
-    .select("*")
-    .eq("user_id", profile.id)
-    .order("name", { ascending: true });
 
-  const selectedCustomer = customerId 
-    ? customers?.find(c => c.id === customerId) || null
+  const [services, customers] = await Promise.all([
+    getCachedServiceLibrary(profile.id),
+    getCachedCustomers(profile.id),
+  ]);
+
+  const selectedCustomer = customerId
+    ? customers.find((c) => c.id === customerId) ?? null
     : null;
 
   return (
-    <DashboardShell user={{ email: profile.email, company_name: profile.company_name }}>
-      <QuoteForm 
-        profile={profile}
-        services={services || []}
-        customers={customers || []}
-        preselectedCustomer={selectedCustomer}
-      />
+    <DashboardShell
+      user={{ email: profile.email, company_name: profile.company_name, brand_color: profile.brand_color }}
+      hasAccess={hasActiveSubscription(profile)}
+    >
+        <QuoteForm
+          profile={profile}
+          services={services}
+          customers={customers}
+          preselectedCustomer={selectedCustomer}
+          hasAccess={hasActiveSubscription(profile)}
+        />
     </DashboardShell>
   );
 }

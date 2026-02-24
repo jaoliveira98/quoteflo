@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
+export const runtime = "edge";
+
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -16,7 +18,7 @@ export async function POST(request: NextRequest) {
 
     const { data: quote, error: fetchError } = await supabase
       .from("quotes")
-      .select("id, status, viewed_at")
+      .select("id, user_id, status, viewed_at")
       .eq("access_token", access_token)
       .single();
 
@@ -39,6 +41,10 @@ export async function POST(request: NextRequest) {
         console.error("Update error:", updateError);
         return NextResponse.json({ error: "Failed to update quote" }, { status: 500 });
       }
+
+      const { revalidateTag } = await import("next/cache");
+      revalidateTag(`quotes-${quote.user_id}`);
+      revalidateTag(`quotes-stats-${quote.user_id}`);
 
       return NextResponse.json({ success: true, viewed_at: new Date().toISOString() });
     }

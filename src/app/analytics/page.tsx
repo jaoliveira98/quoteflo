@@ -16,35 +16,17 @@ import {
   Target
 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
-import { requireAuthWithProfile } from "@/lib/auth";
-import { createClient } from "@/lib/supabase/server";
+import { requireAuthWithProfile, hasActiveSubscription } from "@/lib/auth";
+import { getCachedQuotesForAnalytics } from "@/lib/data/quotes";
 import { AnalyticsCharts } from "./analytics-charts";
-
-interface QuoteWithDates {
-  id: string;
-  status: string;
-  total: number;
-  created_at: string;
-  sent_at: string | null;
-  viewed_at: string | null;
-  accepted_at: string | null;
-  customer_name: string;
-  customer_id: string | null;
-}
 
 export default async function AnalyticsPage() {
   const profile = await requireAuthWithProfile();
-  const supabase = await createClient();
-  
-  const { data: quotes } = await supabase
-    .from("quotes")
-    .select("id, status, total, created_at, sent_at, viewed_at, accepted_at, customer_name, customer_id")
-    .eq("user_id", profile.id)
-    .order("created_at", { ascending: false });
-  
-  const allQuotes: QuoteWithDates[] = (quotes || []).map(q => ({
+  const rawQuotes = await getCachedQuotesForAnalytics(profile.id);
+
+  const allQuotes = rawQuotes.map((q) => ({
     ...q,
-    total: Number(q.total) || 0
+    total: Number(q.total) || 0,
   }));
 
   const now = new Date();
@@ -254,7 +236,7 @@ export default async function AnalyticsPage() {
         ? `${Math.round(avgTimeToAccept / 24)} days` 
         : avgTimeToAccept > 0 
           ? `${avgTimeToAccept} hours`
-          : "N/A",
+          : "No data available",
       icon: Clock,
       color: "text-blue-600",
       bg: "bg-blue-100",
@@ -269,7 +251,10 @@ export default async function AnalyticsPage() {
   ];
 
   return (
-    <DashboardShell user={{ email: profile.email, company_name: profile.company_name }}>
+    <DashboardShell
+      user={{ email: profile.email, company_name: profile.company_name, brand_color: profile.brand_color }}
+      hasAccess={hasActiveSubscription(profile)}
+    >
       <div className="p-6 lg:p-8 space-y-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">

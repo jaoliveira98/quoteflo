@@ -1,4 +1,5 @@
 import { DashboardShell } from "@/components/dashboard-shell";
+import { NewQuoteButton } from "@/components/new-quote-button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,7 +16,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { requireAuthWithProfile } from "@/lib/auth";
+import { requireAuthWithProfile, hasActiveSubscription } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { formatCurrency, getInitials } from "@/lib/utils";
 import { STATUS_COLORS, STATUS_ICONS, STATUS_LABELS } from "@/lib/constants";
@@ -38,24 +39,31 @@ export default async function CustomerDetailPage({
     .eq("user_id", profile.id)
     .single();
 
-  if (error || !customer) {
-    notFound();
-  }
+  if (error || !customer) notFound();
 
-  const { data: quotes } = await supabase
-    .from("quotes")
-    .select("*")
-    .eq("customer_id", id)
-    .eq("user_id", profile.id)
-    .order("created_at", { ascending: false });
+  const [quotesResult, otherCustomersResult] = await Promise.all([
+    supabase
+      .from("quotes")
+      .select("id, quote_number, status, total, created_at, job_description")
+      .eq("customer_id", id)
+      .eq("user_id", profile.id)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("customers")
+      .select("id, name, email")
+      .eq("user_id", profile.id)
+      .neq("id", id)
+      .order("name"),
+  ]);
 
-  const customerQuotes = quotes || [];
+  const customerQuotes = quotesResult.data ?? [];
+  const otherCustomers = otherCustomersResult.data ?? [];
 
   const totalQuotes = customerQuotes.length;
-  const acceptedQuotes = customerQuotes.filter(q => q.status === "accepted").length;
+  const acceptedQuotes = customerQuotes.filter((q) => q.status === "accepted").length;
   const totalValue = customerQuotes.reduce((sum, q) => sum + (Number(q.total) || 0), 0);
   const acceptedValue = customerQuotes
-    .filter(q => q.status === "accepted")
+    .filter((q) => q.status === "accepted")
     .reduce((sum, q) => sum + (Number(q.total) || 0), 0);
 
   const allEmails = [
@@ -68,15 +76,11 @@ export default async function CustomerDetailPage({
     ...(customer.phones || []),
   ].filter((p, i, arr) => p && arr.indexOf(p) === i);
 
-  const { data: otherCustomers } = await supabase
-    .from("customers")
-    .select("id, name, email")
-    .eq("user_id", profile.id)
-    .neq("id", id)
-    .order("name");
-
   return (
-    <DashboardShell user={{ email: profile.email, company_name: profile.company_name }}>
+    <DashboardShell
+      user={{ email: profile.email, company_name: profile.company_name, brand_color: profile.brand_color }}
+      hasAccess={hasActiveSubscription(profile)}
+    >
       <div className="p-6 lg:p-8 space-y-6">
         {/* Header */}
         <div className="flex items-start justify-between gap-4">
@@ -104,15 +108,13 @@ export default async function CustomerDetailPage({
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button asChild>
-              <Link href={`/quotes/new?customer=${customer.id}`}>
-                <Plus className="h-4 w-4" />
-                New Quote
-              </Link>
-            </Button>
-            <CustomerActions 
-              customer={customer} 
-              otherCustomers={otherCustomers || []} 
+            <NewQuoteButton href={`/quotes/new?customer=${customer.id}`}>
+              <Plus className="h-4 w-4" />
+              New Quote
+            </NewQuoteButton>
+            <CustomerActions
+              customer={customer}
+              otherCustomers={otherCustomers}
             />
           </div>
         </div>
@@ -309,12 +311,10 @@ export default async function CustomerDetailPage({
                 <div className="text-center py-12">
                   <FileText className="h-12 w-12 text-surface-300 mx-auto mb-3" />
                   <p className="text-surface-600 mb-4">No quotes yet</p>
-                  <Button asChild>
-                    <Link href={`/quotes/new?customer=${customer.id}`}>
-                      <Plus className="h-4 w-4" />
-                      Create First Quote
-                    </Link>
-                  </Button>
+                  <NewQuoteButton href={`/quotes/new?customer=${customer.id}`}>
+                    <Plus className="h-4 w-4" />
+                    Create First Quote
+                  </NewQuoteButton>
                 </div>
               )}
             </CardContent>

@@ -17,7 +17,7 @@ import {
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { requireAuthWithProfile } from "@/lib/auth";
+import { requireAuthWithProfile, hasActiveSubscription } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { STATUS_CONFIG } from "@/lib/constants";
 import type { QuoteStatus } from "@/types";
@@ -32,29 +32,25 @@ export default async function QuoteDetailPage({
   const { id } = await params;
   const profile = await requireAuthWithProfile();
   const supabase = await createClient();
-  
-  const { data: quote, error } = await supabase
-    .from("quotes")
-    .select("*")
-    .eq("id", id)
-    .eq("user_id", profile.id)
-    .single();
 
-  if (error || !quote) {
-    notFound();
-  }
+  const [quoteResult, lineItemsResult] = await Promise.all([
+    supabase.from("quotes").select("*").eq("id", id).eq("user_id", profile.id).single(),
+    supabase.from("quote_line_items").select("*").eq("quote_id", id).order("item_order", { ascending: true }),
+  ]);
 
-  const { data: lineItems } = await supabase
-    .from("quote_line_items")
-    .select("*")
-    .eq("quote_id", quote.id)
-    .order("item_order", { ascending: true });
+  const { data: quote, error } = quoteResult;
+  if (error || !quote) notFound();
+
+  const lineItems = lineItemsResult.data ?? [];
 
   const status = STATUS_CONFIG[quote.status as QuoteStatus] || STATUS_CONFIG.draft;
   const StatusIcon = status.icon;
 
   return (
-    <DashboardShell user={{ email: profile.email, company_name: profile.company_name }}>
+    <DashboardShell
+      user={{ email: profile.email, company_name: profile.company_name, brand_color: profile.brand_color }}
+      hasAccess={hasActiveSubscription(profile)}
+    >
       <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex flex-col gap-4">
@@ -82,13 +78,14 @@ export default async function QuoteDetailPage({
               </div>
             </div>
             
-            <QuoteDetailActions 
-              quoteId={quote.id} 
+            <QuoteDetailActions
+              quoteId={quote.id}
               status={quote.status}
               accessToken={quote.access_token}
               hasEmail={!!quote.customer_email}
               followUpCount={quote.follow_up_count || 0}
               lastFollowUpAt={quote.last_follow_up_at}
+              hasAccess={hasActiveSubscription(profile)}
             />
           </div>
         </div>
@@ -290,7 +287,7 @@ export default async function QuoteDetailPage({
         </Card>
 
         {/* Danger Zone */}
-        <DeleteQuoteCard quoteId={quote.id} />
+        <DeleteQuoteCard quoteId={quote.id} hasAccess={hasActiveSubscription(profile)} />
       </div>
     </DashboardShell>
   );

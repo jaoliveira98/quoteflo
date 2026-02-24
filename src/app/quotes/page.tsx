@@ -1,15 +1,14 @@
 import { DashboardShell } from "@/components/dashboard-shell";
+import { DashboardNavLink } from "@/components/dashboard-nav-link";
+import { NewQuoteButton } from "@/components/new-quote-button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
-  FileText, 
-  Plus
-} from "lucide-react";
+import { FileText, Plus } from "lucide-react";
 import Link from "next/link";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { requireAuthWithProfile } from "@/lib/auth";
-import { createClient } from "@/lib/supabase/server";
+import { requireAuthWithProfile, hasActiveSubscription } from "@/lib/auth";
+import { getCachedQuotesList } from "@/lib/data/quotes";
 import { STATUS_COLORS, STATUS_LABELS } from "@/lib/constants";
 import type { QuoteStatus } from "@/types";
 import { QuotesFilter } from "./quotes-filter";
@@ -21,8 +20,7 @@ export default async function QuotesPage({
 }) {
   const { search, status, date } = await searchParams;
   const profile = await requireAuthWithProfile();
-  const supabase = await createClient();
-  
+
   // Helper function to get date range based on filter
   const getDateRange = (dateFilter: string | undefined) => {
     if (!dateFilter || dateFilter === "all") return null;
@@ -55,27 +53,15 @@ export default async function QuotesPage({
   };
   
   const dateRange = getDateRange(date);
-  
-  let query = supabase
-    .from("quotes")
-    .select("*")
-    .eq("user_id", profile.id)
-    .order("created_at", { ascending: false });
-  
-  if (status && status !== "all") {
-    query = query.eq("status", status);
-  }
-  
-  if (dateRange) {
-    query = query.gte("created_at", dateRange.start);
-    if (dateRange.end) {
-      query = query.lte("created_at", dateRange.end);
-    }
-  }
-  
-  const { data: quotes } = await query;
-  
-  let filteredQuotes = quotes || [];
+
+  const quotes = await getCachedQuotesList(
+    profile.id,
+    status,
+    date,
+    dateRange
+  );
+
+  let filteredQuotes = quotes;
   
   if (search) {
     const searchLower = search.toLowerCase();
@@ -123,7 +109,10 @@ export default async function QuotesPage({
   }) as [string, { label: string; quotes: typeof filteredQuotes }][];
 
   return (
-    <DashboardShell user={{ email: profile.email, company_name: profile.company_name }}>
+    <DashboardShell
+      user={{ email: profile.email, company_name: profile.company_name, brand_color: profile.brand_color }}
+      hasAccess={hasActiveSubscription(profile)}
+    >
       <div className="p-6 lg:p-8 space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -134,12 +123,10 @@ export default async function QuotesPage({
               {(search || status || (date && date !== "all")) && ` found`}
             </p>
           </div>
-          <Button asChild>
-            <Link href="/quotes/new">
-              <Plus className="h-4 w-4" />
-              New Quote
-            </Link>
-          </Button>
+          <NewQuoteButton>
+            <Plus className="h-4 w-4" />
+            New Quote
+          </NewQuoteButton>
         </div>
 
         {/* Search and Filters */}
@@ -159,12 +146,8 @@ export default async function QuotesPage({
                   {label}
                 </h2>
                 {quotes.map((quote) => (
-                  <Link
-                    key={quote.id}
-                    href={`/quotes/${quote.id}`}
-                    className="block"
-                  >
-                    <Card className="hover:border-surface-300 hover:shadow-soft transition-all group">
+                  <DashboardNavLink key={quote.id} href={`/quotes/${quote.id}`}>
+                    <Card className="hover:border-surface-300 hover:shadow-soft transition-all group cursor-pointer">
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between gap-3">
                           <div className="flex items-center gap-3 sm:gap-4 min-w-0">
@@ -195,7 +178,7 @@ export default async function QuotesPage({
                         </div>
                       </CardContent>
                     </Card>
-                  </Link>
+                  </DashboardNavLink>
                 ))}
               </div>
             ))}
@@ -220,12 +203,10 @@ export default async function QuotesPage({
                   <p className="text-surface-600 mb-6">
                     Create your first quote and start winning more jobs.
                   </p>
-                  <Button asChild>
-                    <Link href="/quotes/new">
-                      <Plus className="h-4 w-4" />
-                      Create your first quote
-                    </Link>
-                  </Button>
+                  <NewQuoteButton>
+                    <Plus className="h-4 w-4" />
+                    Create your first quote
+                  </NewQuoteButton>
                 </>
               )}
             </CardContent>

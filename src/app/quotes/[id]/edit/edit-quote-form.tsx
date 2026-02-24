@@ -46,9 +46,10 @@ interface EditQuoteFormProps {
   quote: Quote;
   existingLineItems: QuoteLineItem[];
   services: ServiceItem[];
+  hasAccess?: boolean;
 }
 
-export function EditQuoteForm({ profile, quote, existingLineItems, services }: EditQuoteFormProps) {
+export function EditQuoteForm({ profile, quote, existingLineItems, services, hasAccess = true }: EditQuoteFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -173,11 +174,14 @@ export function EditQuoteForm({ profile, quote, existingLineItems, services }: E
   };
 
   const handleSubmit = async () => {
+    if (!hasAccess) {
+      setError("Upgrade to QuoteFlo Pro to save changes.");
+      return;
+    }
     if (!customerName.trim()) {
       setError("Please enter a customer name");
       return;
     }
-
     if (lineItems.length === 0) {
       setError("Please add at least one line item");
       return;
@@ -263,9 +267,9 @@ export function EditQuoteForm({ profile, quote, existingLineItems, services }: E
       // Auto-save any new custom items to the service library
       await autoSaveNewItems(supabase);
 
+      await fetch("/api/revalidate", { method: "POST" });
       router.push(`/quotes/${quote.id}`);
       router.refresh();
-
     } catch (err) {
       console.error("Submit error:", err);
       setError(err instanceof Error ? err.message : "Something went wrong");
@@ -513,7 +517,7 @@ export function EditQuoteForm({ profile, quote, existingLineItems, services }: E
         </Button>
         <Button
           onClick={handleSubmit}
-          disabled={isLoading}
+          disabled={isLoading || !hasAccess}
         >
           {isLoading ? (
             <>

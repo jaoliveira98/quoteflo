@@ -244,24 +244,26 @@ function SubscriptionCard({ profile }: { profile: UserProfile }) {
               onClick={handleManageBilling}
               disabled={isLoading}
               size="sm"
+              className="gap-1.5"
             >
               {isLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <>
                   Manage
-                  <ExternalLink className="h-3 w-3 ml-1" />
+                  <ExternalLink className="h-3.5 w-3.5" aria-hidden />
                 </>
               )}
             </Button>
           ) : (
-            <Button onClick={handleUpgrade} disabled={isLoading} size="sm">
+            <Button onClick={handleUpgrade} disabled={isLoading} size="sm" className="gap-1.5">
               {isLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <>
                   <Crown className="h-4 w-4" />
                   Upgrade - £29/mo
+                  <ExternalLink className="h-3.5 w-3.5" aria-hidden />
                 </>
               )}
             </Button>
@@ -298,13 +300,14 @@ function SubscriptionCard({ profile }: { profile: UserProfile }) {
                   </li>
                 </ul>
                 {!hasStripeCustomer && (
-                  <Button onClick={handleUpgrade} disabled={isLoading} className="mt-4" size="sm">
+                  <Button onClick={handleUpgrade} disabled={isLoading} className="mt-4 gap-1.5" size="sm">
                     {isLoading ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
                       <>
                         <Crown className="h-4 w-4" />
                         Upgrade Now - £29/month
+                        <ExternalLink className="h-3.5 w-3.5" aria-hidden />
                       </>
                     )}
                   </Button>
@@ -1256,42 +1259,47 @@ function DeleteAccountCard({ profile }: { profile: UserProfile }) {
 }
 
 // ──────────────────────────────────────────────
-// Main Settings Form
+// Section exports for split settings pages
+// ──────────────────────────────────────────────
+
+export function BusinessSettingsSection({ profile }: SettingsFormProps) {
+  return (
+    <section className="space-y-4">
+      <CompanyDetailsCard profile={profile} />
+      <BrandingCard profile={profile} />
+    </section>
+  );
+}
+
+export function QuotingSettingsSection({ profile }: SettingsFormProps) {
+  return (
+    <section className="space-y-4">
+      <QuoteDefaultsCard profile={profile} />
+      <NotificationsCard profile={profile} />
+    </section>
+  );
+}
+
+export function AccountSettingsSection({ profile }: SettingsFormProps) {
+  return (
+    <section className="space-y-4">
+      <ChangePasswordCard />
+      <SubscriptionCardWrapper profile={profile} />
+      <DeleteAccountCard profile={profile} />
+    </section>
+  );
+}
+
+// ──────────────────────────────────────────────
+// Main Settings Form (all sections, for backwards compatibility)
 // ──────────────────────────────────────────────
 
 export function SettingsForm({ profile }: SettingsFormProps) {
   return (
     <div className="space-y-10">
-      {/* Business section */}
-      <section className="space-y-4">
-        <SectionHeading
-          title="Business"
-          description="Your company info, branding, and trade"
-        />
-        <CompanyDetailsCard profile={profile} />
-        <BrandingCard profile={profile} />
-      </section>
-
-      {/* Quoting section */}
-      <section className="space-y-4">
-        <SectionHeading
-          title="Quoting"
-          description="Default values and automation for your quotes"
-        />
-        <QuoteDefaultsCard profile={profile} />
-        <NotificationsCard profile={profile} />
-      </section>
-
-      {/* Account section */}
-      <section className="space-y-4">
-        <SectionHeading
-          title="Account"
-          description="Security and billing"
-        />
-        <ChangePasswordCard />
-        <SubscriptionCardWrapper profile={profile} />
-        <DeleteAccountCard profile={profile} />
-      </section>
+      <BusinessSettingsSection profile={profile} />
+      <QuotingSettingsSection profile={profile} />
+      <AccountSettingsSection profile={profile} />
     </div>
   );
 }

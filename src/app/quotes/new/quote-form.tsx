@@ -47,9 +47,10 @@ interface QuoteFormProps {
   services: ServiceItem[];
   customers: Customer[];
   preselectedCustomer?: Customer | null;
+  hasAccess?: boolean;
 }
 
-export function QuoteForm({ profile, services, customers, preselectedCustomer }: QuoteFormProps) {
+export function QuoteForm({ profile, services, customers, preselectedCustomer, hasAccess = true }: QuoteFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -191,11 +192,14 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
   };
 
   const handleSubmit = async (status: "draft" | "sent") => {
+    if (!hasAccess) {
+      setError("Upgrade to QuoteFlo Pro to create and send quotes.");
+      return;
+    }
     if (!customerName.trim()) {
       setError("Please enter a customer name");
       return;
     }
-    
     if (lineItems.length === 0) {
       setError("Please add at least one line item");
       return;
@@ -291,9 +295,9 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
         }
       }
 
+      await fetch("/api/revalidate", { method: "POST" });
       router.push(`/quotes/${quote.id}`);
       router.refresh();
-      
     } catch (err) {
       console.error("Submit error:", err);
       setError(err instanceof Error ? err.message : "Something went wrong");
@@ -598,17 +602,25 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer }:
 
       {/* Actions */}
       <div className="flex flex-col sm:flex-row gap-3 justify-end">
-        <Button 
-          variant="outline" 
+        {!hasAccess && (
+          <p className="text-sm text-amber-700 mr-auto flex items-center gap-2">
+            <Link href="/settings" className="font-medium underline underline-offset-2">
+              Upgrade to QuoteFlo Pro
+            </Link>
+            to create quotes.
+          </p>
+        )}
+        <Button
+          variant="outline"
           onClick={() => handleSubmit("draft")}
-          disabled={isLoading}
+          disabled={isLoading || !hasAccess}
         >
           {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
           Save as Draft
         </Button>
-        <Button 
+        <Button
           onClick={() => handleSubmit("sent")}
-          disabled={isLoading}
+          disabled={isLoading || !hasAccess}
         >
           {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
           Save & Send Quote

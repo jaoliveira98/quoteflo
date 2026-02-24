@@ -31,14 +31,16 @@ interface QuoteDetailActionsProps {
   hasEmail: boolean;
   followUpCount?: number;
   lastFollowUpAt?: string | null;
+  hasAccess?: boolean;
 }
 
-export function QuoteDetailActions({ 
-  quoteId, 
-  status, 
+export function QuoteDetailActions({
+  quoteId,
+  status,
   accessToken,
   hasEmail,
   followUpCount = 0,
+  hasAccess = true,
 }: QuoteDetailActionsProps) {
   const router = useRouter();
   const [isSending, setIsSending] = useState(false);
@@ -57,6 +59,10 @@ export function QuoteDetailActions({
   };
 
   const handleSend = async () => {
+    if (!hasAccess) {
+      setSendError("Upgrade to QuoteFlo Pro to send quotes.");
+      return;
+    }
     if (!hasEmail) {
       setSendError("Customer email is required to send the quote");
       return;
@@ -77,8 +83,8 @@ export function QuoteDetailActions({
       }
 
       setSendSuccess(true);
+      await fetch("/api/revalidate", { method: "POST" });
       router.refresh();
-      
       setTimeout(() => setSendSuccess(false), 3000);
     } catch (err) {
       setSendError(err instanceof Error ? err.message : "Failed to send quote");
@@ -106,6 +112,10 @@ export function QuoteDetailActions({
   };
 
   const handleFollowUp = async () => {
+    if (!hasAccess) {
+      setFollowUpError("Upgrade to QuoteFlo Pro to send follow-ups.");
+      return;
+    }
     if (!hasEmail) {
       setFollowUpError("Customer email is required to send follow-up");
       return;
@@ -126,8 +136,8 @@ export function QuoteDetailActions({
       }
 
       setFollowUpSuccess(true);
+      await fetch("/api/revalidate", { method: "POST" });
       router.refresh();
-      
       setTimeout(() => setFollowUpSuccess(false), 3000);
     } catch (err) {
       setFollowUpError(err instanceof Error ? err.message : "Failed to send follow-up");
@@ -147,9 +157,10 @@ export function QuoteDetailActions({
         {canSend && (
           <Button
             onClick={handleSend}
-            disabled={isSending}
+            disabled={isSending || !hasAccess}
             size="sm"
             className="gap-1.5"
+            title={!hasAccess ? "Upgrade to send quotes" : undefined}
           >
             {isSending ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -205,9 +216,9 @@ export function QuoteDetailActions({
             {canFollowUp && (
               <>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem 
-                  onClick={handleFollowUp} 
-                  disabled={isFollowingUp}
+                <DropdownMenuItem
+                  onClick={handleFollowUp}
+                  disabled={isFollowingUp || !hasAccess}
                   className="gap-2"
                 >
                   {isFollowingUp ? (

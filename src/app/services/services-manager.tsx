@@ -39,6 +39,7 @@ import type { UserProfile, ServiceItem } from "@/types";
 interface ServicesManagerProps {
   profile: UserProfile;
   initialServices: ServiceItem[];
+  hasAccess?: boolean;
 }
 
 interface ServiceFormData {
@@ -65,7 +66,7 @@ const emptyForm: ServiceFormData = {
   unit: "each",
 };
 
-export function ServicesManager({ profile, initialServices }: ServicesManagerProps) {
+export function ServicesManager({ profile, initialServices, hasAccess = true }: ServicesManagerProps) {
   const router = useRouter();
   const [services, setServices] = useState<ServiceItem[]>(initialServices);
   const [search, setSearch] = useState("");
@@ -129,6 +130,10 @@ export function ServicesManager({ profile, initialServices }: ServicesManagerPro
   };
 
   const handleSave = async () => {
+    if (!hasAccess) {
+      setError("Upgrade to QuoteFlo Pro to manage services.");
+      return;
+    }
     if (!formData.service_name.trim()) {
       setError("Service name is required");
       return;
@@ -194,6 +199,7 @@ export function ServicesManager({ profile, initialServices }: ServicesManagerPro
       }
 
       setIsDialogOpen(false);
+      await fetch("/api/revalidate", { method: "POST" });
       router.refresh();
     } catch (err) {
       console.error("Save error:", err);
@@ -204,6 +210,7 @@ export function ServicesManager({ profile, initialServices }: ServicesManagerPro
   };
 
   const handleDelete = async (id: string) => {
+    if (!hasAccess) return;
     setIsLoading(true);
     try {
       const supabase = createClient();
@@ -217,6 +224,7 @@ export function ServicesManager({ profile, initialServices }: ServicesManagerPro
 
       setServices(services.filter((s) => s.id !== id));
       setDeleteConfirm(null);
+      await fetch("/api/revalidate", { method: "POST" });
       router.refresh();
     } catch (err) {
       console.error("Delete error:", err);
@@ -235,7 +243,7 @@ export function ServicesManager({ profile, initialServices }: ServicesManagerPro
             Manage your reusable items for quick quote building
           </p>
         </div>
-        <Button onClick={openAddDialog}>
+        <Button onClick={openAddDialog} disabled={!hasAccess} title={!hasAccess ? "Upgrade to add items" : undefined}>
           <Plus className="h-4 w-4" />
           Add Item
         </Button>
@@ -295,18 +303,20 @@ export function ServicesManager({ profile, initialServices }: ServicesManagerPro
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => openEditDialog(service)}
+                        onClick={() => hasAccess && openEditDialog(service)}
+                        disabled={!hasAccess}
                         className="h-8 w-8 text-surface-400 hover:text-surface-600"
-                        title="Edit"
+                        title={hasAccess ? "Edit" : "Upgrade to edit"}
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => setDeleteConfirm(service.id)}
+                        onClick={() => hasAccess && setDeleteConfirm(service.id)}
+                        disabled={!hasAccess}
                         className="h-8 w-8 text-surface-400 hover:text-red-500 hover:bg-red-50"
-                        title="Delete"
+                        title={hasAccess ? "Delete" : "Upgrade to delete"}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -333,7 +343,7 @@ export function ServicesManager({ profile, initialServices }: ServicesManagerPro
                   : "Add your commonly used products, services, or line items to speed up quote creation."}
               </p>
               {!search && (
-                <Button onClick={openAddDialog}>
+                <Button onClick={openAddDialog} disabled={!hasAccess} title={!hasAccess ? "Upgrade to add items" : undefined}>
                   <Plus className="h-4 w-4" />
                   Add your first item
                 </Button>

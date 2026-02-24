@@ -22,7 +22,11 @@ import {
   User
 } from "lucide-react";
 
-export function AddCustomerButton() {
+interface AddCustomerButtonProps {
+  hasAccess?: boolean;
+}
+
+export function AddCustomerButton({ hasAccess = true }: AddCustomerButtonProps) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -44,7 +48,10 @@ export function AddCustomerButton() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+    if (!hasAccess) {
+      setError("Upgrade to QuoteFlo Pro to add customers.");
+      return;
+    }
     if (!formData.name.trim()) {
       setError("Customer name is required");
       return;
@@ -77,6 +84,7 @@ export function AddCustomerButton() {
 
       resetForm();
       setIsOpen(false);
+      await fetch("/api/revalidate", { method: "POST" });
       router.refresh();
     } catch (err) {
       console.error("Error adding customer:", err);
@@ -88,7 +96,11 @@ export function AddCustomerButton() {
 
   return (
     <>
-      <Button onClick={() => setIsOpen(true)}>
+      <Button
+        onClick={() => { if (hasAccess) setIsOpen(true); }}
+        disabled={!hasAccess}
+        title={!hasAccess ? "Upgrade to add customers" : undefined}
+      >
         <Plus className="h-4 w-4" />
         Add Customer
       </Button>
