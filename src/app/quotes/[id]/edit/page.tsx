@@ -1,6 +1,7 @@
 import { DashboardShell } from "@/components/dashboard-shell";
-import { requireAuthWithProfile } from "@/lib/auth";
+import { requireAuthWithProfile, hasActiveSubscription } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { getCachedServiceLibrary } from "@/lib/data/services";
 import { notFound } from "next/navigation";
 import { EditQuoteForm } from "./edit-quote-form";
 
@@ -24,27 +25,28 @@ export default async function EditQuotePage({
     notFound();
   }
 
-  const { data: lineItems } = await supabase
-    .from("quote_line_items")
-    .select("*")
-    .eq("quote_id", quote.id)
-    .order("item_order", { ascending: true });
+  const [lineItemsResult, services] = await Promise.all([
+    supabase
+      .from("quote_line_items")
+      .select("*")
+      .eq("quote_id", quote.id)
+      .order("item_order", { ascending: true }),
+    getCachedServiceLibrary(profile.id),
+  ]);
 
-  const { data: services } = await supabase
-    .from("service_library")
-    .select("*")
-    .eq("user_id", profile.id)
-    .eq("is_active", true)
-    .order("category", { ascending: true })
-    .order("service_name", { ascending: true });
+  const lineItems = lineItemsResult.data ?? [];
 
   return (
-    <DashboardShell user={{ email: profile.email, company_name: profile.company_name }}>
+    <DashboardShell
+      user={{ email: profile.email, company_name: profile.company_name, brand_color: profile.brand_color }}
+      hasAccess={hasActiveSubscription(profile)}
+    >
       <EditQuoteForm
         profile={profile}
         quote={quote}
-        existingLineItems={lineItems || []}
-        services={services || []}
+        existingLineItems={lineItems}
+        services={services}
+        hasAccess={hasActiveSubscription(profile)}
       />
     </DashboardShell>
   );

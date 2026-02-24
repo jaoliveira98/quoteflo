@@ -11,6 +11,11 @@ const dirname =
     : path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      "@": path.resolve(dirname, "src"),
+    },
+  },
   test: {
     projects: [
       {
@@ -27,6 +32,13 @@ export default defineConfig({
             instances: [{ browser: "chromium" }],
           },
           setupFiles: [".storybook/vitest.setup.ts"],
+        },
+      },
+      {
+        test: {
+          name: "unit",
+          include: ["src/**/*.test.ts"],
+          environment: "node",
         },
       },
     ],

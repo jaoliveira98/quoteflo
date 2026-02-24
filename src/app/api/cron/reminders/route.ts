@@ -319,6 +319,7 @@ export async function POST(request: NextRequest) {
   });
 }
 
+/** Vercel Cron uses GET by default; both GET and POST are accepted when Bearer secret is valid. */
 export async function GET(request: NextRequest) {
   return POST(request);
 }

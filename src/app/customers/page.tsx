@@ -1,4 +1,6 @@
 import { DashboardShell } from "@/components/dashboard-shell";
+import { DashboardNavLink } from "@/components/dashboard-nav-link";
+import { NewQuoteButton } from "@/components/new-quote-button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,8 +14,11 @@ import {
   ChevronRight
 } from "lucide-react";
 import Link from "next/link";
-import { requireAuthWithProfile } from "@/lib/auth";
-import { createClient } from "@/lib/supabase/server";
+import { requireAuthWithProfile, hasActiveSubscription } from "@/lib/auth";
+import {
+  getCachedCustomers,
+  getCachedQuotesForStats,
+} from "@/lib/data/customers";
 import { AddCustomerButton } from "./add-customer-button";
 import { CustomersSearch } from "./customers-search";
 import { formatCurrency, getInitials } from "@/lib/utils";
@@ -25,18 +30,11 @@ export default async function CustomersPage({
 }) {
   const { search } = await searchParams;
   const profile = await requireAuthWithProfile();
-  const supabase = await createClient();
-  
-  const { data: customers } = await supabase
-    .from("customers")
-    .select("*")
-    .eq("user_id", profile.id)
-    .order("name", { ascending: true });
 
-  const { data: allQuotes } = await supabase
-    .from("quotes")
-    .select("customer_id, customer_name, customer_email, total, status")
-    .eq("user_id", profile.id);
+  const [customers, allQuotes] = await Promise.all([
+    getCachedCustomers(profile.id),
+    getCachedQuotesForStats(profile.id),
+  ]);
 
   const customerStats: Record<string, { count: number; value: number; accepted: number }> = {};
   
@@ -71,7 +69,10 @@ export default async function CustomersPage({
   const uniqueOrphanCustomers = new Set(orphanQuotes.map(q => `${q.customer_name}|${q.customer_email || ''}`));
 
   return (
-    <DashboardShell user={{ email: profile.email, company_name: profile.company_name }}>
+    <DashboardShell
+      user={{ email: profile.email, company_name: profile.company_name, brand_color: profile.brand_color }}
+      hasAccess={hasActiveSubscription(profile)}
+    >
       <div className="p-6 lg:p-8 space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -82,7 +83,7 @@ export default async function CustomersPage({
               {search && ` found`}
             </p>
           </div>
-          <AddCustomerButton />
+          <AddCustomerButton hasAccess={hasActiveSubscription(profile)} />
         </div>
 
         {/* Info banner for orphan quotes */}
@@ -113,7 +114,7 @@ export default async function CustomersPage({
               ].filter((p: string, i: number, arr: string[]) => p && arr.indexOf(p) === i);
 
               return (
-                <Link key={customer.id} href={`/customers/${customer.id}`}>
+                <DashboardNavLink key={customer.id} href={`/customers/${customer.id}`} className="h-full">
                   <Card className="hover:shadow-soft hover:border-surface-300 transition-all cursor-pointer h-full">
                     <CardContent className="p-5">
                       <div className="flex items-start justify-between mb-3">
@@ -174,7 +175,7 @@ export default async function CustomersPage({
                       </div>
                     </CardContent>
                   </Card>
-                </Link>
+                </DashboardNavLink>
               );
             })}
           </div>
@@ -199,13 +200,11 @@ export default async function CustomersPage({
                     Customers are automatically saved when you create quotes, or add them manually.
                   </p>
                   <div className="flex items-center justify-center gap-3">
-                    <AddCustomerButton />
-                    <Button variant="outline" asChild>
-                      <Link href="/quotes/new">
-                        <Plus className="h-4 w-4" />
-                        Create Quote
-                      </Link>
-                    </Button>
+                    <AddCustomerButton hasAccess={hasActiveSubscription(profile)} />
+                    <NewQuoteButton variant="outline">
+                      <Plus className="h-4 w-4" />
+                      Create Quote
+                    </NewQuoteButton>
                   </div>
                 </>
               )}

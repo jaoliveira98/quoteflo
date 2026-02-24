@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { createClient } from "@supabase/supabase-js";
+import { getQuotesListCacheTag } from "@/lib/data/quotes";
+import { getQuotesStatsCacheTag } from "@/lib/data/customers";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -29,6 +32,16 @@ export async function POST(request: NextRequest) {
 
     if (error || !success) {
       return NextResponse.json({ error: "Quote not found or invalid token" }, { status: 404 });
+    }
+
+    const { data: quote } = await supabase
+      .from("quotes")
+      .select("user_id")
+      .eq("id", quote_id)
+      .single();
+    if (quote?.user_id) {
+      revalidateTag(getQuotesListCacheTag(quote.user_id));
+      revalidateTag(getQuotesStatsCacheTag(quote.user_id));
     }
 
     return NextResponse.json({ success: true });

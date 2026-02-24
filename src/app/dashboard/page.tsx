@@ -1,4 +1,6 @@
 import { DashboardShell } from "@/components/dashboard-shell";
+import { DashboardNavLink } from "@/components/dashboard-nav-link";
+import { NewQuoteButton } from "@/components/new-quote-button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,22 +15,14 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { formatCurrency } from "@/lib/utils";
-import { requireAuthWithProfile } from "@/lib/auth";
-import { createClient } from "@/lib/supabase/server";
+import { requireAuthWithProfile, hasActiveSubscription } from "@/lib/auth";
+import { getCachedQuotesList } from "@/lib/data/quotes";
 import { STATUS_COLORS, STATUS_LABELS } from "@/lib/constants";
 import type { QuoteStatus } from "@/types";
 
 export default async function DashboardPage() {
   const profile = await requireAuthWithProfile();
-  const supabase = await createClient();
-  
-  const { data: quotes } = await supabase
-    .from("quotes")
-    .select("*")
-    .eq("user_id", profile.id)
-    .order("created_at", { ascending: false });
-  
-  const allQuotes = quotes || [];
+  const allQuotes = await getCachedQuotesList(profile.id, undefined, undefined, null);
   
   const { draftCount, awaitingCount, acceptedCount, totalValue } = allQuotes.reduce(
     (acc, q) => {
@@ -56,7 +50,10 @@ export default async function DashboardPage() {
   
   const recentQuotes = allQuotes.slice(0, 4);
   return (
-    <DashboardShell user={{ email: profile.email, company_name: profile.company_name }}>
+    <DashboardShell
+      user={{ email: profile.email, company_name: profile.company_name, brand_color: profile.brand_color }}
+      hasAccess={hasActiveSubscription(profile)}
+    >
       <div className="p-6 lg:p-8 space-y-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -69,12 +66,10 @@ export default async function DashboardPage() {
               }
             </p>
           </div>
-          <Button asChild>
-            <Link href="/quotes/new">
-              <Plus className="h-4 w-4" />
-              New Quote
-            </Link>
-          </Button>
+          <NewQuoteButton>
+            <Plus className="h-4 w-4" />
+            New Quote
+          </NewQuoteButton>
         </div>
 
         {/* Stats Grid */}
@@ -154,7 +149,7 @@ export default async function DashboardPage() {
               {recentQuotes.length > 0 ? (
                 <div className="space-y-3">
                   {recentQuotes.map((quote) => (
-                    <Link
+                    <DashboardNavLink
                       key={quote.id}
                       href={`/quotes/${quote.id}`}
                       className="flex items-center justify-between p-4 rounded-lg border border-surface-200 hover:border-surface-300 hover:bg-surface-50 transition-all group"
@@ -176,7 +171,7 @@ export default async function DashboardPage() {
                           {formatCurrency(Number(quote.total))}
                         </span>
                       </div>
-                    </Link>
+                    </DashboardNavLink>
                   ))}
                 </div>
               ) : (
@@ -188,12 +183,10 @@ export default async function DashboardPage() {
                   <p className="text-surface-600 text-sm mb-5 max-w-xs mx-auto">
                     Pick from your trade&apos;s service library, add customer details, and send a professional quote in minutes.
                   </p>
-                  <Button asChild>
-                    <Link href="/quotes/new">
-                      <Plus className="h-4 w-4" />
-                      Create your first quote
-                    </Link>
-                  </Button>
+                  <NewQuoteButton>
+                    <Plus className="h-4 w-4" />
+                    Create your first quote
+                  </NewQuoteButton>
                 </div>
               )}
             </CardContent>

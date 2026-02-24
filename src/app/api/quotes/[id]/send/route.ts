@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { Resend } from "resend";
 import { formatCurrency, escapeHtml } from "@/lib/utils";
+import { hasActiveSubscription } from "@/lib/auth";
+import type { UserProfile } from "@/types";
+import { getQuotesListCacheTag } from "@/lib/data/quotes";
+import { getQuotesStatsCacheTag } from "@/lib/data/customers";
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
@@ -38,7 +43,14 @@ export async function POST(
     .eq("id", user.id)
     .single();
 
-  const { data: lineItems } = await supabase
+  if (!profile || !hasActiveSubscription(profile as UserProfile)) {
+    return NextResponse.json(
+      { error: "Active subscription required. Please upgrade to QuoteFlo Pro." },
+      { status: 403 }
+    );
+  }
+
+  await supabase
     .from("quote_line_items")
     .select("*")
     .eq("quote_id", quote.id)
@@ -125,6 +137,9 @@ export async function POST(
       sent_at: new Date().toISOString(),
     })
     .eq("id", quote.id);
+
+  revalidateTag(getQuotesListCacheTag(user.id));
+  revalidateTag(getQuotesStatsCacheTag(user.id));
 
   return NextResponse.json({ 
     success: true, 

@@ -52,6 +52,7 @@ export interface UserProfile {
   expiry_reminder_days: number;
   created_at: string;
   updated_at: string;
+  deletion_scheduled_at: string | null;
 }
 
 // Customer

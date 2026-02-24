@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { stripe, getAppUrl } from "@/lib/stripe";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Next.js route signature
 export async function POST(request: NextRequest) {
   if (!stripe) {
     return NextResponse.json(

@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { Resend } from "resend";
 import { formatCurrency, escapeHtml } from "@/lib/utils";
+import { hasActiveSubscription } from "@/lib/auth";
+import type { UserProfile } from "@/types";
+import { getQuotesListCacheTag } from "@/lib/data/quotes";
+import { getQuotesStatsCacheTag } from "@/lib/data/customers";
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
@@ -45,6 +50,13 @@ export async function POST(
     .select("*")
     .eq("id", user.id)
     .single();
+
+  if (!profile || !hasActiveSubscription(profile as UserProfile)) {
+    return NextResponse.json(
+      { error: "Active subscription required. Please upgrade to QuoteFlo Pro." },
+      { status: 403 }
+    );
+  }
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
   const quoteUrl = `${baseUrl}/q/${quote.access_token}`;
@@ -180,8 +192,11 @@ export async function POST(
     });
   }
 
-  return NextResponse.json({ 
-    success: true, 
+  revalidateTag(getQuotesListCacheTag(user.id));
+  revalidateTag(getQuotesStatsCacheTag(user.id));
+
+  return NextResponse.json({
+    success: true,
     message: resend ? "Follow-up sent successfully" : "Follow-up marked as sent (email not configured)",
     followUpNumber,
   });

@@ -1,23 +1,18 @@
 import { DashboardShell } from "@/components/dashboard-shell";
-import { requireAuthWithProfile } from "@/lib/auth";
-import { createClient } from "@/lib/supabase/server";
+import { requireAuthWithProfile, hasActiveSubscription } from "@/lib/auth";
+import { getCachedServiceLibrary } from "@/lib/data/services";
 import { ServicesManager } from "./services-manager";
 
 export default async function ServicesPage() {
   const profile = await requireAuthWithProfile();
-  const supabase = await createClient();
-
-  const { data: services } = await supabase
-    .from("service_library")
-    .select("*")
-    .eq("user_id", profile.id)
-    .eq("is_active", true)
-    .order("category", { ascending: true })
-    .order("service_name", { ascending: true });
+  const services = await getCachedServiceLibrary(profile.id);
 
   return (
-    <DashboardShell user={{ email: profile.email, company_name: profile.company_name }}>
-      <ServicesManager profile={profile} initialServices={services || []} />
+    <DashboardShell
+      user={{ email: profile.email, company_name: profile.company_name, brand_color: profile.brand_color }}
+      hasAccess={hasActiveSubscription(profile)}
+    >
+      <ServicesManager profile={profile} initialServices={services} hasAccess={hasActiveSubscription(profile)} />
     </DashboardShell>
   );
 }

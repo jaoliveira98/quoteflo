@@ -19,13 +19,15 @@ import { Trash2, Loader2 } from "lucide-react";
 
 interface DeleteQuoteCardProps {
   quoteId: string;
+  hasAccess?: boolean;
 }
 
-export function DeleteQuoteCard({ quoteId }: DeleteQuoteCardProps) {
+export function DeleteQuoteCard({ quoteId, hasAccess = true }: DeleteQuoteCardProps) {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
+    if (!hasAccess) return;
     setIsDeleting(true);
 
     try {
@@ -55,9 +57,10 @@ export function DeleteQuoteCard({ quoteId }: DeleteQuoteCardProps) {
           </div>
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="text-red-600 border-red-200 hover:bg-red-50"
+                disabled={!hasAccess}
               >
                 <Trash2 className="h-4 w-4" />
                 Delete
