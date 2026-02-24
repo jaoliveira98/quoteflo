@@ -54,7 +54,12 @@ export default async function AuthLayout({
           </div>
         </div>
         
-        <div className="relative z-10">
+        <div className="relative z-10 flex flex-col gap-2">
+          <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+            <Link href="/terms" className="text-surface-500 underline hover:text-surface-400">Terms</Link>
+            <Link href="/privacy" className="text-surface-500 underline hover:text-surface-400">Privacy</Link>
+            <Link href="/contact" className="text-surface-500 underline hover:text-surface-400">Contact</Link>
+          </div>
           <p className="text-sm text-surface-500">
             © {new Date().getFullYear()} QuoteFlo. Built for UK tradespeople.
           </p>
@@ -78,8 +83,13 @@ export default async function AuthLayout({
         </main>
 
         {/* Mobile footer */}
-        <footer className="p-4 text-center text-sm text-surface-500 lg:hidden">
-          © {new Date().getFullYear()} QuoteFlo. Built for UK tradespeople.
+        <footer className="p-4 text-center text-sm text-surface-500 lg:hidden space-y-2">
+          <div className="flex flex-wrap justify-center gap-x-4 gap-y-1">
+            <Link href="/terms" className="underline hover:text-surface-700">Terms</Link>
+            <Link href="/privacy" className="underline hover:text-surface-700">Privacy</Link>
+            <Link href="/contact" className="underline hover:text-surface-700">Contact</Link>
+          </div>
+          <p>© {new Date().getFullYear()} QuoteFlo. Built for UK tradespeople.</p>
         </footer>
       </div>
     </div>

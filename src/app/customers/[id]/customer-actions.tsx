@@ -254,13 +254,14 @@ export function CustomerActions({ customer, otherCustomers }: CustomerActionsPro
                   setEditForm((prev) => ({ ...prev, name: e.target.value }))
                 }
                 placeholder="Customer name"
+                autoComplete="name"
               />
             </div>
 
             {/* Emails */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <Label>Email Addresses</Label>
+                <span className="text-sm font-medium leading-none">Email Addresses</span>
                 <Button
                   type="button"
                   variant="ghost"
@@ -278,10 +279,13 @@ export function CustomerActions({ customer, otherCustomers }: CustomerActionsPro
                   editForm.emails.map((email, i) => (
                     <div key={i} className="flex items-center gap-2">
                       <Input
+                        id={`customer-email-${i}`}
+                        name={`email-${i}`}
                         type="email"
                         value={email}
                         onChange={(e) => updateEmail(i, e.target.value)}
                         placeholder="email@example.com"
+                        autoComplete="email"
                       />
                       <Button
                         type="button"
@@ -301,7 +305,7 @@ export function CustomerActions({ customer, otherCustomers }: CustomerActionsPro
             {/* Phones */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <Label>Phone Numbers</Label>
+                <span className="text-sm font-medium leading-none">Phone Numbers</span>
                 <Button
                   type="button"
                   variant="ghost"
@@ -319,10 +323,13 @@ export function CustomerActions({ customer, otherCustomers }: CustomerActionsPro
                   editForm.phones.map((phone, i) => (
                     <div key={i} className="flex items-center gap-2">
                       <Input
+                        id={`customer-phone-${i}`}
+                        name={`phone-${i}`}
                         type="tel"
                         value={phone}
                         onChange={(e) => updatePhone(i, e.target.value)}
                         placeholder="07123 456789"
+                        autoComplete="tel"
                       />
                       <Button
                         type="button"
@@ -348,6 +355,7 @@ export function CustomerActions({ customer, otherCustomers }: CustomerActionsPro
                   setEditForm((prev) => ({ ...prev, address: e.target.value }))
                 }
                 placeholder="Street address"
+                autoComplete="street-address"
               />
             </div>
 
@@ -360,6 +368,7 @@ export function CustomerActions({ customer, otherCustomers }: CustomerActionsPro
                   setEditForm((prev) => ({ ...prev, postcode: e.target.value }))
                 }
                 placeholder="AB1 2CD"
+                autoComplete="postal-code"
               />
             </div>
 
@@ -372,6 +381,7 @@ export function CustomerActions({ customer, otherCustomers }: CustomerActionsPro
                   setEditForm((prev) => ({ ...prev, notes: e.target.value }))
                 }
                 placeholder="Any notes about this customer..."
+                autoComplete="off"
                 className="min-h-[100px]"
               />
             </div>
@@ -446,12 +456,14 @@ export function CustomerActions({ customer, otherCustomers }: CustomerActionsPro
             )}
 
             <div>
-              <Label htmlFor="search">Search customers</Label>
+              <Label htmlFor="merge-search">Search customers</Label>
               <Input
-                id="search"
+                id="merge-search"
+                name="mergeSearch"
                 value={mergeSearch}
                 onChange={(e) => setMergeSearch(e.target.value)}
                 placeholder="Search by name or email..."
+                autoComplete="off"
               />
             </div>
 

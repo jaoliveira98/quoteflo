@@ -54,7 +54,7 @@ export default async function DashboardPage() {
       user={{ email: profile.email, company_name: profile.company_name, brand_color: profile.brand_color }}
       hasAccess={hasActiveSubscription(profile)}
     >
-      <div className="p-6 lg:p-8 space-y-8">
+      <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 min-w-0">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
@@ -73,60 +73,60 @@ export default async function DashboardPage() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-surface-500">Total Quotes</p>
-                  <p className="text-2xl font-bold text-surface-900">{stats.totalQuotes}</p>
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex items-center justify-between gap-2 min-h-[3.5rem]">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm text-surface-500">Total Quotes</p>
+                  <p className="text-xl sm:text-2xl font-bold text-surface-900 break-all">{stats.totalQuotes}</p>
                 </div>
-                <div className="h-10 w-10 rounded-lg bg-surface-100 flex items-center justify-center">
-                  <FileText className="h-5 w-5 text-surface-600" />
+                <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg bg-surface-100 flex items-center justify-center flex-shrink-0">
+                  <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-surface-600" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-surface-500">Sent</p>
-                  <p className="text-2xl font-bold text-surface-900">{stats.sentQuotes}</p>
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex items-center justify-between gap-2 min-h-[3.5rem]">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm text-surface-500">Sent</p>
+                  <p className="text-xl sm:text-2xl font-bold text-surface-900 break-all">{stats.sentQuotes}</p>
                 </div>
-                <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                  <Send className="h-5 w-5 text-blue-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-surface-500">Accepted</p>
-                  <p className="text-2xl font-bold text-surface-900">{stats.acceptedQuotes}</p>
-                </div>
-                <div className="h-10 w-10 rounded-lg bg-green-100 flex items-center justify-center">
-                  <CheckCircle2 className="h-5 w-5 text-green-600" />
+                <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
+                  <Send className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-surface-500">Total Value</p>
-                  <p className="text-2xl font-bold text-surface-900">
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex items-center justify-between gap-2 min-h-[3.5rem]">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm text-surface-500">Accepted</p>
+                  <p className="text-xl sm:text-2xl font-bold text-surface-900 break-all">{stats.acceptedQuotes}</p>
+                </div>
+                <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg bg-green-100 flex items-center justify-center flex-shrink-0">
+                  <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex items-center justify-between gap-2 min-h-[3.5rem]">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm text-surface-500">Total Value</p>
+                  <p className="text-xl sm:text-2xl font-bold text-surface-900 break-all">
                     {formatCurrency(stats.totalValue)}
                   </p>
                 </div>
-                <div className="h-10 w-10 rounded-lg bg-brand-100 flex items-center justify-center">
-                  <PoundSterling className="h-5 w-5 text-brand-600" />
+                <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg bg-brand-100 flex items-center justify-center flex-shrink-0">
+                  <PoundSterling className="h-4 w-4 sm:h-5 sm:w-5 text-brand-600" />
                 </div>
               </div>
             </CardContent>
@@ -147,23 +147,23 @@ export default async function DashboardPage() {
             </CardHeader>
             <CardContent>
               {recentQuotes.length > 0 ? (
-                <div className="space-y-3">
+                <div className="space-y-2 sm:space-y-3">
                   {recentQuotes.map((quote) => (
                     <DashboardNavLink
                       key={quote.id}
                       href={`/quotes/${quote.id}`}
-                      className="flex items-center justify-between p-4 rounded-lg border border-surface-200 hover:border-surface-300 hover:bg-surface-50 transition-all group"
+                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 sm:p-4 rounded-lg border border-surface-200 hover:border-surface-300 hover:bg-surface-50 transition-all group"
                     >
-                      <div className="flex items-center gap-4">
-                        <div className="h-10 w-10 rounded-lg bg-surface-100 flex items-center justify-center group-hover:bg-brand-50 transition-colors">
-                          <FileText className="h-5 w-5 text-surface-500 group-hover:text-brand-600 transition-colors" />
+                      <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                        <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg bg-surface-100 flex items-center justify-center flex-shrink-0 group-hover:bg-brand-50 transition-colors">
+                          <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-surface-500 group-hover:text-brand-600 transition-colors" />
                         </div>
-                        <div>
-                          <p className="font-medium text-surface-900">{quote.customer_name}</p>
-                          <p className="text-sm text-surface-500">{quote.quote_number}</p>
+                        <div className="min-w-0">
+                          <p className="font-medium text-surface-900 truncate">{quote.customer_name}</p>
+                          <p className="text-sm text-surface-500 truncate">{quote.quote_number}</p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0 sm:pl-2">
                         <Badge variant={STATUS_COLORS[quote.status as QuoteStatus]}>
                           {STATUS_LABELS[quote.status as QuoteStatus]}
                         </Badge>

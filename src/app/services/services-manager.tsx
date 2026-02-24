@@ -276,7 +276,7 @@ export function ServicesManager({ profile, initialServices, hasAccess = true }: 
                 {categoryServices.map((service) => (
                   <div
                     key={service.id}
-                    className="flex items-center gap-4 p-4 rounded-lg border border-surface-200 bg-white hover:border-surface-300 transition-colors group"
+                    className="relative flex items-center gap-4 p-4 rounded-lg border border-surface-200 bg-white hover:border-surface-300 transition-colors group flex-nowrap"
                   >
                     <div className="h-10 w-10 rounded-lg bg-brand-50 flex items-center justify-center flex-shrink-0">
                       <Package className="h-5 w-5 text-brand-600" />
@@ -294,12 +294,12 @@ export function ServicesManager({ profile, initialServices, hasAccess = true }: 
                         </span>
                       </div>
                     </div>
-                    <div className="text-right flex-shrink-0">
+                    <div className="flex-shrink-0 text-right tabular-nums">
                       <p className="font-semibold text-surface-900">
                         {formatCurrency(service.price)}
                       </p>
                     </div>
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 group-hover:bg-white pl-2 shadow-sm rounded">
                       <Button
                         variant="ghost"
                         size="icon"
@@ -377,6 +377,7 @@ export function ServicesManager({ profile, initialServices, hasAccess = true }: 
                   setFormData({ ...formData, service_name: e.target.value })
                 }
                 placeholder="e.g. Consultation, Widget, Hourly Rate"
+                autoComplete="off"
                 autoFocus
               />
             </div>
@@ -470,7 +471,7 @@ export function ServicesManager({ profile, initialServices, hasAccess = true }: 
                 />
               </div>
               <div className="space-y-2">
-                <Label>Unit</Label>
+                <Label htmlFor="service-unit">Unit</Label>
                 <Select
                   value={formData.unit}
                   onValueChange={(value) =>
@@ -480,7 +481,7 @@ export function ServicesManager({ profile, initialServices, hasAccess = true }: 
                     })
                   }
                 >
-                  <SelectTrigger>
+                  <SelectTrigger id="service-unit">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>

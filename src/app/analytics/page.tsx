@@ -255,7 +255,7 @@ export default async function AnalyticsPage() {
       user={{ email: profile.email, company_name: profile.company_name, brand_color: profile.brand_color }}
       hasAccess={hasActiveSubscription(profile)}
     >
-      <div className="p-6 lg:p-8 space-y-8">
+      <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 min-w-0 overflow-x-hidden">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
           <div>
@@ -269,74 +269,74 @@ export default async function AnalyticsPage() {
         </div>
 
         {/* KPI Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="flex flex-col">
-            <CardContent className="p-6 flex-1 flex flex-col justify-between">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-surface-500">Quotes</p>
-                  <p className="text-2xl font-bold text-surface-900">{currentQuoteCount}</p>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <Card className="flex flex-col min-w-0">
+            <CardContent className="p-4 sm:p-6 flex-1 flex flex-col justify-between">
+              <div className="flex items-center justify-between gap-2 min-h-[3rem]">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm text-surface-500">Quotes</p>
+                  <p className="text-xl sm:text-2xl font-bold text-surface-900 break-all">{currentQuoteCount}</p>
                 </div>
-                <div className="h-10 w-10 rounded-lg bg-surface-100 flex items-center justify-center flex-shrink-0">
-                  <FileText className="h-5 w-5 text-surface-600" />
+                <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg bg-surface-100 flex items-center justify-center flex-shrink-0">
+                  <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-surface-600" />
                 </div>
               </div>
-              <div className="mt-3 flex items-center gap-2">
+              <div className="mt-2 sm:mt-3 flex items-center gap-1.5 flex-wrap">
                 {renderChange(quoteCountChange)}
-                <span className="text-xs text-surface-400">vs prev. period</span>
+                <span className="text-xs text-surface-400">vs prev.</span>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="flex flex-col">
-            <CardContent className="p-6 flex-1 flex flex-col justify-between">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-surface-500">Value</p>
-                  <p className="text-2xl font-bold text-surface-900">{formatCurrency(currentValue)}</p>
+          <Card className="flex flex-col min-w-0">
+            <CardContent className="p-4 sm:p-6 flex-1 flex flex-col justify-between">
+              <div className="flex items-center justify-between gap-2 min-h-[3rem]">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm text-surface-500">Value</p>
+                  <p className="text-xl sm:text-2xl font-bold text-surface-900 break-all">{formatCurrency(currentValue)}</p>
                 </div>
-                <div className="h-10 w-10 rounded-lg bg-brand-100 flex items-center justify-center flex-shrink-0">
-                  <PoundSterling className="h-5 w-5 text-brand-600" />
+                <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg bg-brand-100 flex items-center justify-center flex-shrink-0">
+                  <PoundSterling className="h-4 w-4 sm:h-5 sm:w-5 text-brand-600" />
                 </div>
               </div>
-              <div className="mt-3 flex items-center gap-2">
+              <div className="mt-2 sm:mt-3 flex items-center gap-1.5 flex-wrap">
                 {renderChange(valueChange)}
-                <span className="text-xs text-surface-400">vs prev. period</span>
+                <span className="text-xs text-surface-400">vs prev.</span>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="flex flex-col">
-            <CardContent className="p-6 flex-1 flex flex-col justify-between">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-surface-500">Won</p>
-                  <p className="text-2xl font-bold text-surface-900">{currentAccepted}</p>
+          <Card className="flex flex-col min-w-0">
+            <CardContent className="p-4 sm:p-6 flex-1 flex flex-col justify-between">
+              <div className="flex items-center justify-between gap-2 min-h-[3rem]">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm text-surface-500">Won</p>
+                  <p className="text-xl sm:text-2xl font-bold text-surface-900 break-all">{currentAccepted}</p>
                 </div>
-                <div className="h-10 w-10 rounded-lg bg-green-100 flex items-center justify-center flex-shrink-0">
-                  <CheckCircle2 className="h-5 w-5 text-green-600" />
+                <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg bg-green-100 flex items-center justify-center flex-shrink-0">
+                  <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
                 </div>
               </div>
-              <div className="mt-3 flex items-center gap-2">
+              <div className="mt-2 sm:mt-3 flex items-center gap-1.5 flex-wrap">
                 {renderChange(acceptedChange)}
-                <span className="text-xs text-surface-400">vs prev. period</span>
+                <span className="text-xs text-surface-400">vs prev.</span>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="flex flex-col">
-            <CardContent className="p-6 flex-1 flex flex-col justify-between">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-surface-500">Win Rate</p>
-                  <p className="text-2xl font-bold text-surface-900">{conversionRate}%</p>
+          <Card className="flex flex-col min-w-0">
+            <CardContent className="p-4 sm:p-6 flex-1 flex flex-col justify-between">
+              <div className="flex items-center justify-between gap-2 min-h-[3rem]">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm text-surface-500">Win Rate</p>
+                  <p className="text-xl sm:text-2xl font-bold text-surface-900 break-all">{conversionRate}%</p>
                 </div>
-                <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
-                  <Target className="h-5 w-5 text-blue-600" />
+                <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
+                  <Target className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
                 </div>
               </div>
-              <div className="mt-3 flex items-center gap-2">
-                <span className="text-xs text-surface-400">of {totalSent} sent quotes</span>
+              <div className="mt-2 sm:mt-3 flex items-center gap-1.5 flex-wrap">
+                <span className="text-xs text-surface-400">of {totalSent} sent</span>
               </div>
             </CardContent>
           </Card>

@@ -33,12 +33,15 @@ export function CustomersSearch({ currentSearch }: CustomersSearchProps) {
     <form onSubmit={handleSearchSubmit} className="relative max-w-sm">
       <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-surface-400" />
       <Input
+        id="customers-search"
+        name="search"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         placeholder="Search by name, email, phone..."
         className="pl-9 pr-9"
         disabled={isPending}
         aria-busy={isPending}
+        autoComplete="off"
       />
       {search && (
         <Button

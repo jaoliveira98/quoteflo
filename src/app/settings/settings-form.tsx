@@ -43,6 +43,7 @@ import {
   Receipt,
   RotateCcw,
   Trash2,
+  Download,
 } from "lucide-react";
 import type { UserProfile, Trade } from "@/types";
 import { cn } from "@/lib/utils";
@@ -186,9 +187,9 @@ function SubscriptionCard({ profile }: { profile: UserProfile }) {
           </Alert>
         )}
         
-        <div className="flex items-center justify-between p-4 rounded-lg bg-surface-50">
-          <div>
-            <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 rounded-lg bg-surface-50">
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2">
               <p className="font-medium text-surface-900">
                 {isActive ? "Professional" : isTrialing ? "Free Trial" : "Starter"} Plan
               </p>
@@ -222,37 +223,38 @@ function SubscriptionCard({ profile }: { profile: UserProfile }) {
               }
             </p>
           </div>
-          
-          {isActive || hasStripeCustomer ? (
-            <Button 
-              variant="outline" 
-              onClick={handleManageBilling}
-              disabled={isLoading}
-              size="sm"
-              className="gap-1.5"
-            >
-              {isLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <>
-                  Manage
-                  <ExternalLink className="h-3.5 w-3.5" aria-hidden />
-                </>
-              )}
-            </Button>
-          ) : (
-            <Button onClick={handleUpgrade} disabled={isLoading} size="sm" className="gap-1.5">
-              {isLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <>
-                  <Crown className="h-4 w-4" />
-                  Upgrade - £29/mo
-                  <ExternalLink className="h-3.5 w-3.5" aria-hidden />
-                </>
-              )}
-            </Button>
-          )}
+          <div className="flex-shrink-0">
+            {isActive || hasStripeCustomer ? (
+              <Button 
+                variant="outline" 
+                onClick={handleManageBilling}
+                disabled={isLoading}
+                size="sm"
+                className="gap-1.5 w-full sm:w-auto"
+              >
+                {isLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <>
+                    Manage
+                    <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+                  </>
+                )}
+              </Button>
+            ) : (
+              <Button onClick={handleUpgrade} disabled={isLoading} size="sm" className="gap-1.5 w-full sm:w-auto">
+                {isLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <>
+                    <Crown className="h-4 w-4" />
+                    Upgrade - £29/mo
+                    <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+                  </>
+                )}
+              </Button>
+            )}
+          </div>
         </div>
         
         {isTrialing && (
@@ -442,6 +444,7 @@ function CompanyDetailsCard({ profile }: { profile: UserProfile }) {
               onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
               placeholder="e.g. Smith Electrical Services"
               required
+              autoComplete="organization"
             />
           </div>
 
@@ -454,6 +457,7 @@ function CompanyDetailsCard({ profile }: { profile: UserProfile }) {
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                 placeholder="07123 456789"
+                autoComplete="tel"
               />
             </div>
             <div className="space-y-2">
@@ -463,6 +467,7 @@ function CompanyDetailsCard({ profile }: { profile: UserProfile }) {
                 value={formData.postcode}
                 onChange={(e) => setFormData({ ...formData, postcode: e.target.value })}
                 placeholder="SW1A 1AA"
+                autoComplete="postal-code"
               />
             </div>
           </div>
@@ -753,11 +758,13 @@ function QuoteDefaultsCard({ profile }: { profile: UserProfile }) {
 
             {vatEnabled && (
               <div className="flex items-center gap-3 ml-6 pl-2 border-l-2 border-surface-100">
-                <Label className="text-sm text-surface-600 whitespace-nowrap">
+                <Label htmlFor="vat-rate" className="text-sm text-surface-600 whitespace-nowrap">
                   Default rate
                 </Label>
                 <div className="flex items-center gap-1.5">
                   <Input
+                    id="vat-rate"
+                    name="vatRate"
                     type="number"
                     min="0"
                     max="100"
@@ -869,14 +876,14 @@ function NotificationsCard({ profile }: { profile: UserProfile }) {
             
             {formData.auto_followup_enabled && (
               <div className="flex items-center gap-3 ml-6 pl-2 border-l-2 border-surface-100">
-                <Label className="text-sm text-surface-600 whitespace-nowrap">
+                <Label htmlFor="auto-followup-days" className="text-sm text-surface-600 whitespace-nowrap">
                   Send after
                 </Label>
                 <Select
                   value={String(formData.auto_followup_days)}
                   onValueChange={(value) => setFormData({ ...formData, auto_followup_days: Number(value) })}
                 >
-                  <SelectTrigger className="w-28 h-8">
+                  <SelectTrigger id="auto-followup-days" className="w-28 h-8">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -911,14 +918,14 @@ function NotificationsCard({ profile }: { profile: UserProfile }) {
             
             {formData.expiry_reminder_enabled && (
               <div className="flex items-center gap-3 ml-6 pl-2 border-l-2 border-surface-100">
-                <Label className="text-sm text-surface-600 whitespace-nowrap">
+                <Label htmlFor="expiry-reminder-days" className="text-sm text-surface-600 whitespace-nowrap">
                   Send
                 </Label>
                 <Select
                   value={String(formData.expiry_reminder_days)}
                   onValueChange={(value) => setFormData({ ...formData, expiry_reminder_days: Number(value) })}
                 >
-                  <SelectTrigger className="w-36 h-8">
+                  <SelectTrigger id="expiry-reminder-days" className="w-36 h-8">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -1047,6 +1054,71 @@ function ChangePasswordCard() {
         </CardContent>
       </Card>
     </form>
+  );
+}
+
+// ──────────────────────────────────────────────
+// Download my data (GDPR right of access)
+// ──────────────────────────────────────────────
+
+function DownloadDataCard() {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleDownload = async () => {
+    setIsLoading(true);
+    try {
+      const res = await fetch("/api/account/export");
+      if (!res.ok) throw new Error("Export failed");
+      const blob = await res.blob();
+      const disposition = res.headers.get("Content-Disposition");
+      const match = disposition?.match(/filename="?([^";]+)"?/);
+      const filename = match?.[1] ?? `quoteflo-data-${new Date().toISOString().slice(0, 10)}.json`;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      // Error already logged; user sees button reset
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base flex items-center gap-2">
+          <Download className="h-4 w-4 text-surface-600" />
+          Download my data
+        </CardTitle>
+        <CardDescription>
+          Get a copy of your account data (profile, customers, quotes) in JSON format. This supports your right of access under UK GDPR.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={handleDownload}
+          disabled={isLoading}
+          className="gap-2"
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Preparing…
+            </>
+          ) : (
+            <>
+              <Download className="h-4 w-4" />
+              Download my data
+            </>
+          )}
+        </Button>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -1335,6 +1407,7 @@ export function AccountSettingsSection({ profile }: SettingsFormProps) {
     <section className="space-y-4">
       <ChangePasswordCard />
       <SubscriptionCardWrapper profile={profile} />
+      <DownloadDataCard />
       <DeleteAccountCard profile={profile} />
     </section>
   );
