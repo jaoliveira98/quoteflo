@@ -1,5 +1,8 @@
 import { DashboardShell } from "@/components/dashboard-shell";
+import { PageHeader } from "@/components/page-header";
+import { StatCard } from "@/components/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { 
   FileText, 
   Send, 
@@ -255,91 +258,63 @@ export default async function AnalyticsPage() {
       user={{ email: profile.email, company_name: profile.company_name, brand_color: profile.brand_color }}
       hasAccess={hasActiveSubscription(profile)}
     >
-      <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 min-w-0 overflow-x-hidden">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-surface-900">Analytics</h1>
-            <p className="text-surface-500 mt-1">Track your quoting performance and trends</p>
-          </div>
-          <div className="flex items-center gap-2 text-sm text-surface-500">
-            <Calendar className="h-4 w-4" />
-            <span>Last 30 days vs previous 30 days</span>
-          </div>
-        </div>
+      <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-8 min-w-0 overflow-x-hidden">
+        <PageHeader
+          title="Analytics"
+          subtitle="Track your quoting performance and trends"
+          align="end"
+          action={
+            <div className="flex items-center gap-2 text-sm text-surface-500">
+              <Calendar className="h-4 w-4" />
+              <span>Last 30 days vs previous 30 days</span>
+            </div>
+          }
+        />
 
-        {/* KPI Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          <Card className="flex flex-col min-w-0">
-            <CardContent className="p-4 sm:p-6 flex-1 flex flex-col justify-between">
-              <div className="flex items-center justify-between gap-2 min-h-[3rem]">
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs sm:text-sm text-surface-500">Quotes</p>
-                  <p className="text-xl sm:text-2xl font-bold text-surface-900 break-all">{currentQuoteCount}</p>
-                </div>
-                <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg bg-surface-100 flex items-center justify-center flex-shrink-0">
-                  <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-surface-600" />
-                </div>
-              </div>
-              <div className="mt-2 sm:mt-3 flex items-center gap-1.5 flex-wrap">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard
+            label="Quotes"
+            value={currentQuoteCount}
+            icon={FileText}
+            iconVariant="surface"
+            footer={
+              <>
                 {renderChange(quoteCountChange)}
                 <span className="text-xs text-surface-400">vs prev.</span>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="flex flex-col min-w-0">
-            <CardContent className="p-4 sm:p-6 flex-1 flex flex-col justify-between">
-              <div className="flex items-center justify-between gap-2 min-h-[3rem]">
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs sm:text-sm text-surface-500">Value</p>
-                  <p className="text-xl sm:text-2xl font-bold text-surface-900 break-all">{formatCurrency(currentValue)}</p>
-                </div>
-                <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg bg-brand-100 flex items-center justify-center flex-shrink-0">
-                  <PoundSterling className="h-4 w-4 sm:h-5 sm:w-5 text-brand-600" />
-                </div>
-              </div>
-              <div className="mt-2 sm:mt-3 flex items-center gap-1.5 flex-wrap">
+              </>
+            }
+          />
+          <StatCard
+            label="Value"
+            value={formatCurrency(currentValue)}
+            icon={PoundSterling}
+            iconVariant="brand"
+            footer={
+              <>
                 {renderChange(valueChange)}
                 <span className="text-xs text-surface-400">vs prev.</span>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="flex flex-col min-w-0">
-            <CardContent className="p-4 sm:p-6 flex-1 flex flex-col justify-between">
-              <div className="flex items-center justify-between gap-2 min-h-[3rem]">
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs sm:text-sm text-surface-500">Won</p>
-                  <p className="text-xl sm:text-2xl font-bold text-surface-900 break-all">{currentAccepted}</p>
-                </div>
-                <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg bg-green-100 flex items-center justify-center flex-shrink-0">
-                  <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
-                </div>
-              </div>
-              <div className="mt-2 sm:mt-3 flex items-center gap-1.5 flex-wrap">
+              </>
+            }
+          />
+          <StatCard
+            label="Won"
+            value={currentAccepted}
+            icon={CheckCircle2}
+            iconVariant="green"
+            footer={
+              <>
                 {renderChange(acceptedChange)}
                 <span className="text-xs text-surface-400">vs prev.</span>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="flex flex-col min-w-0">
-            <CardContent className="p-4 sm:p-6 flex-1 flex flex-col justify-between">
-              <div className="flex items-center justify-between gap-2 min-h-[3rem]">
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs sm:text-sm text-surface-500">Win Rate</p>
-                  <p className="text-xl sm:text-2xl font-bold text-surface-900 break-all">{conversionRate}%</p>
-                </div>
-                <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
-                  <Target className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
-                </div>
-              </div>
-              <div className="mt-2 sm:mt-3 flex items-center gap-1.5 flex-wrap">
-                <span className="text-xs text-surface-400">of {totalSent} sent</span>
-              </div>
-            </CardContent>
-          </Card>
+              </>
+            }
+          />
+          <StatCard
+            label="Win Rate"
+            value={`${conversionRate}%`}
+            icon={Target}
+            iconVariant="blue"
+            footer={<span className="text-xs text-surface-400">of {totalSent} sent</span>}
+          />
         </div>
 
         {/* Charts */}
@@ -426,17 +401,17 @@ export default async function AnalyticsPage() {
                   return (
                     <div 
                       key={index}
-                      className="flex items-center gap-4 p-4 rounded-lg border border-surface-200 hover:border-surface-300 hover:bg-surface-50 transition-all"
+                      className="flex items-center gap-3 p-3 rounded-lg border border-surface-200 hover:border-surface-300 hover:bg-surface-50 transition-all"
                     >
-                      <div className="h-10 w-10 rounded-lg bg-brand-100 flex items-center justify-center flex-shrink-0">
+                      <div className="h-9 w-9 rounded-lg bg-brand-100 flex items-center justify-center flex-shrink-0">
                         <span className="text-brand-700 font-semibold text-sm">
                           {customer.name.charAt(0).toUpperCase()}
                         </span>
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-1">
-                          <p className="font-medium text-surface-900 truncate">{customer.name}</p>
-                          <p className="font-medium text-surface-900 ml-4 flex-shrink-0">{formatCurrency(customer.value)}</p>
+                          <p className="text-sm font-medium text-surface-900 truncate">{customer.name}</p>
+                          <p className="text-sm font-semibold text-surface-900 tabular-nums ml-4 flex-shrink-0">{formatCurrency(customer.value)}</p>
                         </div>
                         <div className="flex items-center justify-between">
                           <div className="flex-1 mr-4">
@@ -457,13 +432,11 @@ export default async function AnalyticsPage() {
                 })}
               </div>
             ) : (
-              <div className="text-center py-10">
-                <div className="h-16 w-16 rounded-2xl bg-surface-100 flex items-center justify-center mx-auto mb-4">
-                  <Users className="h-8 w-8 text-surface-300" />
-                </div>
-                <p className="font-semibold text-surface-900 mb-1">No customer data yet</p>
-                <p className="text-sm text-surface-500">Create quotes to see your top customers</p>
-              </div>
+              <EmptyState
+                icon={Users}
+                title="No customer data yet"
+                description="Create quotes to see your top customers"
+              />
             )}
           </CardContent>
         </Card>

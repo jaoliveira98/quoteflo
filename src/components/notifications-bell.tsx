@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Bell, CheckCircle2, Eye, Send, XCircle } from "lucide-react";
+import { Bell } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,7 +12,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { STATUS_ICONS, STATUS_ICON_STYLES } from "@/lib/constants";
+import type { QuoteStatus } from "@/types";
 
 type NotificationEventType = "sent" | "viewed" | "accepted" | "declined";
 
@@ -86,12 +87,6 @@ export function NotificationsBell() {
   ).length;
   const showBadge = unreadCount > 0;
 
-  const renderIcon = (type: NotificationEventType) => {
-    if (type === "accepted") return <CheckCircle2 className="h-4 w-4 text-green-600" />;
-    if (type === "declined") return <XCircle className="h-4 w-4 text-red-600" />;
-    if (type === "viewed") return <Eye className="h-4 w-4 text-amber-600" />;
-    return <Send className="h-4 w-4 text-blue-600" />;
-  };
 
   const renderLabel = (type: NotificationEventType) => {
     if (type === "accepted") return "Quote accepted";
@@ -169,7 +164,11 @@ export function NotificationsBell() {
         {events.length > 0 && (
           <>
             <div className="max-h-96 overflow-y-auto">
-              {events.map((event) => (
+              {events.map((event) => {
+                const eventStatus = event.type as QuoteStatus;
+                const StatusIcon = STATUS_ICONS[eventStatus];
+                const style = STATUS_ICON_STYLES[eventStatus];
+                return (
                 <DropdownMenuItem
                   key={event.id}
                   asChild
@@ -180,12 +179,10 @@ export function NotificationsBell() {
                     className="flex items-start gap-3 px-2 py-2.5 hover:bg-surface-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 rounded-md"
                   >
                     <div
-                      className={cn(
-                        "mt-0.5 inline-flex h-7 w-7 items-center justify-center rounded-full bg-surface-100 flex-shrink-0"
-                      )}
+                      className={`mt-0.5 inline-flex h-7 w-7 items-center justify-center rounded-lg flex-shrink-0 ${style.bg}`}
                       aria-hidden="true"
                     >
-                      {renderIcon(event.type)}
+                      <StatusIcon className={`h-3.5 w-3.5 ${style.color}`} />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-xs font-medium text-surface-900 truncate">
@@ -200,7 +197,8 @@ export function NotificationsBell() {
                     </div>
                   </Link>
                 </DropdownMenuItem>
-              ))}
+              );
+              })}
             </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild className="justify-center text-xs font-medium text-brand-600">

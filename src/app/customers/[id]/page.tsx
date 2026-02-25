@@ -1,6 +1,7 @@
 import { DashboardShell } from "@/components/dashboard-shell";
 import { DashboardNavLink } from "@/components/dashboard-nav-link";
 import { NewQuoteButton } from "@/components/new-quote-button";
+import { StatCard } from "@/components/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -20,7 +21,7 @@ import { notFound } from "next/navigation";
 import { requireAuthWithProfile, hasActiveSubscription } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { formatCurrency, getInitials } from "@/lib/utils";
-import { STATUS_COLORS, STATUS_ICONS, STATUS_LABELS } from "@/lib/constants";
+import { STATUS_COLORS, STATUS_ICONS, STATUS_ICON_STYLES, STATUS_LABELS } from "@/lib/constants";
 import type { QuoteStatus } from "@/types";
 import { CustomerActions } from "./customer-actions";
 
@@ -82,7 +83,7 @@ export default async function CustomerDetailPage({
       user={{ email: profile.email, company_name: profile.company_name, brand_color: profile.brand_color }}
       hasAccess={hasActiveSubscription(profile)}
     >
-      <div className="p-4 sm:p-6 lg:p-8 space-y-6 min-w-0 overflow-x-hidden">
+      <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-6 min-w-0 overflow-x-hidden">
         {/* Header */}
         <div className="flex flex-col gap-4">
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
@@ -122,87 +123,35 @@ export default async function CustomerDetailPage({
           </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          <Card className="min-w-0">
-            <CardContent className="p-4 sm:p-5">
-              <div className="flex items-center justify-between gap-2 min-h-[3.5rem]">
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs sm:text-sm text-surface-500">Total Quotes</p>
-                  <p className="text-xl sm:text-2xl font-bold text-surface-900 break-all">{totalQuotes}</p>
-                </div>
-                <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg bg-surface-100 flex items-center justify-center flex-shrink-0">
-                  <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-surface-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="min-w-0">
-            <CardContent className="p-4 sm:p-5">
-              <div className="flex items-center justify-between gap-2 min-h-[3.5rem]">
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs sm:text-sm text-surface-500">Won</p>
-                  <p className="text-xl sm:text-2xl font-bold text-surface-900 break-all">{acceptedQuotes}</p>
-                </div>
-                <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg bg-green-100 flex items-center justify-center flex-shrink-0">
-                  <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="min-w-0">
-            <CardContent className="p-4 sm:p-5">
-              <div className="flex items-center justify-between gap-2 min-h-[3.5rem]">
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs sm:text-sm text-surface-500">Total Quoted</p>
-                  <p className="text-xl sm:text-2xl font-bold text-surface-900 break-all">{formatCurrency(totalValue)}</p>
-                </div>
-                <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg bg-surface-100 flex items-center justify-center flex-shrink-0">
-                  <PoundSterling className="h-4 w-4 sm:h-5 sm:w-5 text-surface-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="min-w-0">
-            <CardContent className="p-4 sm:p-5">
-              <div className="flex items-center justify-between gap-2 min-h-[3.5rem]">
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs sm:text-sm text-surface-500">Won Value</p>
-                  <p className="text-xl sm:text-2xl font-bold text-surface-900 break-all">{formatCurrency(acceptedValue)}</p>
-                </div>
-                <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg bg-green-100 flex items-center justify-center flex-shrink-0">
-                  <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard label="Total Quotes" value={totalQuotes} icon={FileText} iconVariant="surface" />
+          <StatCard label="Won" value={acceptedQuotes} icon={CheckCircle2} iconVariant="green" />
+          <StatCard label="Total Quoted" value={formatCurrency(totalValue)} icon={PoundSterling} iconVariant="surface" />
+          <StatCard label="Won Value" value={formatCurrency(acceptedValue)} icon={CheckCircle2} iconVariant="green" />
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Contact Information */}
-          <Card>
+          <Card className="min-w-0 overflow-visible">
             <CardHeader>
               <CardTitle className="text-lg">Contact Information</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6 min-w-0">
               {/* Emails */}
-              <div>
-                <p className="text-sm font-medium text-surface-500 mb-2">Email</p>
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-surface-500 mb-2.5">Email</p>
                 {allEmails.length > 0 ? (
-                  <div className="space-y-2">
+                  <div className="space-y-2.5">
                     {allEmails.map((email, i) => (
-                      <div key={i} className="flex items-center gap-2">
-                        <Mail className="h-4 w-4 text-surface-400" />
+                      <div key={i} className="flex items-start gap-3">
+                        <Mail className="h-4 w-4 text-surface-400 flex-shrink-0 mt-0.5" />
                         <a 
                           href={`mailto:${email}`}
-                          className="text-brand-600 hover:underline"
+                          className="text-brand-600 hover:underline break-all min-w-0 flex-1"
                         >
                           {email}
                         </a>
-                        {i === 0 && <Badge variant="secondary" className="text-xs">Primary</Badge>}
+                        {i === 0 && <Badge variant="secondary" className="text-xs flex-shrink-0">Primary</Badge>}
                       </div>
                     ))}
                   </div>
@@ -212,20 +161,20 @@ export default async function CustomerDetailPage({
               </div>
 
               {/* Phones */}
-              <div>
-                <p className="text-sm font-medium text-surface-500 mb-2">Phone</p>
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-surface-500 mb-2.5">Phone</p>
                 {allPhones.length > 0 ? (
-                  <div className="space-y-2">
+                  <div className="space-y-2.5">
                     {allPhones.map((phone, i) => (
-                      <div key={i} className="flex items-center gap-2">
-                        <Phone className="h-4 w-4 text-surface-400" />
+                      <div key={i} className="flex items-start gap-3">
+                        <Phone className="h-4 w-4 text-surface-400 flex-shrink-0 mt-0.5" />
                         <a 
                           href={`tel:${phone}`}
-                          className="text-brand-600 hover:underline"
+                          className="text-brand-600 hover:underline break-all min-w-0 flex-1"
                         >
                           {phone}
                         </a>
-                        {i === 0 && <Badge variant="secondary" className="text-xs">Primary</Badge>}
+                        {i === 0 && <Badge variant="secondary" className="text-xs flex-shrink-0">Primary</Badge>}
                       </div>
                     ))}
                   </div>
@@ -235,12 +184,12 @@ export default async function CustomerDetailPage({
               </div>
 
               {/* Address */}
-              <div>
-                <p className="text-sm font-medium text-surface-500 mb-2">Address</p>
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-surface-500 mb-2.5">Address</p>
                 {customer.address || customer.postcode ? (
-                  <div className="flex items-start gap-2">
-                    <MapPin className="h-4 w-4 text-surface-400 mt-0.5" />
-                    <div>
+                  <div className="flex items-start gap-3">
+                    <MapPin className="h-4 w-4 text-surface-400 mt-0.5 flex-shrink-0" />
+                    <div className="min-w-0 flex-1 break-words">
                       {customer.address && <p className="text-surface-700">{customer.address}</p>}
                       {customer.postcode && <p className="text-surface-700">{customer.postcode}</p>}
                     </div>
@@ -253,7 +202,7 @@ export default async function CustomerDetailPage({
               {/* Notes */}
               {customer.notes && (
                 <div>
-                  <p className="text-sm font-medium text-surface-500 mb-2">Notes</p>
+                  <p className="text-sm font-medium text-surface-500 mb-2.5">Notes</p>
                   <p className="text-surface-700 text-sm whitespace-pre-wrap">{customer.notes}</p>
                 </div>
               )}
@@ -267,22 +216,24 @@ export default async function CustomerDetailPage({
             </CardHeader>
             <CardContent className="min-w-0">
               {customerQuotes.length > 0 ? (
-                <div className="space-y-2 sm:space-y-3">
+                <div className="space-y-3">
                   {customerQuotes.map((quote) => {
-                    const StatusIcon = STATUS_ICONS[quote.status as QuoteStatus] || FileText;
+                    const status = quote.status as QuoteStatus;
+                    const StatusIcon = STATUS_ICONS[status] || FileText;
+                    const style = STATUS_ICON_STYLES[status];
                     return (
                       <DashboardNavLink
                         key={quote.id}
                         href={`/quotes/${quote.id}`}
-                        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 sm:p-4 rounded-lg border border-surface-200 hover:border-surface-300 hover:bg-surface-50 transition-colors min-w-0"
+                        className="flex items-center justify-between gap-3 p-3 rounded-lg border border-surface-200 hover:border-surface-300 hover:bg-surface-50 transition-all group min-w-0"
                       >
-                        <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-                          <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg bg-surface-100 flex items-center justify-center flex-shrink-0">
-                            <StatusIcon className="h-4 w-4 sm:h-5 sm:w-5 text-surface-500" />
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className={`h-9 w-9 rounded-lg flex items-center justify-center flex-shrink-0 ${style.bg}`}>
+                            <StatusIcon className={`h-4 w-4 ${style.color}`} />
                           </div>
                           <div className="min-w-0 flex-1">
-                            <p className="font-medium text-surface-900 truncate">{quote.quote_number}</p>
-                            <div className="flex items-center gap-2 text-sm text-surface-500 flex-wrap">
+                            <p className="text-sm font-medium text-surface-900 truncate">{quote.quote_number}</p>
+                            <div className="flex items-center gap-2 text-xs text-surface-500 flex-wrap">
                               <span className="flex items-center gap-1.5 shrink-0">
                                 <Calendar className="h-3.5 w-3.5" />
                                 {new Date(quote.created_at).toLocaleDateString("en-GB", {
@@ -300,11 +251,11 @@ export default async function CustomerDetailPage({
                             </div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0">
-                          <Badge variant={STATUS_COLORS[quote.status as QuoteStatus]}>
-                            {STATUS_LABELS[quote.status as QuoteStatus]}
+                        <div className="flex items-center gap-3 flex-shrink-0">
+                          <Badge variant={STATUS_COLORS[status]}>
+                            {STATUS_LABELS[status]}
                           </Badge>
-                          <span className="font-semibold text-surface-900">
+                          <span className="text-sm font-semibold text-surface-900 tabular-nums">
                             {formatCurrency(Number(quote.total))}
                           </span>
                         </div>

@@ -52,6 +52,19 @@ export const STATUS_ICONS: Record<QuoteStatus, typeof FileText> = {
   expired: Clock,
 };
 
+/** Icon container bg + icon color for list rows; use same mapping everywhere so users associate color with status. */
+export const STATUS_ICON_STYLES: Record<
+  QuoteStatus,
+  { bg: string; color: string }
+> = {
+  draft: { bg: "bg-surface-100", color: "text-surface-500" },
+  sent: { bg: "bg-blue-50", color: "text-blue-600" },
+  viewed: { bg: "bg-amber-50", color: "text-amber-600" },
+  accepted: { bg: "bg-green-50", color: "text-green-600" },
+  declined: { bg: "bg-red-50", color: "text-red-600" },
+  expired: { bg: "bg-surface-100", color: "text-surface-500" },
+};
+
 export const STATUS_CONFIG: Record<
   QuoteStatus,
   { label: string; variant: "success" | "warning" | "info" | "secondary"; icon: typeof FileText }

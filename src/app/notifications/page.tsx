@@ -1,13 +1,15 @@
 import Link from "next/link";
 import { DashboardShell } from "@/components/dashboard-shell";
+import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, Eye, Send, XCircle } from "lucide-react";
 import { requireAuthWithProfile, hasActiveSubscription } from "@/lib/auth";
+import { STATUS_ICONS, STATUS_ICON_STYLES } from "@/lib/constants";
 import {
   getRecentNotifications,
   NotificationEvent,
 } from "@/lib/data/notifications";
+import type { QuoteStatus } from "@/types";
 
 function formatTimestamp(iso: string) {
   const date = new Date(iso);
@@ -37,18 +39,6 @@ function getLabelAndVariant(event: NotificationEvent) {
   }
 }
 
-function getIcon(event: NotificationEvent) {
-  switch (event.type) {
-    case "accepted":
-      return <CheckCircle2 className="h-4 w-4 text-green-600" />;
-    case "declined":
-      return <XCircle className="h-4 w-4 text-red-600" />;
-    case "viewed":
-      return <Eye className="h-4 w-4 text-amber-600" />;
-    default:
-      return <Send className="h-4 w-4 text-blue-600" />;
-  }
-}
 
 export default async function NotificationsPage() {
   const profile = await requireAuthWithProfile();
@@ -63,17 +53,11 @@ export default async function NotificationsPage() {
       }}
       hasAccess={hasActiveSubscription(profile)}
     >
-      <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-surface-900">
-              Notifications
-            </h1>
-            <p className="text-surface-600 text-sm">
-              See when customers opened, accepted, or declined your quotes.
-            </p>
-          </div>
-        </div>
+      <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-8">
+        <PageHeader
+          title="Notifications"
+          subtitle="See when customers opened, accepted, or declined your quotes."
+        />
 
         <Card>
           <CardHeader>
@@ -90,15 +74,18 @@ export default async function NotificationsPage() {
               <div className="divide-y divide-surface-100">
                 {events.map((event) => {
                   const { label, variant } = getLabelAndVariant(event);
+                  const eventStatus = event.type as QuoteStatus;
+                  const StatusIcon = STATUS_ICONS[eventStatus];
+                  const style = STATUS_ICON_STYLES[eventStatus];
                   return (
                     <Link
                       key={event.id}
                       href={`/quotes/${event.quoteId}`}
-                      className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-3 sm:py-3.5 hover:bg-surface-50 px-2 sm:px-3 rounded-lg -mx-2 sm:-mx-3 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
+                      className="flex items-center justify-between gap-3 p-3 rounded-lg hover:bg-surface-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
                     >
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className="h-8 w-8 rounded-full bg-surface-100 flex items-center justify-center flex-shrink-0">
-                          {getIcon(event)}
+                        <div className={`h-9 w-9 rounded-lg flex items-center justify-center flex-shrink-0 ${style.bg}`}>
+                          <StatusIcon className={`h-4 w-4 ${style.color}`} />
                         </div>
                         <div className="min-w-0">
                           <p className="text-sm font-medium text-surface-900 truncate">
@@ -109,7 +96,7 @@ export default async function NotificationsPage() {
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-start sm:items-center justify-between sm:justify-end gap-2 flex-1">
+                      <div className="flex items-center gap-3 flex-shrink-0">
                         <Badge variant={variant}>{label}</Badge>
                         <span className="text-xs text-surface-400 whitespace-nowrap">
                           {formatTimestamp(event.at)}

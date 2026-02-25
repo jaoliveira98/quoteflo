@@ -28,11 +28,13 @@ export const Default: Story = {
         company_name: "Acme Inc",
       }}
     >
-      <div className="p-6">
-        <h1 className="text-2xl font-semibold mb-4">Dashboard</h1>
-        <p className="text-muted-foreground">
+      <div className="p-6 lg:p-8 space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-surface-900">Dashboard</h1>
+          <p className="text-surface-600 mt-1">
           Main content area. The shell provides the sidebar navigation and header.
-        </p>
+          </p>
+        </div>
       </div>
     </DashboardShell>
   ),

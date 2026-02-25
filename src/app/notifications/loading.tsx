@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function NotificationsLoading() {
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 animate-pulse">
+    <div className="p-6 lg:p-8 space-y-8 animate-pulse">
       <div className="h-7 w-40 rounded-md bg-surface-100" />
       <Card>
         <CardHeader>
@@ -16,7 +16,7 @@ export default function NotificationsLoading() {
                 className="flex items-center justify-between gap-3 py-2 border-b border-surface-100 last:border-0"
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="h-8 w-8 rounded-full bg-surface-100" />
+                  <div className="h-8 w-8 rounded-lg bg-surface-100" />
                   <div className="space-y-1 min-w-0">
                     <div className="h-3 w-32 rounded bg-surface-100" />
                     <div className="h-3 w-24 rounded bg-surface-100" />

@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { useUserPreview } from "@/components/dashboard-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -46,7 +47,7 @@ import {
   Download,
 } from "lucide-react";
 import type { UserProfile, Trade } from "@/types";
-import { cn } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 import { TRADES_CONFIG, BRAND_COLORS } from "@/lib/constants";
 import { Suspense } from "react";
 
@@ -338,6 +339,7 @@ function SubscriptionCardWrapper({ profile }: { profile: UserProfile }) {
 
 function CompanyDetailsCard({ profile }: { profile: UserProfile }) {
   const router = useRouter();
+  const previewContext = useUserPreview();
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -360,6 +362,14 @@ function CompanyDetailsCard({ profile }: { profile: UserProfile }) {
   const [selectedTrade, setSelectedTrade] = useState<Trade>(initialTradeValues.trade);
   const [customTradeName, setCustomTradeName] = useState(initialTradeValues.customTradeName);
 
+  useEffect(() => {
+    previewContext?.setPreview((prev) => ({
+      ...prev,
+      company_name: formData.company_name || undefined,
+      phone: formData.phone || undefined,
+    }));
+  }, [previewContext, formData.company_name, formData.phone]);
+
   const isFormDirty =
     formData.company_name !== initialValues.company_name ||
     formData.phone !== initialValues.phone ||
@@ -378,7 +388,12 @@ function CompanyDetailsCard({ profile }: { profile: UserProfile }) {
     setFormData(initialValues);
     setSelectedTrade(initialTradeValues.trade);
     setCustomTradeName(initialTradeValues.customTradeName);
-  }, [initialValues, initialTradeValues]);
+    previewContext?.setPreview((prev) => ({
+      ...prev,
+      company_name: undefined,
+      phone: undefined,
+    }));
+  }, [initialValues, initialTradeValues, previewContext]);
 
   const tradeConfig = TRADES_CONFIG.find((t) => t.value === selectedTrade);
   const tradeName =
@@ -414,6 +429,11 @@ function CompanyDetailsCard({ profile }: { profile: UserProfile }) {
       if (updateError) throw updateError;
 
       setSuccess(true);
+      previewContext?.setPreview((prev) => ({
+        ...prev,
+        company_name: undefined,
+        phone: undefined,
+      }));
       router.refresh();
       setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
@@ -536,20 +556,29 @@ function CompanyDetailsCard({ profile }: { profile: UserProfile }) {
 
 function BrandingCard({ profile }: { profile: UserProfile }) {
   const router = useRouter();
+  const previewContext = useUserPreview();
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const initialColor = profile.brand_color || "#22c55e";
   const [brandColor, setBrandColor] = useState(initialColor);
-  const companyName = profile.company_name || "Your Company";
-  const phone = profile.phone || "Phone number";
+
+  const companyName = (previewContext?.preview?.company_name ?? profile.company_name) || "Your Company";
+
+  useEffect(() => {
+    previewContext?.setPreview((prev) => ({
+      ...prev,
+      brand_color: brandColor,
+    }));
+  }, [previewContext, brandColor]);
 
   const isDirty = brandColor !== initialColor;
 
   const handleUndo = useCallback(() => {
     setBrandColor(initialColor);
-  }, [initialColor]);
+    previewContext?.setPreview((prev) => ({ ...prev, brand_color: undefined }));
+  }, [initialColor, previewContext]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -570,6 +599,7 @@ function BrandingCard({ profile }: { profile: UserProfile }) {
       if (updateError) throw updateError;
 
       setSuccess(true);
+      previewContext?.setPreview((prev) => ({ ...prev, brand_color: undefined }));
       router.refresh();
       setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
@@ -612,22 +642,71 @@ function BrandingCard({ profile }: { profile: UserProfile }) {
             ))}
           </div>
 
-          <div className="p-4 rounded-lg border border-surface-200 bg-surface-800">
-            <p className="text-xs font-medium text-surface-400 uppercase tracking-wider mb-3 text-surface-300">Preview</p>
-            <div className="flex items-center gap-3">
-              <div 
-                className="h-10 w-10 rounded-lg flex items-center justify-center text-white font-bold text-sm"
-                style={{ backgroundColor: brandColor }}
-              >
-                {companyName.charAt(0) || "Q"}
+          <div className="rounded-xl border border-surface-200 bg-surface-50 p-4 space-y-4">
+            <p className="text-xs font-semibold uppercase tracking-wider text-surface-500">Preview</p>
+            <p className="text-sm text-surface-600">
+              How your colour appears in emails and on quote pages customers see.
+            </p>
+
+            <div className="space-y-4">
+              <div className="rounded-lg border border-surface-200 bg-white shadow-soft overflow-hidden max-w-sm">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-surface-400 px-3 pt-2 pb-1">
+                  Email (when you send a quote)
+                </p>
+                <div className="p-3 text-center border-b-2" style={{ borderBottomColor: brandColor }} aria-hidden>
+                  <p className="font-semibold text-surface-900 text-sm">{companyName}</p>
+                </div>
+                <div className="p-3 space-y-2">
+                  <div className="rounded-lg bg-surface-100 p-2.5">
+                    <p className="text-[10px] text-surface-500">Quote #Q-001</p>
+                    <p className="text-lg font-bold" style={{ color: brandColor }}>
+                      Total: {formatCurrency(1234)}
+                    </p>
+                  </div>
+                  <div
+                    className="rounded-lg py-2 text-center text-sm font-semibold text-white"
+                    style={{ backgroundColor: brandColor }}
+                    aria-hidden
+                  >
+                    View Quote
+                  </div>
+                </div>
               </div>
-              <div>
-                <p className="font-semibold text-sm text-white">
-                  {companyName}
+
+              <div className="rounded-lg border border-surface-200 bg-white shadow-soft overflow-hidden max-w-sm">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-surface-400 px-3 pt-2 pb-1">
+                  Quote page (customer view)
                 </p>
-                <p className="text-xs text-surface-400">
-                  {phone}
+                <div
+                  className="p-4 text-white"
+                  style={{
+                    background: `linear-gradient(135deg, ${brandColor}, ${brandColor}dd)`,
+                  }}
+                  aria-hidden
+                >
+                  <p className="text-xs opacity-90 mb-0.5">Total Quote Amount</p>
+                  <p className="text-xl font-bold">{formatCurrency(1500)}</p>
+                  <p className="text-xs opacity-90 mt-0.5">Including VAT</p>
+                </div>
+                <div className="p-2 flex justify-between border-t border-surface-100">
+                  <span className="text-[10px] text-surface-500">Quote for</span>
+                  <span className="text-[10px] font-medium text-surface-700">Customer</span>
+                </div>
+              </div>
+
+              <div className="rounded-lg border border-surface-200 bg-white overflow-hidden max-w-sm">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-surface-400 px-3 pt-2 pb-1">
+                  PDF / quote header
                 </p>
+                <div className="p-2 flex justify-between items-start border-b-2" style={{ borderBottomColor: brandColor }}>
+                  <p className="text-xs font-semibold text-surface-900">{companyName}</p>
+                  <p className="text-sm font-bold" style={{ color: brandColor }}>QUOTE</p>
+                </div>
+                <div className="p-2 flex justify-end">
+                  <span className="text-xs font-semibold" style={{ color: brandColor }}>
+                    Total {formatCurrency(999)}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -757,11 +836,11 @@ function QuoteDefaultsCard({ profile }: { profile: UserProfile }) {
             </div>
 
             {vatEnabled && (
-              <div className="flex items-center gap-3 ml-6 pl-2 border-l-2 border-surface-100">
+              <div className="flex items-center gap-4 ml-6 pl-3 border-l-2 border-surface-100">
                 <Label htmlFor="vat-rate" className="text-sm text-surface-600 whitespace-nowrap">
                   Default rate
                 </Label>
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-2">
                   <Input
                     id="vat-rate"
                     name="vatRate"
@@ -917,7 +996,7 @@ function NotificationsCard({ profile }: { profile: UserProfile }) {
             </div>
             
             {formData.expiry_reminder_enabled && (
-              <div className="flex items-center gap-3 ml-6 pl-2 border-l-2 border-surface-100">
+              <div className="flex items-center gap-4 ml-6 pl-3 border-l-2 border-surface-100">
                 <Label htmlFor="expiry-reminder-days" className="text-sm text-surface-600 whitespace-nowrap">
                   Send
                 </Label>

@@ -1,6 +1,9 @@
 import { DashboardShell } from "@/components/dashboard-shell";
 import { DashboardNavLink } from "@/components/dashboard-nav-link";
 import { NewQuoteButton } from "@/components/new-quote-button";
+import { PageHeader } from "@/components/page-header";
+import { ContactInfoRow } from "@/components/contact-info-row";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -73,18 +76,12 @@ export default async function CustomersPage({
       user={{ email: profile.email, company_name: profile.company_name, brand_color: profile.brand_color }}
       hasAccess={hasActiveSubscription(profile)}
     >
-      <div className="p-6 lg:p-8 space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-surface-900">Customers</h1>
-            <p className="text-surface-600">
-              {filteredCustomers.length} {filteredCustomers.length === 1 ? 'customer' : 'customers'}
-              {search && ` found`}
-            </p>
-          </div>
-          <AddCustomerButton hasAccess={hasActiveSubscription(profile)} />
-        </div>
+      <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
+        <PageHeader
+          title="Customers"
+          subtitle={`${filteredCustomers.length} ${filteredCustomers.length === 1 ? "customer" : "customers"}${search ? " found" : ""}`}
+          action={<AddCustomerButton hasAccess={hasActiveSubscription(profile)} />}
+        />
 
         {/* Info banner for orphan quotes */}
         {uniqueOrphanCustomers.size > 0 && !search && (
@@ -128,30 +125,25 @@ export default async function CustomersPage({
                       
                       <h3 className="font-semibold text-surface-900 mb-2">{customer.name}</h3>
                       
-                      <div className="space-y-1.5 text-sm">
+                      <div className="space-y-1.5">
                         {allEmails.length > 0 && (
-                          <div className="flex items-center gap-2 text-surface-600">
-                            <Mail className="h-3.5 w-3.5 text-surface-400 flex-shrink-0" />
-                            <span className="truncate">{allEmails[0]}</span>
+                          <div className="flex items-center gap-2 min-w-0">
+                            <ContactInfoRow icon={Mail}>{allEmails[0]}</ContactInfoRow>
                             {allEmails.length > 1 && (
-                              <Badge variant="secondary" className="text-xs">+{allEmails.length - 1}</Badge>
+                              <Badge variant="secondary" className="text-xs flex-shrink-0">+{allEmails.length - 1}</Badge>
                             )}
                           </div>
                         )}
                         {allPhones.length > 0 && (
-                          <div className="flex items-center gap-2 text-surface-600">
-                            <Phone className="h-3.5 w-3.5 text-surface-400 flex-shrink-0" />
-                            <span>{allPhones[0]}</span>
+                          <div className="flex items-center gap-2 min-w-0">
+                            <ContactInfoRow icon={Phone}>{allPhones[0]}</ContactInfoRow>
                             {allPhones.length > 1 && (
-                              <Badge variant="secondary" className="text-xs">+{allPhones.length - 1}</Badge>
+                              <Badge variant="secondary" className="text-xs flex-shrink-0">+{allPhones.length - 1}</Badge>
                             )}
                           </div>
                         )}
                         {customer.postcode && (
-                          <div className="flex items-center gap-2 text-surface-600">
-                            <MapPin className="h-3.5 w-3.5 text-surface-400 flex-shrink-0" />
-                            <span>{customer.postcode}</span>
-                          </div>
+                          <ContactInfoRow icon={MapPin}>{customer.postcode}</ContactInfoRow>
                         )}
                       </div>
 
@@ -181,32 +173,31 @@ export default async function CustomersPage({
           </div>
         ) : (
           <Card>
-            <CardContent className="py-16 text-center">
-              <Users className="h-12 w-12 text-surface-300 mx-auto mb-4" />
+            <CardContent className="px-6">
               {search ? (
-                <>
-                  <h3 className="text-lg font-medium text-surface-900 mb-2">No customers found</h3>
-                  <p className="text-surface-600 mb-6">
-                    Try adjusting your search
-                  </p>
+                <EmptyState
+                  icon={Users}
+                  title="No customers found"
+                  description="Try adjusting your search"
+                >
                   <Button variant="outline" asChild>
                     <Link href="/customers">Clear search</Link>
                   </Button>
-                </>
+                </EmptyState>
               ) : (
-                <>
-                  <h3 className="text-lg font-medium text-surface-900 mb-2">No customers yet</h3>
-                  <p className="text-surface-600 mb-6">
-                    Customers are automatically saved when you create quotes, or add them manually.
-                  </p>
-                  <div className="flex items-center justify-center gap-3">
+                <EmptyState
+                  icon={Users}
+                  title="No customers yet"
+                  description="Customers are automatically saved when you create quotes, or add them manually."
+                >
+                  <>
                     <AddCustomerButton hasAccess={hasActiveSubscription(profile)} />
                     <NewQuoteButton variant="outline">
                       <Plus className="h-4 w-4" />
                       Create Quote
                     </NewQuoteButton>
-                  </div>
-                </>
+                  </>
+                </EmptyState>
               )}
             </CardContent>
           </Card>
