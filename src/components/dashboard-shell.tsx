@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
+import { NotificationsBell } from "@/components/notifications-bell";
 
 type DashboardNavContextValue = {
   startNavigation: (href: string) => void;
@@ -226,15 +227,18 @@ function SidebarContent({
               {user?.email || "user@example.com"}
             </p>
           </div>
-          <Button 
-            variant="ghost"
-            size="icon"
-            onClick={handleLogout}
-            className="h-8 w-8 text-surface-400 hover:text-surface-600"
-            title="Log out"
-          >
-            <LogOut className="h-4 w-4" />
-          </Button>
+          <div className="flex items-center gap-1">
+            <NotificationsBell />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleLogout}
+              className="h-8 w-8 text-surface-400 hover:text-surface-600"
+              title="Log out"
+            >
+              <LogOut className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </div>
     </div>
@@ -372,10 +376,13 @@ export function DashboardShell({ children, user, hasAccess = true }: DashboardSh
           </Button>
         </header>
 
-        <main id="main-content" className={cn(
-          "min-h-[calc(100vh-3.5rem)] lg:min-h-screen transition-opacity duration-150",
-          isNavigating && "opacity-60 pointer-events-none"
-        )}>
+        <main
+          id="main-content"
+          className={cn(
+            "min-h-[calc(100vh-3.5rem)] lg:min-h-screen transition-opacity duration-150",
+            isNavigating && "opacity-60 pointer-events-none"
+          )}
+        >
           {hasAccess === false && (
             <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 text-center text-sm text-amber-800">
               Trial or subscription ended.{" "}

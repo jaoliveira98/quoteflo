@@ -30,7 +30,7 @@ export async function getCachedQuotesList(
       const supabase = createServiceRoleClient();
       let query = supabase
         .from("quotes")
-        .select("id, quote_number, customer_name, customer_email, status, total, created_at")
+        .select("id, quote_number, customer_name, customer_email, status, total, created_at, sent_at, viewed_at, accepted_at")
         .eq("user_id", userId)
         .order("created_at", { ascending: false });
 

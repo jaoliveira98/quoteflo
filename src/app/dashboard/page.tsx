@@ -4,14 +4,16 @@ import { NewQuoteButton } from "@/components/new-quote-button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
-  FileText, 
-  Send, 
-  CheckCircle2, 
+import {
+  FileText,
+  Send,
+  CheckCircle2,
   PoundSterling,
   Plus,
   ArrowUpRight,
-  Clock
+  Clock,
+  Eye,
+  XCircle,
 } from "lucide-react";
 import Link from "next/link";
 import { formatCurrency } from "@/lib/utils";
@@ -47,7 +49,68 @@ export default async function DashboardPage() {
     draftCount,
     awaitingCount,
   };
-  
+
+  const recentActivity = allQuotes
+    .flatMap((quote) => {
+      const events: {
+        id: string;
+        quoteId: string;
+        customerName: string;
+        quoteNumber: string;
+        type: "sent" | "viewed" | "accepted" | "declined";
+        at: string;
+      }[] = [];
+
+      if (quote.sent_at) {
+        events.push({
+          id: `${quote.id}-sent-${quote.sent_at}`,
+          quoteId: quote.id,
+          customerName: quote.customer_name,
+          quoteNumber: quote.quote_number,
+          type: "sent",
+          at: quote.sent_at,
+        });
+      }
+
+      if (quote.viewed_at) {
+        events.push({
+          id: `${quote.id}-viewed-${quote.viewed_at}`,
+          quoteId: quote.id,
+          customerName: quote.customer_name,
+          quoteNumber: quote.quote_number,
+          type: "viewed",
+          at: quote.viewed_at,
+        });
+      }
+
+      if (quote.accepted_at) {
+        events.push({
+          id: `${quote.id}-accepted-${quote.accepted_at}`,
+          quoteId: quote.id,
+          customerName: quote.customer_name,
+          quoteNumber: quote.quote_number,
+          type: "accepted",
+          at: quote.accepted_at,
+        });
+      }
+
+      if (quote.status === "declined") {
+        const declinedAt = quote.viewed_at || quote.sent_at || quote.created_at;
+        events.push({
+          id: `${quote.id}-declined-${declinedAt}`,
+          quoteId: quote.id,
+          customerName: quote.customer_name,
+          quoteNumber: quote.quote_number,
+          type: "declined",
+          at: declinedAt,
+        });
+      }
+
+      return events;
+    })
+    .sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime())
+    .slice(0, 10);
+
   const recentQuotes = allQuotes.slice(0, 4);
   return (
     <DashboardShell
@@ -249,6 +312,85 @@ export default async function DashboardPage() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Recent Activity */}
+        {recentActivity.length > 0 && (
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="text-lg">Recent activity</CardTitle>
+              <span className="text-xs text-surface-500">
+                Showing latest {recentActivity.length} updates
+              </span>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {recentActivity.map((event) => {
+                  let Icon = FileText;
+                  let label = "";
+                  let iconBg = "bg-surface-100";
+                  let iconColor = "text-surface-500";
+
+                  if (event.type === "sent") {
+                    Icon = Send;
+                    label = "Quote sent";
+                    iconBg = "bg-blue-50";
+                    iconColor = "text-blue-600";
+                  } else if (event.type === "viewed") {
+                    Icon = Eye;
+                    label = "Quote opened";
+                    iconBg = "bg-amber-50";
+                    iconColor = "text-amber-600";
+                  } else if (event.type === "accepted") {
+                    Icon = CheckCircle2;
+                    label = "Quote accepted";
+                    iconBg = "bg-green-50";
+                    iconColor = "text-green-600";
+                  } else if (event.type === "declined") {
+                    Icon = XCircle;
+                    label = "Quote declined";
+                    iconBg = "bg-red-50";
+                    iconColor = "text-red-600";
+                  }
+
+                  const date = new Date(event.at);
+                  const formatted = `${date.toLocaleDateString("en-GB", {
+                    day: "numeric",
+                    month: "short",
+                  })} • ${date.toLocaleTimeString("en-GB", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}`;
+
+                  return (
+                    <DashboardNavLink
+                      key={event.id}
+                      href={`/quotes/${event.quoteId}`}
+                      className="flex items-center justify-between gap-3 p-3 rounded-lg border border-surface-200 hover:border-surface-300 hover:bg-surface-50 transition-all group"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div
+                          className={`h-9 w-9 rounded-full flex items-center justify-center flex-shrink-0 ${iconBg}`}
+                        >
+                          <Icon className={`h-4 w-4 ${iconColor}`} />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-surface-900 truncate">
+                            {event.customerName}
+                          </p>
+                          <p className="text-xs text-surface-500 truncate">
+                            {label} • {event.quoteNumber}
+                          </p>
+                          <p className="text-xs text-surface-400">{formatted}</p>
+                        </div>
+                      </div>
+                      <ArrowUpRight className="h-4 w-4 text-surface-400 flex-shrink-0 group-hover:text-surface-600" />
+                    </DashboardNavLink>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </DashboardShell>
   );
