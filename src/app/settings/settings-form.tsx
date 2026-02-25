@@ -612,8 +612,8 @@ function BrandingCard({ profile }: { profile: UserProfile }) {
             ))}
           </div>
 
-          <div className="p-4 rounded-lg border border-surface-200 bg-white">
-            <p className="text-xs font-medium text-surface-400 uppercase tracking-wider mb-3">Preview</p>
+          <div className="p-4 rounded-lg border border-surface-200 bg-surface-800">
+            <p className="text-xs font-medium text-surface-400 uppercase tracking-wider mb-3 text-surface-300">Preview</p>
             <div className="flex items-center gap-3">
               <div 
                 className="h-10 w-10 rounded-lg flex items-center justify-center text-white font-bold text-sm"
@@ -622,10 +622,10 @@ function BrandingCard({ profile }: { profile: UserProfile }) {
                 {companyName.charAt(0) || "Q"}
               </div>
               <div>
-                <p className="font-semibold text-sm" style={{ color: brandColor }}>
+                <p className="font-semibold text-sm text-white">
                   {companyName}
                 </p>
-                <p className="text-xs text-surface-500">
+                <p className="text-xs text-surface-400">
                   {phone}
                 </p>
               </div>
@@ -894,7 +894,7 @@ function NotificationsCard({ profile }: { profile: UserProfile }) {
                     <SelectItem value="7">7 days</SelectItem>
                   </SelectContent>
                 </Select>
-                <p className="text-xs text-surface-400">Up to 3 emails, 3 days apart</p>
+                <p className="text-xs text-surface-500">Up to 3 emails, 3 days apart</p>
               </div>
             )}
           </div>
@@ -936,7 +936,7 @@ function NotificationsCard({ profile }: { profile: UserProfile }) {
                     <SelectItem value="7">7 days before</SelectItem>
                   </SelectContent>
                 </Select>
-                <span className="text-xs text-surface-400">expiry</span>
+                <span className="text-xs text-surface-500">expiry</span>
               </div>
             )}
           </div>

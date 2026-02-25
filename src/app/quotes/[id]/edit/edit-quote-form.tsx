@@ -294,7 +294,7 @@ export function EditQuoteForm({ profile, quote, existingLineItems, services, has
       </div>
 
       {error && (
-        <Alert variant="destructive">{error}</Alert>
+        <Alert variant="destructive" aria-live="polite" role="alert">{error}</Alert>
       )}
 
       {/* Customer Details */}

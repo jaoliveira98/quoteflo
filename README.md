@@ -99,7 +99,7 @@ To enable subscription billing:
 
 3. In Stripe Dashboard:
    - Create a Product called "QuoteFlo Professional"
-   - Add a Price: £19/month recurring
+   - Add a Price: £29/month recurring
    - Copy the Price ID (starts with `price_`)
 
 4. Add environment variables:
@@ -187,7 +187,7 @@ quoteflo/
 ### ✅ Step 5: Sending Quotes (Complete)
 - [x] PDF generation
 - [x] Email sending (Resend)
-- [x] SMS sending (Twilio)
+- [ ] SMS sending (Twilio) — planned, not yet implemented
 - [x] Public quote view page
 
 ### ✅ Step 6: Customer Management (Complete)
@@ -212,7 +212,7 @@ quoteflo/
 ### ✅ Step 9: Stripe Billing (Complete)
 - [x] Stripe integration
 - [x] 14-day free trial
-- [x] £19/month Professional plan
+- [x] £29/month Professional plan
 - [x] Stripe Checkout for upgrades
 - [x] Customer Portal for subscription management
 - [x] Webhook handling for subscription events

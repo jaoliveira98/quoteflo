@@ -138,7 +138,7 @@ export default async function PublicQuotePage({
           <CardContent className="p-6">
             <h3 className="font-semibold text-surface-900 mb-4">Quote Breakdown</h3>
             
-            <div className="space-y-3">
+            <div className="space-y-3" role="list" aria-label="Quote line items">
               {lineItems && lineItems.map((item) => (
                 <div 
                   key={item.id}

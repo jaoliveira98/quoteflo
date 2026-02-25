@@ -154,7 +154,7 @@ function SidebarContent({
       <nav className="flex-1 px-3 pt-2 overflow-y-auto">
         {navigationGroups.map((group, groupIdx) => (
           <div key={group.label} className={cn(groupIdx > 0 && "mt-4")}>
-            <p className="px-3 mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-surface-400">
+            <p className="px-3 mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-surface-500">
               {group.label}
             </p>
             <div className="space-y-0.5">
@@ -168,6 +168,7 @@ function SidebarContent({
                     variant="ghost"
                     onClick={() => handleNavigation(item.href)}
                     disabled={isNavigating && !isLoading}
+                    aria-current={isActive ? "page" : undefined}
                     className={cn(
                       "w-full justify-start gap-3 px-3 py-2.5 h-auto rounded-lg text-sm font-medium transition-all",
                       isActive
@@ -322,9 +323,12 @@ export function DashboardShell({ children, user, hasAccess = true }: DashboardSh
   return (
     <div className="min-h-screen bg-surface-50">
       {isNavigating && (
-        <div className="fixed top-0 left-0 right-0 z-[100] h-1 bg-brand-100">
-          <div className="h-full bg-brand-500 animate-loading-bar" />
-        </div>
+        <>
+          <div className="fixed top-0 left-0 right-0 z-[100] h-1 bg-brand-100" aria-hidden="true">
+            <div className="h-full bg-brand-500 animate-loading-bar" />
+          </div>
+          <div className="sr-only" aria-live="polite" role="status">Loading page</div>
+        </>
       )}
 
       {/* Mobile Sidebar (Sheet) */}
@@ -368,7 +372,7 @@ export function DashboardShell({ children, user, hasAccess = true }: DashboardSh
           </Button>
         </header>
 
-        <main className={cn(
+        <main id="main-content" className={cn(
           "min-h-[calc(100vh-3.5rem)] lg:min-h-screen transition-opacity duration-150",
           isNavigating && "opacity-60 pointer-events-none"
         )}>

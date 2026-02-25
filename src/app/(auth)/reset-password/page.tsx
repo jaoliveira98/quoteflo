@@ -95,7 +95,7 @@ export default function ResetPasswordPage() {
   return (
     <Card className="border-0 shadow-medium">
       <CardHeader className="text-center pb-2">
-        <CardTitle className="text-2xl">Set new password</CardTitle>
+        <h1 className="text-2xl font-semibold leading-none tracking-tight">Set new password</h1>
         <CardDescription>
           Enter your new password below
         </CardDescription>
@@ -132,7 +132,7 @@ export default function ResetPasswordPage() {
           </div>
 
           {error && (
-            <Alert variant="destructive">{error}</Alert>
+            <Alert variant="destructive" aria-live="polite" role="alert">{error}</Alert>
           )}
 
           <Button type="submit" className="w-full" size="lg" disabled={isLoading}>

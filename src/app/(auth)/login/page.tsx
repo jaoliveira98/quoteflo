@@ -70,7 +70,7 @@ function LoginForm() {
       )}
       <Card className="border-0 shadow-medium">
         <CardHeader className="text-center pb-2">
-          <CardTitle className="text-2xl">Welcome back</CardTitle>
+          <h1 className="text-2xl font-semibold leading-none tracking-tight">Welcome back</h1>
           <CardDescription>
             Log in to your QuoteFlo account
           </CardDescription>
@@ -112,7 +112,7 @@ function LoginForm() {
             </div>
 
             {error && (
-              <Alert variant="destructive">{error}</Alert>
+              <Alert variant="destructive" aria-live="polite" role="alert">{error}</Alert>
             )}
 
             <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
@@ -144,7 +144,7 @@ export default function LoginPage() {
     <Suspense fallback={
       <Card className="border-0 shadow-medium">
         <CardHeader className="text-center pb-2">
-          <CardTitle className="text-2xl">Welcome back</CardTitle>
+          <h1 className="text-2xl font-semibold leading-none tracking-tight">Welcome back</h1>
           <CardDescription>Loading...</CardDescription>
         </CardHeader>
       </Card>
