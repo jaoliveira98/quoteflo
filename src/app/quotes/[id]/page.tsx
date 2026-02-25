@@ -143,15 +143,17 @@ export default async function QuoteDetailPage({
             <CardTitle className="text-lg">Quote Items</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
+            <div className="space-y-3" role="table" aria-label="Quote line items">
               {lineItems && lineItems.length > 0 ? (
                 <>
                   {/* Header */}
-                  <div className="hidden sm:grid grid-cols-12 gap-4 text-sm font-medium text-surface-500 px-4 pb-2 border-b border-surface-200">
-                    <div className="col-span-6">Description</div>
-                    <div className="col-span-2 text-right">Qty</div>
-                    <div className="col-span-2 text-right">Unit Price</div>
-                    <div className="col-span-2 text-right">Total</div>
+                  <div role="rowgroup">
+                    <div className="hidden sm:grid grid-cols-12 gap-4 text-sm font-medium text-surface-500 px-4 pb-2 border-b border-surface-200" role="row">
+                      <div className="col-span-6" role="columnheader">Description</div>
+                      <div className="col-span-2 text-right" role="columnheader">Qty</div>
+                      <div className="col-span-2 text-right" role="columnheader">Unit Price</div>
+                      <div className="col-span-2 text-right" role="columnheader">Total</div>
+                    </div>
                   </div>
                   
                   {/* Items */}
@@ -159,19 +161,20 @@ export default async function QuoteDetailPage({
                     <div 
                       key={item.id}
                       className="grid grid-cols-12 gap-4 p-4 rounded-lg bg-surface-50 items-center"
+                      role="row"
                     >
-                      <div className="col-span-12 sm:col-span-6">
+                      <div className="col-span-12 sm:col-span-6" role="cell">
                         <p className="font-medium text-surface-900">{item.description}</p>
                       </div>
-                      <div className="col-span-4 sm:col-span-2 text-left sm:text-right">
+                      <div className="col-span-4 sm:col-span-2 text-left sm:text-right" role="cell">
                         <span className="sm:hidden text-sm text-surface-500 mr-2">Qty:</span>
                         {item.quantity}
                       </div>
-                      <div className="col-span-4 sm:col-span-2 text-left sm:text-right">
+                      <div className="col-span-4 sm:col-span-2 text-left sm:text-right" role="cell">
                         <span className="sm:hidden text-sm text-surface-500 mr-2">@</span>
                         {formatCurrency(Number(item.unit_price))}
                       </div>
-                      <div className="col-span-4 sm:col-span-2 text-right font-medium">
+                      <div className="col-span-4 sm:col-span-2 text-right font-medium" role="cell">
                         {formatCurrency(Number(item.line_total))}
                       </div>
                     </div>
@@ -216,33 +219,33 @@ export default async function QuoteDetailPage({
             <CardTitle className="text-lg">Activity</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <ol className="space-y-4 list-none p-0 m-0" aria-label="Quote activity timeline">
               {quote.accepted_at && (
-                <div className="flex items-center gap-3 text-sm">
+                <li className="flex items-center gap-3 text-sm">
                   <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
-                    <CheckCircle2 className="h-4 w-4 text-green-600" />
+                    <CheckCircle2 className="h-4 w-4 text-green-600" aria-hidden="true" />
                   </div>
                   <div>
                     <p className="font-medium text-surface-900">Quote accepted</p>
                     <p className="text-surface-500">{formatDate(quote.accepted_at)}</p>
                   </div>
-                </div>
+                </li>
               )}
               {quote.expiry_reminder_sent_at && (
-                <div className="flex items-center gap-3 text-sm">
+                <li className="flex items-center gap-3 text-sm">
                   <div className="h-8 w-8 rounded-full bg-orange-100 flex items-center justify-center">
-                    <Clock className="h-4 w-4 text-orange-600" />
+                    <Clock className="h-4 w-4 text-orange-600" aria-hidden="true" />
                   </div>
                   <div>
                     <p className="font-medium text-surface-900">Expiry reminder sent</p>
                     <p className="text-surface-500">{formatDate(quote.expiry_reminder_sent_at)}</p>
                   </div>
-                </div>
+                </li>
               )}
               {quote.last_follow_up_at && (
-                <div className="flex items-center gap-3 text-sm">
+                <li className="flex items-center gap-3 text-sm">
                   <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center">
-                    <Bell className="h-4 w-4 text-purple-600" />
+                    <Bell className="h-4 w-4 text-purple-600" aria-hidden="true" />
                   </div>
                   <div>
                     <p className="font-medium text-surface-900">
@@ -250,40 +253,40 @@ export default async function QuoteDetailPage({
                     </p>
                     <p className="text-surface-500">{formatDate(quote.last_follow_up_at)}</p>
                   </div>
-                </div>
+                </li>
               )}
               {quote.viewed_at && (
-                <div className="flex items-center gap-3 text-sm">
+                <li className="flex items-center gap-3 text-sm">
                   <div className="h-8 w-8 rounded-full bg-amber-100 flex items-center justify-center">
-                    <Eye className="h-4 w-4 text-amber-600" />
+                    <Eye className="h-4 w-4 text-amber-600" aria-hidden="true" />
                   </div>
                   <div>
                     <p className="font-medium text-surface-900">Quote viewed</p>
                     <p className="text-surface-500">{formatDate(quote.viewed_at)}</p>
                   </div>
-                </div>
+                </li>
               )}
               {quote.sent_at && (
-                <div className="flex items-center gap-3 text-sm">
+                <li className="flex items-center gap-3 text-sm">
                   <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
-                    <Send className="h-4 w-4 text-blue-600" />
+                    <Send className="h-4 w-4 text-blue-600" aria-hidden="true" />
                   </div>
                   <div>
                     <p className="font-medium text-surface-900">Quote sent</p>
                     <p className="text-surface-500">{formatDate(quote.sent_at)}</p>
                   </div>
-                </div>
+                </li>
               )}
-              <div className="flex items-center gap-3 text-sm">
+              <li className="flex items-center gap-3 text-sm">
                 <div className="h-8 w-8 rounded-full bg-surface-100 flex items-center justify-center">
-                  <Edit className="h-4 w-4 text-surface-600" />
+                  <Edit className="h-4 w-4 text-surface-600" aria-hidden="true" />
                 </div>
                 <div>
                   <p className="font-medium text-surface-900">Quote created</p>
                   <p className="text-surface-500">{formatDate(quote.created_at)}</p>
                 </div>
-              </div>
-            </div>
+              </li>
+            </ol>
           </CardContent>
         </Card>
 

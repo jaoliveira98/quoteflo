@@ -76,7 +76,6 @@ export default function PrivacyPage() {
               <li><strong>Supabase</strong> — hosting our database and authentication.</li>
               <li><strong>Stripe</strong> — payment and subscription processing.</li>
               <li><strong>Resend</strong> — transactional email (e.g. quote emails, reminders).</li>
-              <li><strong>Twilio</strong> — SMS if used (e.g. notifications); we do not use SMS for marketing without opt-in.</li>
               <li><strong>Vercel</strong> (or our hosting provider) — application hosting and serverless functions.</li>
             </ul>
             <p className="mt-2">

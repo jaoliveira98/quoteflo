@@ -7,6 +7,7 @@ import { hasActiveSubscription } from "@/lib/auth";
 import type { UserProfile } from "@/types";
 import { getQuotesListCacheTag } from "@/lib/data/quotes";
 import { getQuotesStatsCacheTag } from "@/lib/data/customers";
+import { getAppUrl } from "@/lib/url";
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
@@ -58,8 +59,7 @@ export async function POST(
     );
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-  const quoteUrl = `${baseUrl}/q/${quote.access_token}`;
+  const quoteUrl = `${getAppUrl()}/q/${quote.access_token}`;
 
   // Determine follow-up message based on count
   const followUpNumber = (quote.follow_up_count || 0) + 1;

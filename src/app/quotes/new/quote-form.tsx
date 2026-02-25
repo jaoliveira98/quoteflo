@@ -322,7 +322,7 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer, h
       </div>
 
       {error && (
-        <Alert variant="destructive">{error}</Alert>
+        <Alert variant="destructive" aria-live="polite" role="alert">{error}</Alert>
       )}
 
       {/* Customer Details */}

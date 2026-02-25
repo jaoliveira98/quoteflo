@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
 import { Loader2, CheckCircle2, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -125,7 +125,7 @@ export default function SignupPage() {
       )}
       <Card className="border-0 shadow-medium">
         <CardHeader className="text-center pb-2">
-          <CardTitle className="text-2xl">Create your account</CardTitle>
+          <h1 className="text-2xl font-semibold leading-none tracking-tight">Create your account</h1>
           <CardDescription>
             {step === 1 
               ? "First, tell us what trade you're in"
@@ -272,7 +272,7 @@ export default function SignupPage() {
               </div>
 
               {error && (
-                <Alert variant="destructive">{error}</Alert>
+                <Alert variant="destructive" aria-live="polite" role="alert">{error}</Alert>
               )}
 
               <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
@@ -285,6 +285,10 @@ export default function SignupPage() {
                   "Start 14-Day Free Trial"
                 )}
               </Button>
+
+              <p className="text-xs text-center text-surface-500 mt-2">
+                After your 14-day trial, it&apos;s £29/month. No hidden fees. Cancel anytime via the Stripe Customer Portal in Settings.
+              </p>
 
               <p className="text-xs text-center text-surface-500">
                 By signing up, you agree to our{" "}

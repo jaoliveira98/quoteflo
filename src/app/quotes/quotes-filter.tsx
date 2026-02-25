@@ -116,7 +116,7 @@ export function QuotesFilter({ currentSearch, currentStatus, currentDateFilter, 
           onValueChange={handleDateFilterChange}
           disabled={isPending}
         >
-          <SelectTrigger className="w-full sm:w-[180px] h-11">
+          <SelectTrigger className="w-full sm:w-[180px] h-11" aria-label="Filter by date range">
             <SelectValue placeholder="Date range" />
           </SelectTrigger>
           <SelectContent>
@@ -142,6 +142,7 @@ export function QuotesFilter({ currentSearch, currentStatus, currentDateFilter, 
               disabled={isPending}
               variant={isActive ? "default" : "outline"}
               size="sm"
+              aria-pressed={isActive}
               className={cn(
                 "rounded-full gap-1.5",
                 isActive

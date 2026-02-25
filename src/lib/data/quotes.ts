@@ -11,6 +11,10 @@ export type QuoteListItem = {
   status: string;
   total: number;
   created_at: string;
+  sent_at?: string | null;
+  viewed_at?: string | null;
+  accepted_at?: string | null;
+  declined_at?: string | null;
 };
 
 export function getQuotesListCacheTag(userId: string) {
@@ -30,7 +34,9 @@ export async function getCachedQuotesList(
       const supabase = createServiceRoleClient();
       let query = supabase
         .from("quotes")
-        .select("id, quote_number, customer_name, customer_email, status, total, created_at")
+        .select(
+          "id, quote_number, customer_name, customer_email, status, total, created_at, sent_at, viewed_at, accepted_at, declined_at"
+        )
         .eq("user_id", userId)
         .order("created_at", { ascending: false });
 

@@ -13,7 +13,7 @@ export default async function AuthLayout({
   return (
     <div className="min-h-screen bg-surface-50 flex flex-col lg:flex-row">
       {/* Left side - Branding (hidden on mobile) */}
-      <div className="hidden lg:flex lg:w-[45%] xl:w-[40%] bg-surface-900 text-white p-10 xl:p-14 flex-col justify-between relative overflow-hidden">
+      <aside className="hidden lg:flex lg:w-[45%] xl:w-[40%] bg-surface-900 text-white p-10 xl:p-14 flex-col justify-between relative overflow-hidden" aria-label="QuoteFlo features">
         {/* Background decoration */}
         <div className="absolute inset-0">
           <div className="absolute top-1/4 -left-20 w-80 h-80 bg-brand-600/10 rounded-full blur-3xl" />
@@ -56,15 +56,15 @@ export default async function AuthLayout({
         
         <div className="relative z-10 flex flex-col gap-2">
           <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
-            <Link href="/terms" className="text-surface-500 underline hover:text-surface-400">Terms</Link>
-            <Link href="/privacy" className="text-surface-500 underline hover:text-surface-400">Privacy</Link>
-            <Link href="/contact" className="text-surface-500 underline hover:text-surface-400">Contact</Link>
+            <Link href="/terms" className="text-surface-400 underline hover:text-surface-300">Terms</Link>
+            <Link href="/privacy" className="text-surface-400 underline hover:text-surface-300">Privacy</Link>
+            <Link href="/contact" className="text-surface-400 underline hover:text-surface-300">Contact</Link>
           </div>
-          <p className="text-sm text-surface-500">
+          <p className="text-sm text-surface-400">
             © {new Date().getFullYear()} QuoteFlo. Built for UK tradespeople.
           </p>
         </div>
-      </div>
+      </aside>
 
       {/* Right side - Form */}
       <div className="flex-1 flex flex-col">
@@ -76,7 +76,7 @@ export default async function AuthLayout({
         </header>
 
         {/* Content */}
-        <main className="flex-1 flex items-center justify-center p-4 sm:p-6">
+        <main id="main-content" className="flex-1 flex items-center justify-center p-4 sm:p-6">
           <div className="w-full max-w-md">
             {children}
           </div>

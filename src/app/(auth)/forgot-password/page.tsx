@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
 import { Loader2, ArrowLeft, CheckCircle2 } from "lucide-react";
 
@@ -80,7 +80,7 @@ export default function ForgotPasswordPage() {
   return (
     <Card className="border-0 shadow-medium">
       <CardHeader className="text-center pb-2">
-        <CardTitle className="text-2xl">Forgot password?</CardTitle>
+        <h1 className="text-2xl font-semibold leading-none tracking-tight">Forgot password?</h1>
         <CardDescription>
           Enter your email and we&apos;ll send you a reset link
         </CardDescription>
@@ -101,7 +101,7 @@ export default function ForgotPasswordPage() {
           </div>
 
           {error && (
-            <Alert variant="destructive">{error}</Alert>
+            <Alert variant="destructive" aria-live="polite" role="alert">{error}</Alert>
           )}
 
           <Button type="submit" className="w-full" size="lg" disabled={isLoading}>

@@ -42,8 +42,9 @@ export default function HomePage() {
         </div>
       </nav>
 
+      <main id="main-content">
       {/* Hero */}
-      <section className="pt-28 sm:pt-32 pb-16 sm:pb-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      <section className="pt-28 sm:pt-32 pb-16 sm:pb-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden" aria-labelledby="hero-heading">
         {/* Background decoration */}
         <div className="absolute inset-0 -z-10">
           <div className="absolute top-20 left-1/4 w-72 h-72 bg-brand-100/40 rounded-full blur-3xl" />
@@ -53,12 +54,12 @@ export default function HomePage() {
         <div className="max-w-4xl mx-auto text-center">
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-50 text-brand-700 text-sm font-medium mb-6 sm:mb-8 border border-brand-100">
-            <Zap className="h-3.5 w-3.5" />
+            <Zap className="h-3.5 w-3.5" aria-hidden="true" />
             Built for UK Tradespeople
           </div>
 
           {/* Headline */}
-          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold text-surface-900 tracking-tight mb-5 sm:mb-6 leading-tight">
+          <h1 id="hero-heading" className="text-3xl sm:text-5xl lg:text-6xl font-bold text-surface-900 tracking-tight mb-5 sm:mb-6 leading-tight">
             Professional Quotes in{" "}
             <span className="text-brand-600 relative inline-block">
               Under 5 Minutes
@@ -114,10 +115,10 @@ export default function HomePage() {
       </section>
 
       {/* How It Works */}
-      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-surface-50 border-y border-surface-100">
+      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-surface-50 border-y border-surface-100" aria-labelledby="steps-heading">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-2xl sm:text-3xl font-bold text-surface-900 mb-3">
+            <h2 id="steps-heading" className="text-2xl sm:text-3xl font-bold text-surface-900 mb-3">
               Quote to Cash in 3 Steps
             </h2>
             <p className="text-base sm:text-lg text-surface-600">
@@ -169,10 +170,10 @@ export default function HomePage() {
       </section>
 
       {/* Features */}
-      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8">
+      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8" aria-labelledby="features-heading">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-2xl sm:text-3xl font-bold text-surface-900 mb-3">
+            <h2 id="features-heading" className="text-2xl sm:text-3xl font-bold text-surface-900 mb-3">
               Why Tradespeople Love QuoteFlo
             </h2>
             <p className="text-base sm:text-lg text-surface-600 max-w-2xl mx-auto">
@@ -240,10 +241,10 @@ export default function HomePage() {
       </section>
 
       {/* Testimonials */}
-      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-surface-50 border-y border-surface-100">
+      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-surface-50 border-y border-surface-100" aria-labelledby="testimonials-heading">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-10 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl font-bold text-surface-900 mb-3">
+            <h2 id="testimonials-heading" className="text-2xl sm:text-3xl font-bold text-surface-900 mb-3">
               Hear From Other Trades
             </h2>
           </div>
@@ -295,13 +296,13 @@ export default function HomePage() {
       </section>
 
       {/* Pricing Preview */}
-      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8">
+      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8" aria-labelledby="pricing-heading">
         <div className="max-w-lg mx-auto text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold text-surface-900 mb-3">
+          <h2 id="pricing-heading" className="text-2xl sm:text-3xl font-bold text-surface-900 mb-3">
             Simple, Honest Pricing
           </h2>
           <p className="text-base sm:text-lg text-surface-600 mb-8 sm:mb-10">
-            Just £29/month for unlimited quotes. That&apos;s less than £1/day.
+            14-day free trial, then just £29/month for unlimited quotes. No hidden fees.
           </p>
           
           <div className="bg-white rounded-2xl border-2 border-surface-200 overflow-hidden shadow-soft">
@@ -341,7 +342,7 @@ export default function HomePage() {
                 </Link>
               </Button>
               <p className="text-xs text-surface-500 mt-3">
-                No credit card required • Cancel anytime
+                No credit card required • No hidden fees • Cancel anytime
               </p>
             </div>
           </div>
@@ -349,9 +350,9 @@ export default function HomePage() {
       </section>
 
       {/* Final CTA */}
-      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-surface-900">
+      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-surface-900" aria-labelledby="cta-heading">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
+          <h2 id="cta-heading" className="text-2xl sm:text-3xl font-bold text-white mb-4">
             Ready to Win More Jobs?
           </h2>
           <p className="text-surface-300 text-base sm:text-lg mb-8 max-w-xl mx-auto">
@@ -366,6 +367,7 @@ export default function HomePage() {
           </Button>
         </div>
       </section>
+      </main>
 
       {/* Footer */}
       <footer className="py-8 sm:py-10 px-4 sm:px-6 lg:px-8 border-t border-surface-200">

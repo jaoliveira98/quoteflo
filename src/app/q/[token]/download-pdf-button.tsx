@@ -13,9 +13,9 @@ export function DownloadPDFButton({ token }: DownloadPDFButtonProps) {
   };
 
   return (
-    <Button variant="outline" size="sm" onClick={handleDownload}>
-      <Download className="h-4 w-4" />
-      <span className="hidden sm:inline">Download PDF</span>
+    <Button variant="outline" size="sm" onClick={handleDownload} aria-label="Download PDF">
+      <Download className="h-4 w-4" aria-hidden="true" />
+      <span className="hidden sm:inline" aria-hidden="true">Download PDF</span>
     </Button>
   );
 }

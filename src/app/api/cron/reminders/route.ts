@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { Resend } from "resend";
 import { formatCurrency, escapeHtml } from "@/lib/utils";
+import { getAppUrl } from "@/lib/url";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -36,8 +37,7 @@ async function sendFollowUpEmail(quote: {
   job_description?: string;
   valid_until?: string;
 }) {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-  const quoteUrl = `${baseUrl}/q/${quote.access_token}`;
+  const quoteUrl = `${getAppUrl()}/q/${quote.access_token}`;
   
   const followUpNumber = (quote.follow_up_count || 0) + 1;
   let followUpMessage = "";
@@ -133,8 +133,7 @@ async function sendExpiryReminderEmail(quote: {
   brand_color: string;
   access_token: string;
 }) {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-  const quoteUrl = `${baseUrl}/q/${quote.access_token}`;
+  const quoteUrl = `${getAppUrl()}/q/${quote.access_token}`;
   
   const expiryDate = new Date(quote.valid_until);
   const formattedExpiry = expiryDate.toLocaleDateString("en-GB", { 
