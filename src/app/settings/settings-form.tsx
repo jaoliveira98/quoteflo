@@ -565,7 +565,6 @@ function BrandingCard({ profile }: { profile: UserProfile }) {
   const [brandColor, setBrandColor] = useState(initialColor);
 
   const companyName = (previewContext?.preview?.company_name ?? profile.company_name) || "Your Company";
-  const phone = (previewContext?.preview?.phone ?? profile.phone) || "Phone number";
 
   useEffect(() => {
     previewContext?.setPreview((prev) => ({
