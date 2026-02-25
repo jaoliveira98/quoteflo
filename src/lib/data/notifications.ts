@@ -28,7 +28,19 @@ export async function getRecentNotifications(
 
   if (!quotes) return [];
 
-  const events: NotificationEvent[] = (quotes as any[])
+  type QuoteRow = {
+    id: string;
+    quote_number: string;
+    customer_name: string;
+    status: string;
+    created_at: string;
+    sent_at: string | null;
+    viewed_at: string | null;
+    accepted_at: string | null;
+    declined_at: string | null;
+  };
+
+  const events: NotificationEvent[] = (quotes as QuoteRow[])
     .flatMap((quote) => {
       const quoteEvents: NotificationEvent[] = [];
 

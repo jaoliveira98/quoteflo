@@ -101,12 +101,6 @@ interface SidebarContentProps {
   loadingPath: string | null;
   isNavigating: boolean;
   handleNavigation: (href: string) => void;
-  handleLogout: () => void;
-  user?: {
-    email: string;
-    company_name: string;
-    brand_color?: string;
-  };
   hasAccess?: boolean;
   onOpenUpgradeDialog?: () => void;
 }
@@ -124,8 +118,6 @@ function SidebarContent({
   loadingPath,
   isNavigating,
   handleNavigation,
-  handleLogout,
-  user,
   hasAccess = true,
   onOpenUpgradeDialog,
 }: SidebarContentProps) {
@@ -305,8 +297,6 @@ export function DashboardShell({ children, user, hasAccess = true }: DashboardSh
     loadingPath,
     isNavigating,
     handleNavigation,
-    handleLogout,
-    user,
     hasAccess,
     onOpenUpgradeDialog: hasAccess ? undefined : handleOpenUpgradeDialog,
   };
