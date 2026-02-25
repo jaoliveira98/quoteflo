@@ -368,7 +368,7 @@ function CompanyDetailsCard({ profile }: { profile: UserProfile }) {
       company_name: formData.company_name || undefined,
       phone: formData.phone || undefined,
     }));
-  }, [formData.company_name, formData.phone]);
+  }, [previewContext, formData.company_name, formData.phone]);
 
   const isFormDirty =
     formData.company_name !== initialValues.company_name ||
@@ -571,7 +571,7 @@ function BrandingCard({ profile }: { profile: UserProfile }) {
       ...prev,
       brand_color: brandColor,
     }));
-  }, [brandColor]);
+  }, [previewContext, brandColor]);
 
   const isDirty = brandColor !== initialColor;
 

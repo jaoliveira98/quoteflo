@@ -3,10 +3,7 @@ import { cn } from "@/lib/utils";
 
 type StatCardIconVariant = "surface" | "blue" | "green" | "brand";
 
-const iconVariantClasses: Record<
-  StatCardIconVariant,
-  { container: string; icon: string }
-> = {
+const iconVariantClasses: Record<StatCardIconVariant, string> = {
   surface: "bg-surface-100 text-surface-600",
   blue: "bg-blue-100 text-blue-600",
   green: "bg-green-100 text-green-600",
