@@ -20,7 +20,7 @@ export async function getRecentNotifications(
   const { data: quotes } = await supabase
     .from("quotes")
     .select(
-      "id, quote_number, customer_name, status, created_at, sent_at, viewed_at, accepted_at"
+      "id, quote_number, customer_name, status, created_at, sent_at, viewed_at, accepted_at, declined_at"
     )
     .eq("user_id", userId)
     .order("created_at", { ascending: false })
@@ -66,7 +66,8 @@ export async function getRecentNotifications(
       }
 
       if (quote.status === "declined") {
-        const declinedAt = quote.viewed_at || quote.sent_at || quote.created_at;
+        const declinedAt =
+          quote.declined_at || quote.viewed_at || quote.sent_at || quote.created_at;
         quoteEvents.push({
           id: `${quote.id}-declined-${declinedAt}`,
           quoteId: quote.id,

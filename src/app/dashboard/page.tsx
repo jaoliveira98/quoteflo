@@ -95,7 +95,8 @@ export default async function DashboardPage() {
       }
 
       if (quote.status === "declined") {
-        const declinedAt = quote.viewed_at || quote.sent_at || quote.created_at;
+        const declinedAt =
+          quote.declined_at || quote.viewed_at || quote.sent_at || quote.created_at;
         events.push({
           id: `${quote.id}-declined-${declinedAt}`,
           quoteId: quote.id,

@@ -37,6 +37,14 @@ import {
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { NotificationsBell } from "@/components/notifications-bell";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 type DashboardNavContextValue = {
   startNavigation: (href: string) => void;
@@ -192,53 +200,32 @@ function SidebarContent({
         ))}
       </nav>
 
-      <div className="p-4 border-t border-surface-200 space-y-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="w-full justify-start gap-3 px-3 py-2.5 h-auto text-sm font-medium text-surface-600 hover:text-surface-900 hover:bg-surface-50"
-          onClick={() => handleNavigation("/contact")}
-          disabled={isNavigating}
-          title="Contact support"
-        >
-          <HelpCircle className="h-5 w-5 text-surface-400" />
-          Contact support
-        </Button>
-        <div className="flex items-center gap-3 px-3 py-2">
-          <div
-            className={cn(
-              "h-9 w-9 rounded-full flex items-center justify-center",
-              !user?.brand_color && "bg-brand-100"
-            )}
-            style={user?.brand_color ? brandAvatarStyle(user.brand_color) : undefined}
+      <div className="p-4 border-t border-surface-200 space-y-4">
+        <div className="rounded-lg border border-surface-200 bg-surface-50 px-3 py-3">
+          <div className="flex items-start gap-3">
+            <div className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-surface-100">
+              <HelpCircle className="h-4 w-4 text-surface-500" aria-hidden="true" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-surface-900">
+                Need a hand?
+              </p>
+              <p className="mt-0.5 text-xs text-surface-500">
+                Contact our support team if you&apos;re stuck or have a question.
+              </p>
+            </div>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="mt-3 w-full justify-center gap-2 px-3 py-2.5 h-auto text-sm font-medium text-surface-700 hover:text-surface-900 hover:bg-surface-100"
+            onClick={() => handleNavigation("/contact")}
+            disabled={isNavigating}
+            title="Contact support"
           >
-            <span
-              className={cn("text-sm font-medium", !user?.brand_color && "text-brand-700")}
-              style={user?.brand_color ? { color: user.brand_color } : undefined}
-            >
-              {user?.company_name?.charAt(0) || "Q"}
-            </span>
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-surface-900 truncate">
-              {user?.company_name || "My Company"}
-            </p>
-            <p className="text-xs text-surface-500 truncate">
-              {user?.email || "user@example.com"}
-            </p>
-          </div>
-          <div className="flex items-center gap-1">
-            <NotificationsBell />
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleLogout}
-              className="h-8 w-8 text-surface-400 hover:text-surface-600"
-              title="Log out"
-            >
-              <LogOut className="h-4 w-4" />
-            </Button>
-          </div>
+            <HelpCircle className="h-4 w-4" aria-hidden="true" />
+            Contact support
+          </Button>
         </div>
       </div>
     </div>
@@ -353,27 +340,91 @@ export function DashboardShell({ children, user, hasAccess = true }: DashboardSh
 
       {/* Main content */}
       <div className="lg:pl-64">
-        <header className="sticky top-0 z-30 flex items-center h-14 px-4 bg-white/95 backdrop-blur-sm border-b border-surface-200 lg:hidden">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setSidebarOpen(true)}
-            className="-ml-2"
-            aria-label="Open menu"
-          >
-            <Menu className="h-5 w-5 text-surface-700" />
-          </Button>
-          <div className="flex-1 flex justify-center">
+        <header className="sticky top-0 z-30 flex items-center h-14 px-4 bg-white/95 backdrop-blur-sm border-b border-surface-200">
+          <div className="flex items-center gap-2 lg:hidden">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setSidebarOpen(true)}
+              className="-ml-2"
+              aria-label="Open menu"
+            >
+              <Menu className="h-5 w-5 text-surface-700" />
+            </Button>
             <Logo size="sm" />
           </div>
-          <Button
-            size="icon"
-            onClick={hasAccess ? () => handleNavigation("/quotes/new") : handleOpenUpgradeDialog}
-            className="-mr-2"
-            aria-label={hasAccess ? "New quote" : "Upgrade to create quotes"}
-          >
-            <Plus className="h-5 w-5" />
-          </Button>
+          <div className="flex-1" />
+          <div className="flex items-center gap-3">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  className={cn(
+                    "flex h-8 w-8 items-center justify-center rounded-full border border-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                    !user?.brand_color && "bg-brand-100"
+                  )}
+                  style={user?.brand_color ? brandAvatarStyle(user.brand_color) : undefined}
+                  aria-label="Open account menu"
+                >
+                  <span
+                    className={cn("text-xs font-medium", !user?.brand_color && "text-brand-700")}
+                    style={user?.brand_color ? { color: user.brand_color } : undefined}
+                  >
+                    {user?.company_name?.charAt(0) || "Q"}
+                  </span>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>
+                  <p className="text-sm font-medium text-surface-900">
+                    {user?.company_name || "My Company"}
+                  </p>
+                  <p className="text-xs text-surface-500 truncate">
+                    {user?.email || "user@example.com"}
+                  </p>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onSelect={(event) => {
+                    event.preventDefault();
+                    handleNavigation("/settings/account");
+                  }}
+                >
+                  <Settings className="mr-2 h-4 w-4" aria-hidden="true" />
+                  <span>Account settings</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={(event) => {
+                    event.preventDefault();
+                    handleNavigation("/settings/business");
+                  }}
+                >
+                  <Building2 className="mr-2 h-4 w-4" aria-hidden="true" />
+                  <span>Business settings</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <NotificationsBell />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleLogout}
+              className="inline-flex lg:hidden h-8 w-8 text-surface-500 hover:text-surface-900 hover:bg-surface-100"
+              title="Log out"
+              aria-label="Log out"
+            >
+              <LogOut className="h-4 w-4" aria-hidden="true" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleLogout}
+              className="hidden lg:inline-flex h-9 px-3 text-xs font-medium text-surface-600 hover:text-surface-900 hover:bg-surface-100"
+              title="Log out"
+            >
+              <LogOut className="mr-1 h-3.5 w-3.5" aria-hidden="true" />
+              Log out
+            </Button>
+          </div>
         </header>
 
         <main
