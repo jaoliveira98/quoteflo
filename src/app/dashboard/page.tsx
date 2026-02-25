@@ -232,7 +232,7 @@ export default async function DashboardPage() {
               <div className="pt-4 border-t border-surface-200">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-surface-600 whitespace-nowrap">Avg. Quote Value</span>
-                  <span className="text-lg font-semibold text-surface-900">
+                  <span className="text-sm font-semibold text-surface-900">
                     {formatCurrency(stats.avgQuoteValue)}
                   </span>
                 </div>
