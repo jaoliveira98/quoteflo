@@ -154,7 +154,7 @@ export default function SignupPage() {
                     variant="outline"
                     onClick={() => handleTradeSelect(trade.value)}
                     className={cn(
-                      "w-full flex items-center gap-4 p-3 h-auto rounded-xl border-2 transition-all text-left justify-start",
+                      "w-full flex items-center gap-4 p-3 h-auto rounded-lg border-2 transition-all text-left justify-start",
                       "hover:border-brand-300 hover:bg-brand-50",
                       selectedTrade === trade.value
                         ? "border-brand-500 bg-brand-50 hover:bg-brand-50"
@@ -162,7 +162,7 @@ export default function SignupPage() {
                     )}
                   >
                     <div className={cn(
-                      "h-10 w-10 rounded-xl flex items-center justify-center flex-shrink-0",
+                      "h-10 w-10 rounded-lg flex items-center justify-center flex-shrink-0",
                       selectedTrade === trade.value ? "bg-brand-500" : "bg-surface-100"
                     )}>
                       <trade.icon className={cn(

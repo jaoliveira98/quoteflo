@@ -1,6 +1,8 @@
 import { DashboardShell } from "@/components/dashboard-shell";
 import { DashboardNavLink } from "@/components/dashboard-nav-link";
 import { NewQuoteButton } from "@/components/new-quote-button";
+import { PageHeader } from "@/components/page-header";
+import { StatCard } from "@/components/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,14 +14,12 @@ import {
   Plus,
   ArrowUpRight,
   Clock,
-  Eye,
-  XCircle,
 } from "lucide-react";
 import Link from "next/link";
 import { formatCurrency } from "@/lib/utils";
 import { requireAuthWithProfile, hasActiveSubscription } from "@/lib/auth";
 import { getCachedQuotesList } from "@/lib/data/quotes";
-import { STATUS_COLORS, STATUS_LABELS } from "@/lib/constants";
+import { STATUS_COLORS, STATUS_ICONS, STATUS_ICON_STYLES, STATUS_LABELS } from "@/lib/constants";
 import type { QuoteStatus } from "@/types";
 
 export default async function DashboardPage() {
@@ -118,83 +118,32 @@ export default async function DashboardPage() {
       user={{ email: profile.email, company_name: profile.company_name, brand_color: profile.brand_color }}
       hasAccess={hasActiveSubscription(profile)}
     >
-      <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 min-w-0">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-surface-900">Dashboard</h1>
-            <p className="text-surface-600">
-              {allQuotes.length === 0 
-                ? `Welcome to QuoteFlo, ${profile.company_name}! Let's create your first quote.`
-                : `Welcome back, ${profile.company_name}!`
-              }
-            </p>
-          </div>
-          <NewQuoteButton>
-            <Plus className="h-4 w-4" />
-            New Quote
-          </NewQuoteButton>
-        </div>
+      <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-8 min-w-0">
+        <PageHeader
+          title="Dashboard"
+          subtitle={
+            allQuotes.length === 0
+              ? `Welcome to QuoteFlo, ${profile.company_name}! Let's create your first quote.`
+              : `Welcome back, ${profile.company_name}!`
+          }
+          action={
+            <NewQuoteButton>
+              <Plus className="h-4 w-4" />
+              New Quote
+            </NewQuoteButton>
+          }
+        />
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          <Card>
-            <CardContent className="p-4 sm:p-6">
-              <div className="flex items-center justify-between gap-2 min-h-[3.5rem]">
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs sm:text-sm text-surface-500">Total Quotes</p>
-                  <p className="text-xl sm:text-2xl font-bold text-surface-900 break-all">{stats.totalQuotes}</p>
-                </div>
-                <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg bg-surface-100 flex items-center justify-center flex-shrink-0">
-                  <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-surface-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4 sm:p-6">
-              <div className="flex items-center justify-between gap-2 min-h-[3.5rem]">
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs sm:text-sm text-surface-500">Sent</p>
-                  <p className="text-xl sm:text-2xl font-bold text-surface-900 break-all">{stats.sentQuotes}</p>
-                </div>
-                <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
-                  <Send className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4 sm:p-6">
-              <div className="flex items-center justify-between gap-2 min-h-[3.5rem]">
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs sm:text-sm text-surface-500">Accepted</p>
-                  <p className="text-xl sm:text-2xl font-bold text-surface-900 break-all">{stats.acceptedQuotes}</p>
-                </div>
-                <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg bg-green-100 flex items-center justify-center flex-shrink-0">
-                  <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4 sm:p-6">
-              <div className="flex items-center justify-between gap-2 min-h-[3.5rem]">
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs sm:text-sm text-surface-500">Total Value</p>
-                  <p className="text-xl sm:text-2xl font-bold text-surface-900 break-all">
-                    {formatCurrency(stats.totalValue)}
-                  </p>
-                </div>
-                <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg bg-brand-100 flex items-center justify-center flex-shrink-0">
-                  <PoundSterling className="h-4 w-4 sm:h-5 sm:w-5 text-brand-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard label="Total Quotes" value={stats.totalQuotes} icon={FileText} iconVariant="surface" />
+          <StatCard label="Sent" value={stats.sentQuotes} icon={Send} iconVariant="blue" />
+          <StatCard label="Accepted" value={stats.acceptedQuotes} icon={CheckCircle2} iconVariant="green" />
+          <StatCard
+            label="Total Value"
+            value={formatCurrency(stats.totalValue)}
+            icon={PoundSterling}
+            iconVariant="brand"
+          />
         </div>
 
         {/* Acceptance Rate Card */}
@@ -211,32 +160,37 @@ export default async function DashboardPage() {
             </CardHeader>
             <CardContent>
               {recentQuotes.length > 0 ? (
-                <div className="space-y-2 sm:space-y-3">
-                  {recentQuotes.map((quote) => (
+                <div className="space-y-3">
+                  {recentQuotes.map((quote) => {
+                    const status = quote.status as QuoteStatus;
+                    const StatusIcon = STATUS_ICONS[status];
+                    const style = STATUS_ICON_STYLES[status];
+                    return (
                     <DashboardNavLink
                       key={quote.id}
                       href={`/quotes/${quote.id}`}
-                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 sm:p-4 rounded-lg border border-surface-200 hover:border-surface-300 hover:bg-surface-50 transition-all group"
+                      className="flex items-center justify-between gap-3 p-3 rounded-lg border border-surface-200 hover:border-surface-300 hover:bg-surface-50 transition-all group"
                     >
-                      <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-                        <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg bg-surface-100 flex items-center justify-center flex-shrink-0 group-hover:bg-brand-50 transition-colors">
-                          <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-surface-500 group-hover:text-brand-600 transition-colors" />
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className={`h-9 w-9 rounded-lg flex items-center justify-center flex-shrink-0 ${style.bg}`}>
+                          <StatusIcon className={`h-4 w-4 ${style.color}`} />
                         </div>
                         <div className="min-w-0">
-                          <p className="font-medium text-surface-900 truncate">{quote.customer_name}</p>
-                          <p className="text-sm text-surface-500 truncate">{quote.quote_number}</p>
+                          <p className="text-sm font-medium text-surface-900 truncate">{quote.customer_name}</p>
+                          <p className="text-xs text-surface-500 truncate">{quote.quote_number}</p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0 sm:pl-2">
-                        <Badge variant={STATUS_COLORS[quote.status as QuoteStatus]}>
-                          {STATUS_LABELS[quote.status as QuoteStatus]}
+                      <div className="flex items-center gap-3 flex-shrink-0">
+                        <Badge variant={STATUS_COLORS[status]}>
+                          {STATUS_LABELS[status]}
                         </Badge>
-                        <span className="font-medium text-surface-900">
+                        <span className="text-sm font-semibold text-surface-900 tabular-nums">
                           {formatCurrency(Number(quote.total))}
                         </span>
                       </div>
                     </DashboardNavLink>
-                  ))}
+                  );
+                  })}
                 </div>
               ) : (
                 <div className="text-center py-10">
@@ -277,7 +231,7 @@ export default async function DashboardPage() {
 
               <div className="pt-4 border-t border-surface-200">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-surface-600">Avg. Quote Value</span>
+                  <span className="text-sm text-surface-600 whitespace-nowrap">Avg. Quote Value</span>
                   <span className="text-lg font-semibold text-surface-900">
                     {formatCurrency(stats.avgQuoteValue)}
                   </span>
@@ -326,32 +280,17 @@ export default async function DashboardPage() {
             <CardContent>
               <div className="space-y-3">
                 {recentActivity.map((event) => {
-                  let Icon = FileText;
-                  let label = "";
-                  let iconBg = "bg-surface-100";
-                  let iconColor = "text-surface-500";
-
-                  if (event.type === "sent") {
-                    Icon = Send;
-                    label = "Quote sent";
-                    iconBg = "bg-blue-50";
-                    iconColor = "text-blue-600";
-                  } else if (event.type === "viewed") {
-                    Icon = Eye;
-                    label = "Quote opened";
-                    iconBg = "bg-amber-50";
-                    iconColor = "text-amber-600";
-                  } else if (event.type === "accepted") {
-                    Icon = CheckCircle2;
-                    label = "Quote accepted";
-                    iconBg = "bg-green-50";
-                    iconColor = "text-green-600";
-                  } else if (event.type === "declined") {
-                    Icon = XCircle;
-                    label = "Quote declined";
-                    iconBg = "bg-red-50";
-                    iconColor = "text-red-600";
-                  }
+                  const eventStatus = event.type as QuoteStatus;
+                  const Icon = STATUS_ICONS[eventStatus];
+                  const style = STATUS_ICON_STYLES[eventStatus];
+                  const label =
+                    event.type === "sent"
+                      ? "Quote sent"
+                      : event.type === "viewed"
+                        ? "Quote opened"
+                        : event.type === "accepted"
+                          ? "Quote accepted"
+                          : "Quote declined";
 
                   const date = new Date(event.at);
                   const formatted = `${date.toLocaleDateString("en-GB", {
@@ -370,9 +309,9 @@ export default async function DashboardPage() {
                     >
                       <div className="flex items-center gap-3 min-w-0">
                         <div
-                          className={`h-9 w-9 rounded-full flex items-center justify-center flex-shrink-0 ${iconBg}`}
+                          className={`h-9 w-9 rounded-lg flex items-center justify-center flex-shrink-0 ${style.bg}`}
                         >
-                          <Icon className={`h-4 w-4 ${iconColor}`} />
+                          <Icon className={`h-4 w-4 ${style.color}`} />
                         </div>
                         <div className="min-w-0">
                           <p className="text-sm font-medium text-surface-900 truncate">
@@ -381,7 +320,7 @@ export default async function DashboardPage() {
                           <p className="text-xs text-surface-500 truncate">
                             {label} • {event.quoteNumber}
                           </p>
-                          <p className="text-xs text-surface-400">{formatted}</p>
+                          <p className="text-xs text-surface-400 mt-0.5">{formatted}</p>
                         </div>
                       </div>
                       <ArrowUpRight className="h-4 w-4 text-surface-400 flex-shrink-0 group-hover:text-surface-600" />

@@ -42,7 +42,7 @@ export function ConfirmDialog({
         <AlertDialogHeader>
           <div className="flex items-start gap-4">
             <div className={cn(
-              "h-10 w-10 rounded-full flex items-center justify-center flex-shrink-0",
+              "h-10 w-10 rounded-lg flex items-center justify-center flex-shrink-0",
               variant === "danger" ? "bg-red-100" : "bg-amber-100"
             )}>
               <AlertTriangle className={cn(

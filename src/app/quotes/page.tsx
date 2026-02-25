@@ -1,6 +1,9 @@
 import { DashboardShell } from "@/components/dashboard-shell";
 import { DashboardNavLink } from "@/components/dashboard-nav-link";
 import { NewQuoteButton } from "@/components/new-quote-button";
+import { PageHeader } from "@/components/page-header";
+import { SectionLabel } from "@/components/section-label";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +12,7 @@ import Link from "next/link";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { requireAuthWithProfile, hasActiveSubscription } from "@/lib/auth";
 import { getCachedQuotesList } from "@/lib/data/quotes";
-import { STATUS_COLORS, STATUS_LABELS } from "@/lib/constants";
+import { STATUS_COLORS, STATUS_ICONS, STATUS_ICON_STYLES, STATUS_LABELS } from "@/lib/constants";
 import type { QuoteStatus } from "@/types";
 import { QuotesFilter } from "./quotes-filter";
 
@@ -113,21 +116,17 @@ export default async function QuotesPage({
       user={{ email: profile.email, company_name: profile.company_name, brand_color: profile.brand_color }}
       hasAccess={hasActiveSubscription(profile)}
     >
-      <div className="p-6 lg:p-8 space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-surface-900">Quotes</h1>
-            <p className="text-surface-600">
-              {filteredQuotes.length} {filteredQuotes.length === 1 ? 'quote' : 'quotes'}
-              {(search || status || (date && date !== "all")) && ` found`}
-            </p>
-          </div>
-          <NewQuoteButton>
-            <Plus className="h-4 w-4" />
-            New Quote
-          </NewQuoteButton>
-        </div>
+      <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
+        <PageHeader
+          title="Quotes"
+          subtitle={`${filteredQuotes.length} ${filteredQuotes.length === 1 ? "quote" : "quotes"}${(search || status || (date && date !== "all")) ? " found" : ""}`}
+          action={
+            <NewQuoteButton>
+              <Plus className="h-4 w-4" />
+              New Quote
+            </NewQuoteButton>
+          }
+        />
 
         {/* Search and Filters */}
         <QuotesFilter 
@@ -142,72 +141,72 @@ export default async function QuotesPage({
           <div className="space-y-6">
             {sortedGroups.map(([key, { label, quotes }]) => (
               <div key={key} className="space-y-2">
-                <h2 className="text-sm font-semibold text-surface-500 uppercase tracking-wider mb-3">
-                  {label}
-                </h2>
-                {quotes.map((quote) => (
+                <SectionLabel>{label}</SectionLabel>
+                {quotes.map((quote) => {
+                  const status = quote.status as QuoteStatus;
+                  const StatusIcon = STATUS_ICONS[status];
+                  const style = STATUS_ICON_STYLES[status];
+                  return (
                   <DashboardNavLink key={quote.id} href={`/quotes/${quote.id}`}>
                     <Card className="hover:border-surface-300 hover:shadow-soft transition-all group cursor-pointer">
-                      <CardContent className="p-4">
+                      <CardContent className="p-3">
                         <div className="flex items-center justify-between gap-3">
-                          <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-                            <div className="h-10 w-10 rounded-lg bg-surface-100 flex items-center justify-center flex-shrink-0 group-hover:bg-brand-50 transition-colors">
-                              <FileText className="h-5 w-5 text-surface-500 group-hover:text-brand-600 transition-colors" />
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className={`h-9 w-9 rounded-lg flex items-center justify-center flex-shrink-0 ${style.bg}`}>
+                              <StatusIcon className={`h-4 w-4 ${style.color}`} />
                             </div>
                             <div className="min-w-0">
                               <div className="flex items-center gap-2 flex-wrap">
-                                <p className="font-medium text-surface-900 truncate">
+                                <p className="text-sm font-medium text-surface-900 truncate">
                                   {quote.customer_name}
                                 </p>
-                                <Badge variant={STATUS_COLORS[quote.status as QuoteStatus]} className="flex-shrink-0">
-                                  {STATUS_LABELS[quote.status as QuoteStatus]}
+                                <Badge variant={STATUS_COLORS[status]} className="flex-shrink-0">
+                                  {STATUS_LABELS[status]}
                                 </Badge>
                               </div>
-                              <div className="flex items-center gap-2 text-sm text-surface-500">
+                              <div className="flex items-center gap-2 text-xs text-surface-500">
                                 <span className="truncate">{quote.quote_number}</span>
                                 <span className="hidden sm:inline">•</span>
                                 <span className="hidden sm:inline">{formatDate(quote.created_at)}</span>
                               </div>
                             </div>
                           </div>
-                          <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
-                            <span className="font-semibold text-surface-900 text-sm sm:text-base">
-                              {formatCurrency(Number(quote.total))}
-                            </span>
-                          </div>
+                          <span className="text-sm font-semibold text-surface-900 tabular-nums flex-shrink-0">
+                            {formatCurrency(Number(quote.total))}
+                          </span>
                         </div>
                       </CardContent>
                     </Card>
                   </DashboardNavLink>
-                ))}
+                );
+                })}
               </div>
             ))}
           </div>
         ) : (
           <Card>
-            <CardContent className="py-16 text-center">
-              <FileText className="h-12 w-12 text-surface-300 mx-auto mb-4" />
+            <CardContent className="px-6">
               {search || status || (date && date !== "all") ? (
-                <>
-                  <h3 className="text-lg font-medium text-surface-900 mb-2">No quotes found</h3>
-                  <p className="text-surface-600 mb-6">
-                    Try adjusting your search or filters
-                  </p>
+                <EmptyState
+                  icon={FileText}
+                  title="No quotes found"
+                  description="Try adjusting your search or filters"
+                >
                   <Button variant="outline" asChild>
                     <Link href="/quotes">Clear filters</Link>
                   </Button>
-                </>
+                </EmptyState>
               ) : (
-                <>
-                  <h3 className="text-lg font-medium text-surface-900 mb-2">No quotes yet</h3>
-                  <p className="text-surface-600 mb-6">
-                    Create your first quote and start winning more jobs.
-                  </p>
+                <EmptyState
+                  icon={FileText}
+                  title="No quotes yet"
+                  description="Create your first quote and start winning more jobs."
+                >
                   <NewQuoteButton>
                     <Plus className="h-4 w-4" />
                     Create your first quote
                   </NewQuoteButton>
-                </>
+                </EmptyState>
               )}
             </CardContent>
           </Card>

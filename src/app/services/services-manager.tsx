@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -235,19 +236,16 @@ export function ServicesManager({ profile, initialServices, hasAccess = true }: 
 
   return (
     <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-surface-900">Services & Items</h1>
-          <p className="text-surface-600">
-            Manage your reusable items for quick quote building
-          </p>
-        </div>
-        <Button onClick={openAddDialog} disabled={!hasAccess} title={!hasAccess ? "Upgrade to add items" : undefined}>
-          <Plus className="h-4 w-4" />
-          Add Item
-        </Button>
-      </div>
+      <PageHeader
+        title="Services & Items"
+        subtitle="Manage your reusable items for quick quote building"
+        action={
+          <Button onClick={openAddDialog} disabled={!hasAccess} title={!hasAccess ? "Upgrade to add items" : undefined}>
+            <Plus className="h-4 w-4" />
+            Add Item
+          </Button>
+        }
+      />
 
       {/* Search */}
       {services.length > 0 && (
@@ -272,20 +270,20 @@ export function ServicesManager({ profile, initialServices, hasAccess = true }: 
                   {category}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2">
+              <CardContent className="space-y-3">
                 {categoryServices.map((service) => (
                   <div
                     key={service.id}
-                    className="relative flex items-center gap-4 p-4 rounded-lg border border-surface-200 bg-white hover:border-surface-300 transition-colors group flex-nowrap"
+                    className="relative flex items-center gap-3 p-3 rounded-lg border border-surface-200 bg-white hover:border-surface-300 transition-colors group flex-nowrap"
                   >
-                    <div className="h-10 w-10 rounded-lg bg-brand-50 flex items-center justify-center flex-shrink-0">
-                      <Package className="h-5 w-5 text-brand-600" />
+                    <div className="h-9 w-9 rounded-lg bg-brand-50 flex items-center justify-center flex-shrink-0">
+                      <Package className="h-4 w-4 text-brand-600" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-surface-900 truncate">
+                      <p className="text-sm font-medium text-surface-900 truncate">
                         {service.service_name}
                       </p>
-                      <div className="flex items-center gap-3 text-sm text-surface-500">
+                      <div className="flex items-center gap-3 text-xs text-surface-500">
                         {service.description && (
                           <span className="truncate">{service.description}</span>
                         )}
@@ -295,11 +293,11 @@ export function ServicesManager({ profile, initialServices, hasAccess = true }: 
                       </div>
                     </div>
                     <div className="flex-shrink-0 text-right tabular-nums">
-                      <p className="font-semibold text-surface-900">
+                      <p className="text-sm font-semibold text-surface-900">
                         {formatCurrency(service.price)}
                       </p>
                     </div>
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 group-hover:bg-white pl-2 shadow-sm rounded">
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 group-hover:bg-white pl-2 shadow-soft rounded">
                       <Button
                         variant="ghost"
                         size="icon"

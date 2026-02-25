@@ -51,7 +51,7 @@ export default async function QuoteDetailPage({
       user={{ email: profile.email, company_name: profile.company_name, brand_color: profile.brand_color }}
       hasAccess={hasActiveSubscription(profile)}
     >
-      <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto space-y-6 min-w-0">
+      <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-6 min-w-0">
         {/* Header */}
         <div className="flex flex-col gap-4">
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
@@ -222,7 +222,7 @@ export default async function QuoteDetailPage({
             <ol className="space-y-4 list-none p-0 m-0" aria-label="Quote activity timeline">
               {quote.accepted_at && (
                 <li className="flex items-center gap-3 text-sm">
-                  <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
+                  <div className="h-8 w-8 rounded-lg bg-green-100 flex items-center justify-center">
                     <CheckCircle2 className="h-4 w-4 text-green-600" aria-hidden="true" />
                   </div>
                   <div>
@@ -233,7 +233,7 @@ export default async function QuoteDetailPage({
               )}
               {quote.expiry_reminder_sent_at && (
                 <li className="flex items-center gap-3 text-sm">
-                  <div className="h-8 w-8 rounded-full bg-orange-100 flex items-center justify-center">
+                  <div className="h-8 w-8 rounded-lg bg-orange-100 flex items-center justify-center">
                     <Clock className="h-4 w-4 text-orange-600" aria-hidden="true" />
                   </div>
                   <div>
@@ -244,7 +244,7 @@ export default async function QuoteDetailPage({
               )}
               {quote.last_follow_up_at && (
                 <li className="flex items-center gap-3 text-sm">
-                  <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center">
+                  <div className="h-8 w-8 rounded-lg bg-purple-100 flex items-center justify-center">
                     <Bell className="h-4 w-4 text-purple-600" aria-hidden="true" />
                   </div>
                   <div>
@@ -257,7 +257,7 @@ export default async function QuoteDetailPage({
               )}
               {quote.viewed_at && (
                 <li className="flex items-center gap-3 text-sm">
-                  <div className="h-8 w-8 rounded-full bg-amber-100 flex items-center justify-center">
+                  <div className="h-8 w-8 rounded-lg bg-amber-100 flex items-center justify-center">
                     <Eye className="h-4 w-4 text-amber-600" aria-hidden="true" />
                   </div>
                   <div>
@@ -268,7 +268,7 @@ export default async function QuoteDetailPage({
               )}
               {quote.sent_at && (
                 <li className="flex items-center gap-3 text-sm">
-                  <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
+                  <div className="h-8 w-8 rounded-lg bg-blue-100 flex items-center justify-center">
                     <Send className="h-4 w-4 text-blue-600" aria-hidden="true" />
                   </div>
                   <div>
@@ -278,7 +278,7 @@ export default async function QuoteDetailPage({
                 </li>
               )}
               <li className="flex items-center gap-3 text-sm">
-                <div className="h-8 w-8 rounded-full bg-surface-100 flex items-center justify-center">
+                <div className="h-8 w-8 rounded-lg bg-surface-100 flex items-center justify-center">
                   <Edit className="h-4 w-4 text-surface-600" aria-hidden="true" />
                 </div>
                 <div>

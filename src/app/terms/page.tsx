@@ -25,7 +25,7 @@ export default function TermsPage() {
           Last updated: February 2025
         </p>
 
-        <article className="prose prose-slate max-w-none space-y-8 text-surface-700">
+        <article className="prose prose-headings:text-surface-900 prose-p:text-surface-700 prose-li:text-surface-700 max-w-none space-y-8">
           <section>
             <h2 className="text-lg font-semibold text-surface-900 mb-2">
               1. Description of the service and acceptable use

@@ -587,7 +587,7 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer, h
                   {formatCurrency(total)}
                 </span>
               </div>
-              <div className="flex items-center gap-3 pt-3 mt-1 border-t border-surface-100">
+              <div className="flex items-center gap-4 pt-3 mt-1 border-t border-surface-100 flex-wrap">
                 <Switch
                   id="vat-toggle"
                   checked={vatEnabled}
@@ -597,7 +597,7 @@ export function QuoteForm({ profile, services, customers, preselectedCustomer, h
                   Include VAT
                 </Label>
                 {vatEnabled && (
-                  <div className="flex items-center gap-1 ml-2">
+                  <div className="flex items-center gap-2">
                     <Input
                       id="vat-rate"
                       name="vatRate"

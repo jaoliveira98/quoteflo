@@ -135,7 +135,7 @@ export function AnalyticsCharts({ monthlyData, statusData }: AnalyticsChartsProp
           ) : (
             <div className="h-72 flex items-center justify-center flex-1">
               <div className="text-center">
-                <div className="h-14 w-14 rounded-2xl bg-surface-100 flex items-center justify-center mx-auto mb-4">
+                <div className="h-14 w-14 rounded-lg bg-surface-100 flex items-center justify-center mx-auto mb-4">
                   <BarChart3 className="h-7 w-7 text-surface-300" />
                 </div>
                 <p className="font-medium text-surface-700 mb-1">No data yet</p>
@@ -256,7 +256,7 @@ export function AnalyticsCharts({ monthlyData, statusData }: AnalyticsChartsProp
           ) : (
             <div className="h-72 flex items-center justify-center flex-1">
               <div className="text-center">
-                <div className="h-14 w-14 rounded-2xl bg-surface-100 flex items-center justify-center mx-auto mb-4">
+                <div className="h-14 w-14 rounded-lg bg-surface-100 flex items-center justify-center mx-auto mb-4">
                   <PieChartIcon className="h-7 w-7 text-surface-300" />
                 </div>
                 <p className="font-medium text-surface-700 mb-1">No data yet</p>
