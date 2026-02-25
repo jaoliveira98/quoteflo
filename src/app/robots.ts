@@ -1,13 +1,8 @@
 import type { MetadataRoute } from "next";
-
-function getBaseUrl(): string {
-  if (process.env.NEXT_PUBLIC_APP_URL) return process.env.NEXT_PUBLIC_APP_URL;
-  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
-  return "http://localhost:3000";
-}
+import { getAppUrl } from "@/lib/url";
 
 export default function robots(): MetadataRoute.Robots {
-  const base = getBaseUrl();
+  const base = getAppUrl();
   return {
     rules: [
       {
