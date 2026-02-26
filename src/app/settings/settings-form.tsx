@@ -340,6 +340,7 @@ function SubscriptionCardWrapper({ profile }: { profile: UserProfile }) {
 function CompanyDetailsCard({ profile }: { profile: UserProfile }) {
   const router = useRouter();
   const previewContext = useUserPreview();
+  const setPreview = previewContext?.setPreview;
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -363,12 +364,13 @@ function CompanyDetailsCard({ profile }: { profile: UserProfile }) {
   const [customTradeName, setCustomTradeName] = useState(initialTradeValues.customTradeName);
 
   useEffect(() => {
-    previewContext?.setPreview((prev) => ({
+    if (!setPreview) return;
+    setPreview((prev) => ({
       ...prev,
       company_name: formData.company_name || undefined,
       phone: formData.phone || undefined,
     }));
-  }, [previewContext, formData.company_name, formData.phone]);
+  }, [setPreview, formData.company_name, formData.phone]);
 
   const isFormDirty =
     formData.company_name !== initialValues.company_name ||
@@ -557,6 +559,7 @@ function CompanyDetailsCard({ profile }: { profile: UserProfile }) {
 function BrandingCard({ profile }: { profile: UserProfile }) {
   const router = useRouter();
   const previewContext = useUserPreview();
+  const setPreview = previewContext?.setPreview;
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -567,11 +570,12 @@ function BrandingCard({ profile }: { profile: UserProfile }) {
   const companyName = (previewContext?.preview?.company_name ?? profile.company_name) || "Your Company";
 
   useEffect(() => {
-    previewContext?.setPreview((prev) => ({
+    if (!setPreview) return;
+    setPreview((prev) => ({
       ...prev,
       brand_color: brandColor,
     }));
-  }, [previewContext, brandColor]);
+  }, [setPreview, brandColor]);
 
   const isDirty = brandColor !== initialColor;
 
