@@ -47,7 +47,7 @@ export default async function NotificationsPage() {
   return (
     <DashboardShell
       user={{
-        email: profile.email,
+        email: profile.business_email ?? profile.email,
         company_name: profile.company_name,
         brand_color: profile.brand_color,
       }}

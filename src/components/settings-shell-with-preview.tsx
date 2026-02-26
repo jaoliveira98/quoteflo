@@ -23,11 +23,19 @@ export function SettingsShellWithPreview({
 
   const effectiveUser = useMemo(
     () => ({
-      email: profile.email,
+      email: preview.email ?? profile.business_email ?? profile.email,
       company_name: preview.company_name ?? profile.company_name ?? "",
       brand_color: preview.brand_color ?? profile.brand_color,
     }),
-    [profile.email, profile.company_name, profile.brand_color, preview.company_name, preview.brand_color]
+    [
+      profile.email,
+      profile.business_email,
+      profile.company_name,
+      profile.brand_color,
+      preview.email,
+      preview.company_name,
+      preview.brand_color,
+    ]
   );
 
   return (

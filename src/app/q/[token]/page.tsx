@@ -39,13 +39,21 @@ export default async function PublicQuotePage({
   const { quote, line_items: lineItems, profile } = data as {
     quote: Quote;
     line_items: QuoteLineItem[];
-    profile: { company_name: string; phone: string | null; email: string; logo_url: string | null; brand_color: string } | null;
+    profile: {
+      company_name: string;
+      phone: string | null;
+      email: string;
+      business_email: string | null;
+      logo_url: string | null;
+      brand_color: string;
+    } | null;
   };
 
   const isExpired = quote.valid_until && new Date(quote.valid_until) < new Date();
   const isAccepted = quote.status === "accepted";
   const isDeclined = quote.status === "declined";
   const brandColor = profile?.brand_color || "#22c55e";
+  const businessEmail = profile?.business_email || profile?.email;
 
   return (
     <div className="min-h-screen bg-surface-50">
@@ -227,13 +235,13 @@ export default async function PublicQuotePage({
                   <span className="font-medium text-surface-900">{profile.phone}</span>
                 </a>
               )}
-              {profile?.email && (
+              {businessEmail && (
                 <a 
-                  href={`mailto:${profile.email}`}
+                  href={`mailto:${businessEmail}`}
                   className="flex items-center gap-3 p-3 rounded-lg bg-surface-50 hover:bg-surface-100 transition-colors"
                 >
                   <Mail className="h-5 w-5" style={{ color: brandColor }} />
-                  <span className="font-medium text-surface-900">{profile.email}</span>
+                  <span className="font-medium text-surface-900">{businessEmail}</span>
                 </a>
               )}
             </div>

@@ -53,6 +53,7 @@ function generateQuoteHTML(
   profile: UserProfile | null
 ) {
   const brandColor = escapeHtml(profile?.brand_color || "#22c55e");
+  const businessEmail = profile?.business_email || profile?.email || "";
   
   return `
 <!DOCTYPE html>
@@ -227,7 +228,7 @@ function generateQuoteHTML(
     <div>
       <div class="company-name">${escapeHtml(profile?.company_name || "Company Name")}</div>
       ${profile?.phone ? `<p>${escapeHtml(profile.phone)}</p>` : ""}
-      ${profile?.email ? `<p>${escapeHtml(profile.email)}</p>` : ""}
+      ${businessEmail ? `<p>${escapeHtml(businessEmail)}</p>` : ""}
     </div>
     <div class="quote-title">
       <h1>QUOTE</h1>

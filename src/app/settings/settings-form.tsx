@@ -349,6 +349,7 @@ function CompanyDetailsCard({ profile }: { profile: UserProfile }) {
     company_name: profile.company_name || "",
     phone: profile.phone || "",
     postcode: profile.postcode || "",
+    business_email: profile.business_email ?? profile.email ?? "",
   }), [profile]);
 
   const initialTradeValues = useMemo(
@@ -375,7 +376,8 @@ function CompanyDetailsCard({ profile }: { profile: UserProfile }) {
   const isFormDirty =
     formData.company_name !== initialValues.company_name ||
     formData.phone !== initialValues.phone ||
-    formData.postcode !== initialValues.postcode;
+    formData.postcode !== initialValues.postcode ||
+    formData.business_email !== initialValues.business_email;
 
   const isTradeDirty =
     selectedTrade !== initialTradeValues.trade ||
@@ -421,6 +423,7 @@ function CompanyDetailsCard({ profile }: { profile: UserProfile }) {
           company_name: formData.company_name,
           phone: formData.phone || null,
           postcode: formData.postcode || null,
+          business_email: formData.business_email || null,
           trade: selectedTrade,
           custom_trade_name:
             selectedTrade === "other" ? customTradeName.trim() : null,
@@ -468,6 +471,24 @@ function CompanyDetailsCard({ profile }: { profile: UserProfile }) {
               required
               autoComplete="organization"
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="business_email">Business email</Label>
+            <Input
+              id="business_email"
+              type="email"
+              value={formData.business_email}
+              onChange={(e) =>
+                setFormData({ ...formData, business_email: e.target.value })
+              }
+              placeholder="quotes@your-company.com"
+              autoComplete="email"
+            />
+            <p className="text-xs text-surface-500">
+              This email appears on your quotes and public quote pages. It can be different
+              from the email you log in with.
+            </p>
           </div>
 
           <div className="grid sm:grid-cols-2 gap-4">

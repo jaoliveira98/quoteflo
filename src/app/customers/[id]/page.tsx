@@ -80,7 +80,11 @@ export default async function CustomerDetailPage({
 
   return (
     <DashboardShell
-      user={{ email: profile.email, company_name: profile.company_name, brand_color: profile.brand_color }}
+      user={{
+        email: profile.business_email ?? profile.email,
+        company_name: profile.company_name,
+        brand_color: profile.brand_color,
+      }}
       hasAccess={hasActiveSubscription(profile)}
     >
       <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-6 min-w-0 overflow-x-hidden">
