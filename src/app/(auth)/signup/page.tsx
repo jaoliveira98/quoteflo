@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
+import { Switch } from "@/components/ui/switch";
 import { Loader2, CheckCircle2, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { TRADES_CONFIG } from "@/lib/constants";
@@ -27,6 +28,8 @@ export default function SignupPage() {
     email: "",
     password: "",
     companyName: "",
+    businessEmail: "",
+    useEmailAsBusinessEmail: true,
   });
 
   const filteredTrades = TRADES_CONFIG.filter(
@@ -53,6 +56,15 @@ export default function SignupPage() {
     e.preventDefault();
     if (!selectedTrade) return;
 
+    const businessEmail = formData.useEmailAsBusinessEmail
+      ? formData.email
+      : formData.businessEmail;
+
+    if (!businessEmail) {
+      setError("Please enter a business email.");
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
@@ -67,6 +79,7 @@ export default function SignupPage() {
             trade: selectedTrade,
             company_name: formData.companyName,
             custom_trade_name: selectedTrade === "other" ? customTradeName : null,
+            business_email: businessEmail,
           },
         },
       });
@@ -87,6 +100,7 @@ export default function SignupPage() {
           .upsert({
             id: data.user.id,
             email: formData.email,
+            business_email: businessEmail,
             trade: selectedTrade,
             custom_trade_name: selectedTrade === "other" ? customTradeName : null,
             company_name: formData.companyName,
@@ -244,17 +258,62 @@ export default function SignupPage() {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  required
-                  autoComplete="email"
-                />
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Account email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    required
+                    autoComplete="email"
+                  />
+                </div>
+                <div className="space-y-2 rounded-lg border border-surface-200 bg-surface-50 p-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-medium text-surface-900">
+                        Use this email on your quotes
+                      </p>
+                      <p className="text-xs text-surface-500">
+                        Shown to customers on quote PDFs and pages.
+                      </p>
+                    </div>
+                    <Switch
+                      checked={formData.useEmailAsBusinessEmail}
+                      onCheckedChange={(checked) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          useEmailAsBusinessEmail: checked,
+                          businessEmail: checked ? prev.email : prev.businessEmail,
+                        }))
+                      }
+                      aria-label="Use account email as business email"
+                    />
+                  </div>
+                  {!formData.useEmailAsBusinessEmail && (
+                    <div className="space-y-1 pt-2 border-t border-surface-200">
+                      <Label htmlFor="business-email" className="text-xs text-surface-500">
+                        Business email
+                      </Label>
+                      <Input
+                        id="business-email"
+                        type="email"
+                        placeholder="quotes@your-company.com"
+                        value={formData.businessEmail}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            businessEmail: e.target.value,
+                          }))
+                        }
+                        required
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="space-y-2">

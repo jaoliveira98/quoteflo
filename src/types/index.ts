@@ -29,6 +29,7 @@ export type QuoteStatus = "draft" | "sent" | "viewed" | "accepted" | "declined" 
 export interface UserProfile {
   id: string;
   email: string;
+  business_email: string | null;
   trade: Trade;
   custom_trade_name: string | null;
   company_name: string;

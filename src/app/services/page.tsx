@@ -9,7 +9,11 @@ export default async function ServicesPage() {
 
   return (
     <DashboardShell
-      user={{ email: profile.email, company_name: profile.company_name, brand_color: profile.brand_color }}
+      user={{
+        email: profile.business_email ?? profile.email,
+        company_name: profile.company_name,
+        brand_color: profile.brand_color,
+      }}
       hasAccess={hasActiveSubscription(profile)}
     >
       <ServicesManager profile={profile} initialServices={services} hasAccess={hasActiveSubscription(profile)} />
