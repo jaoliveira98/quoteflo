@@ -26,17 +26,10 @@ type NotificationEvent = {
   at: string;
 };
 
-const NOTIFICATIONS_LAST_SEEN_KEY = "quoteflo-notifications-last-seen";
-
-function getStoredLastSeen(): number {
-  if (typeof window === "undefined") return 0;
-  try {
-    const stored = localStorage.getItem(NOTIFICATIONS_LAST_SEEN_KEY);
-    return stored ? Math.max(0, parseInt(stored, 10)) : 0;
-  } catch {
-    return 0;
-  }
-}
+type NotificationsResponse = {
+  events: NotificationEvent[];
+  lastSeenAt: number;
+};
 
 type ApiResponse<T> = {
   data: T | null;
@@ -45,12 +38,8 @@ type ApiResponse<T> = {
 
 export function NotificationsBell() {
   const [events, setEvents] = useState<NotificationEvent[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [lastSeenAt, setLastSeenAt] = useState<number>(0);
-
-  useEffect(() => {
-    setLastSeenAt(getStoredLastSeen());
-  }, []);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -62,9 +51,10 @@ export function NotificationsBell() {
         if (!res.ok) {
           return;
         }
-        const json = (await res.json()) as ApiResponse<NotificationEvent[]>;
+        const json = (await res.json()) as ApiResponse<NotificationsResponse>;
         if (isMounted && json.data) {
-          setEvents(json.data);
+          setEvents(json.data.events);
+          setLastSeenAt(json.data.lastSeenAt);
         }
       } catch {
         // Ignore errors – notifications are a secondary enhancement
@@ -116,11 +106,13 @@ export function NotificationsBell() {
         Date.now()
       );
       setLastSeenAt(latest);
-      try {
-        localStorage.setItem(NOTIFICATIONS_LAST_SEEN_KEY, String(latest));
-      } catch {
-        // ignore
-      }
+      fetch("/api/dashboard/notifications", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lastSeenAt: latest }),
+      }).catch(() => {
+        // Ignore – notifications are a secondary enhancement
+      });
     }
   };
 
